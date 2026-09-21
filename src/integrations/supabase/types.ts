@@ -49,8 +49,36 @@ export type Database = {
           },
         ]
       }
+      branches: {
+        Row: {
+          created_at: string
+          id: string
+          location: string | null
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
+          branch_id: string | null
           created_at: string
           department: string | null
           full_name: string
@@ -62,6 +90,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          branch_id?: string | null
           created_at?: string
           department?: string | null
           full_name: string
@@ -73,6 +102,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          branch_id?: string | null
           created_at?: string
           department?: string | null
           full_name?: string
@@ -83,7 +113,15 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "employees_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payroll: {
         Row: {
@@ -170,21 +208,32 @@ export type Database = {
       }
       users: {
         Row: {
+          branch_id: string | null
           created_at: string
           email: string
           id: string
         }
         Insert: {
+          branch_id?: string | null
           created_at?: string
           email: string
           id: string
         }
         Update: {
+          branch_id?: string | null
           created_at?: string
           email?: string
           id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "users_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -201,6 +250,11 @@ export type Database = {
         }
         Returns: number
       }
+      get_employee_branch_id: {
+        Args: { _employee_id: string }
+        Returns: string
+      }
+      get_user_branch_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -208,14 +262,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_role_name: {
+        Args: { _role: string; _user_id: string }
+        Returns: boolean
+      }
       is_admin: { Args: never; Returns: boolean }
+      is_operator: { Args: never; Returns: boolean }
+      is_viewer: { Args: never; Returns: boolean }
       monthly_attendance_rate: {
         Args: { _employee_id: string; _month: string }
         Returns: number
       }
     }
     Enums: {
-      app_role: "admin" | "viewer"
+      app_role: "admin" | "viewer" | "operator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -343,7 +403,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "viewer"],
+      app_role: ["admin", "viewer", "operator"],
     },
   },
 } as const
