@@ -8,11 +8,17 @@ const employeeMonth = z.object({
 });
 
 const netSalaryInput = employeeMonth.extend({
+  // الراتب الأساسي بيانات مالية تعيش في جدول payroll فقط (وليس في جدول الموظفين)
+  baseSalary: z.number(),
   bonuses: z.number().default(0),
   deductions: z.number().default(0),
 });
 
-/** صافي الراتب = الأساسي + البدلات - (أيام الغياب × الأساسي/30) - الخصومات */
+/**
+ * صافي الراتب = الأساسي + البدلات - (أيام الغياب × الأساسي/30) - الخصومات
+ * الدالة في قاعدة البيانات ترفض أي مستدعٍ ليس admin، وسياسة RLS تمنع Viewer/Operator
+ * من قراءة أي صف في جدول الرواتب أصلاً.
+ */
 export const getNetSalary = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => netSalaryInput.parse(input))
@@ -20,6 +26,7 @@ export const getNetSalary = createServerFn({ method: "POST" })
     const { data: result, error } = await context.supabase.rpc("calculate_net_salary", {
       _employee_id: data.employeeId,
       _month: data.month,
+      _base_salary: data.baseSalary,
       _bonuses: data.bonuses,
       _deductions: data.deductions,
     });

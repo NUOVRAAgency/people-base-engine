@@ -3,8 +3,12 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 /**
- * هيكل جاهز لتوليد التقارير الذكية عبر Gemini.
- * لا يعمل فعليًا حتى تتم إضافة المفتاح GEMINI_API_KEY لاحقًا.
+ * وسيط الذكاء الاصطناعي (Gemini).
+ *
+ * قواعد أمنية:
+ * - GEMINI_API_KEY يُقرأ داخل الـ handler من أسرار الخلفية فقط (Edge Function Secrets).
+ * - لا يوجد أي متغير VITE_* للمفتاح، فلا تصل قيمته إلى المتصفح أو حزمة الواجهة إطلاقاً.
+ * - الاستدعاء محصور بالمدير (admin) لأن التقارير قد تتضمن بيانات مالية.
  */
 export const generateSmartReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -12,20 +16,26 @@ export const generateSmartReport = createServerFn({ method: "POST" })
     z.object({ month: z.string(), prompt: z.string().optional() }).parse(input),
   )
   .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("is_admin");
+    if (!isAdmin) {
+      throw new Error("Forbidden: تقارير الذكاء الاصطناعي متاحة للمدير فقط");
+    }
+
+    // يُقرأ وقت التنفيذ على الخادم فقط — لا يُسرَّب في أي استجابة.
     const apiKey = process.env["GEMINI_API_KEY"];
     if (!apiKey) {
       return {
         ready: false as const,
-        message: "GEMINI_API_KEY غير مضاف بعد. الهيكل جاهز لاستقبال المفتاح لاحقًا.",
+        message:
+          "GEMINI_API_KEY غير مضاف بعد في أسرار الخلفية. البنية جاهزة لاستقباله دون أي تعديل على الشفرة.",
       };
     }
 
-    // نقطة الاتصال الجاهزة — تُفعَّل عند إضافة المفتاح.
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
         body: JSON.stringify({
           contents: [
             {
@@ -43,6 +53,7 @@ export const generateSmartReport = createServerFn({ method: "POST" })
     );
 
     if (!res.ok) {
+      // لا نمرر نص الخطأ الخام حتى لا تتسرب أي تفاصيل عن المفتاح.
       return { ready: true as const, error: `Gemini error ${res.status}`, content: null };
     }
 

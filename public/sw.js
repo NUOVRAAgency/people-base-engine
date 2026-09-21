@@ -21,7 +21,10 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // شبكة فقط: كل الكتابة والبيانات والمصادقة
+  // شبكة فقط، بدون أي تخزين محلي: كل البيانات والمصادقة.
+  // أي استجابة من Supabase (نطاق خارجي) أو من وظائف الخادم لا تُخزَّن أبداً،
+  // فلا يبقى على جهاز Operator/Viewer أي بيانات رواتب — والتصفية تتم في قاعدة
+  // البيانات عبر RLS قبل أن تصل النتيجة إلى المتصفح أصلاً.
   if (
     req.method !== "GET" ||
     url.origin !== self.location.origin ||
