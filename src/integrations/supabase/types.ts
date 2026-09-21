@@ -51,7 +51,6 @@ export type Database = {
       }
       employees: {
         Row: {
-          base_salary: number
           created_at: string
           department: string | null
           full_name: string
@@ -63,7 +62,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          base_salary?: number
           created_at?: string
           department?: string | null
           full_name: string
@@ -75,7 +73,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          base_salary?: number
           created_at?: string
           department?: string | null
           full_name?: string
@@ -196,6 +193,7 @@ export type Database = {
     Functions: {
       calculate_net_salary: {
         Args: {
+          _base_salary: number
           _bonuses?: number
           _deductions?: number
           _employee_id: string
