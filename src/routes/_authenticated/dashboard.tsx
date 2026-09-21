@@ -41,7 +41,8 @@ function Dashboard() {
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       const email = data.user?.email ?? "";
-      if (email.length > 0) setUserName(email.split("@")[0]);
+      const name = email.split("@")[0] || "مدير النظام";
+      setUserName(name);
     });
     setToday(
       new Intl.DateTimeFormat("ar", {
