@@ -132,9 +132,15 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
 
-  // PWA: تسجيل خدمة التخزين المؤقت لقشرة التطبيق
+  // PWA: تسجيل خدمة التخزين المؤقت لقشرة التطبيق (في الإنتاج فقط)
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    if (import.meta.env.DEV) {
+      // أثناء التطوير: إلغاء أي نسخة قديمة مخزّنة تسبب شاشة بيضاء
+      navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister()));
+      if ("caches" in window) caches.keys().then((ks) => ks.forEach((k) => caches.delete(k)));
+      return;
+    }
     navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
 
