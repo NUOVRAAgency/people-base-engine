@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const BUCKET = "hr-branding";
-
 export type HeaderNotification = {
   id: string;
   title: string;
@@ -11,15 +9,8 @@ export type HeaderNotification = {
   kind: "attendance" | "report";
 };
 
-async function signedUrl(path: string | null) {
-  if (!path) return "";
-  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, 3600);
-  return data?.signedUrl ?? "";
-}
-
 export function useHeaderData() {
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const [logoUrl, setLogoUrl] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [notifications, setNotifications] = useState<HeaderNotification[]>([]);
 
   const load = useCallback(async () => {
@@ -27,9 +18,8 @@ export function useHeaderData() {
     const user = authData.user;
     if (!user) return;
 
-    const [profileResult, settingsResult, attendanceResult, reportsResult] = await Promise.all([
-      supabase.from("users").select("avatar_path").eq("id", user.id).maybeSingle(),
-      supabase.from("app_settings").select("logo_path").eq("id", "organization").maybeSingle(),
+    const [settingsResult, attendanceResult, reportsResult] = await Promise.all([
+      supabase.from("app_settings").select("company_name").eq("id", "organization").maybeSingle(),
       supabase
         .from("attendance")
         .select("id,status,date,note,employees(full_name)")
@@ -39,12 +29,7 @@ export function useHeaderData() {
       supabase.from("reports").select("id,generated_at,month").order("generated_at", { ascending: false }).limit(2),
     ]);
 
-    const [nextAvatar, nextLogo] = await Promise.all([
-      signedUrl(profileResult.data?.avatar_path ?? null),
-      signedUrl(settingsResult.data?.logo_path ?? null),
-    ]);
-    setAvatarUrl(nextAvatar);
-    setLogoUrl(nextLogo);
+    setCompanyName(settingsResult.data?.company_name?.trim() ?? "");
 
     const attendanceItems: HeaderNotification[] = (attendanceResult.data ?? []).map((item) => {
       const employee = Array.isArray(item.employees) ? item.employees[0] : item.employees;
@@ -73,5 +58,5 @@ export function useHeaderData() {
     return () => window.removeEventListener("hr-header-refresh", refresh);
   }, [load]);
 
-  return { avatarUrl, logoUrl, notifications, refresh: load };
+  return { companyName, notifications, refresh: load };
 }
