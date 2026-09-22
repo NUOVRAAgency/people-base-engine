@@ -1,6 +1,5 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { MobileHeader, MobileTabs } from "@/components/mobile-header";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -33,12 +32,7 @@ function AuthenticatedLayout() {
   }
 
   return (
-    <div dir="rtl" className="min-h-dvh bg-background">
-      <MobileHeader>
-        <div className="flex h-full flex-col justify-end">
-          <MobileTabs />
-        </div>
-      </MobileHeader>
+    <div dir="rtl" className="min-h-dvh bg-white">
       <Outlet />
     </div>
   );
