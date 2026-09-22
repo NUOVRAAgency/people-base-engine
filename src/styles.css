@@ -138,6 +138,7 @@
   --warning: oklch(0.84 0.14 78);
   --warning-foreground: oklch(0.42 0.11 58);
   --login-grid: oklch(0.5 0.18 263 / 7%);
+  --header-gradient: linear-gradient(180deg, #0c4bbc 0%, #0055ff 100%);
 }
 
 .dark {
