@@ -13,7 +13,7 @@ import {
 import { useEffect, useRef, type ReactNode } from "react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useHeaderData } from "@/hooks/use-header-data";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
