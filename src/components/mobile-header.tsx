@@ -11,9 +11,9 @@ export function MobileHeader({ children }: { children?: ReactNode }) {
   return (
     <header
       dir="rtl"
-      className="w-full h-[98px] shrink-0 text-white"
+      className="h-[98px] w-full shrink-0 text-primary-foreground"
       style={{
-        background: "linear-gradient(180deg, #0C4BBC 0%, #0055FF 100%)",
+        background: "var(--header-gradient)",
       }}
     >
       {children}
@@ -38,7 +38,7 @@ export function MobileTabs() {
   const { isAdmin } = useCurrentUser();
   const visible = TABS.filter((tab) => !tab.adminOnly || isAdmin);
   return (
-    <nav dir="rtl" aria-label="أقسام النظام" className="font-kufi flex items-center gap-1.5 overflow-x-auto px-3 pb-2.5">
+    <nav dir="rtl" aria-label="أقسام النظام" className="font-kufi flex items-center gap-5 overflow-x-auto px-3 pb-4 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {visible.map(({ to, label }) => {
         const active = pathname === to;
         return (
@@ -46,10 +46,10 @@ export function MobileTabs() {
             key={to}
             to={to}
             className={cn(
-              "shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-bold whitespace-nowrap transition-colors duration-150",
+              "shrink-0 rounded-full px-6 py-1.5 text-[20px] font-normal leading-9 whitespace-nowrap transition-colors duration-150",
               active
-                ? "bg-white text-[#0055FF] shadow-sm"
-                : "bg-transparent text-white"
+                ? "bg-card text-primary shadow-sm"
+                : "bg-transparent text-primary-foreground"
             )}
           >
             {label}
