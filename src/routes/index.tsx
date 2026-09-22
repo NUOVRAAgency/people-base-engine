@@ -1,11 +1,6 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
-  beforeLoad: async () => {
-    const { data } = await supabase.auth.getSession();
-    throw redirect({ to: data.session ? "/dashboard" : "/auth" });
-  },
   head: () => ({
     meta: [
       { title: "HR System" },
@@ -20,5 +15,5 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  return <div />;
+  return <div className="min-h-screen bg-white" />;
 }
