@@ -2,6 +2,22 @@
 @source "../src";
 @import "tw-animate-css";
 
+/* خط Droid Arabic Kufi — مستضاف محلياً لضمان التحميل دون حجب CORS */
+@font-face {
+  font-family: "Droid Arabic Kufi";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/DroidKufi-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Droid Arabic Kufi";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/DroidKufi-Bold.woff2") format("woff2");
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /*
