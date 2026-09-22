@@ -30,7 +30,16 @@
   --color-header-blue: var(--header-blue);
   --color-glass: var(--glass);
   --color-glass-border: var(--glass-border);
+  --color-ink: var(--ink);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --shadow-glass: 0 8px 32px oklch(0.208 0.042 262.6 / 10%);
+  --shadow-card: 0 18px 40px oklch(0.208 0.042 262.6 / 12%);
+  --shadow-sidebar: 12px 0 40px oklch(0.19 0.08 263 / 18%);
+  --shadow-nav: 0 8px 22px oklch(0.18 0.08 263 / 16%);
+  --shadow-mobile-nav: 0 12px 34px oklch(0.18 0.08 263 / 25%);
+  --shadow-login: 0 28px 70px oklch(0.208 0.042 262.6 / 13%);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -103,6 +112,11 @@
   --header-blue: oklch(0.502 0.244 262.6 / 88%);
   --glass: oklch(1 0 0 / 55%);
   --glass-border: oklch(1 0 0 / 70%);
+  --ink: oklch(0.2 0.025 260);
+  --success: oklch(0.55 0.15 155);
+  --warning: oklch(0.84 0.14 78);
+  --warning-foreground: oklch(0.42 0.11 58);
+  --login-grid: oklch(0.5 0.18 263 / 7%);
 }
 
 .dark {
@@ -138,6 +152,19 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  --ink: oklch(0.91 0.01 260);
+  --success: oklch(0.71 0.14 155);
+  --warning: oklch(0.77 0.14 78);
+  --warning-foreground: oklch(0.86 0.12 85);
+  --login-grid: oklch(1 0 0 / 5%);
+}
+
+@utility bg-login-pattern {
+  background-image:
+    linear-gradient(to right, var(--login-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--login-grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
 }
 
 @layer base {

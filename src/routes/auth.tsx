@@ -1,6 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { UsersRound } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -63,34 +67,11 @@ function AuthPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-10">
-      {/* لمسة ضوئية زرقاء ناعمة خلف البطاقة */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-40 left-1/2 h-[28rem] w-[42rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-48 right-[-8rem] h-[26rem] w-[26rem] rounded-full bg-primary/5 blur-3xl"
-      />
-
-      <div className="relative w-full max-w-md rounded-3xl border border-glass-border bg-glass p-8 shadow-glass backdrop-blur-xl sm:p-10">
+      <div aria-hidden className="absolute inset-0 bg-login-pattern opacity-50" />
+      <div className="relative w-full max-w-md rounded-lg border border-glass-border bg-glass p-8 shadow-login backdrop-blur-xl sm:p-10">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-glass">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-7 w-7"
-            >
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
+          <div className="mx-auto mb-5 grid h-14 w-14 place-items-center rounded-lg bg-primary text-primary-foreground shadow-glass">
+            <UsersRound className="h-7 w-7" aria-hidden="true" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">
             نظام إدارة الموارد البشرية
@@ -102,10 +83,10 @@ function AuthPage() {
 
         <form onSubmit={onSubmit} className="space-y-5">
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-foreground">
+            <Label htmlFor="email" className="block text-sm font-medium text-foreground">
               اسم المستخدم
-            </label>
-            <input
+            </Label>
+            <Input
               id="email"
               type="email"
               value={email}
@@ -113,15 +94,15 @@ function AuthPage() {
               placeholder="example@email.com"
               required
               dir="ltr"
-              className="w-full rounded-xl border border-glass-border bg-white/60 px-4 py-3 text-sm text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-2 focus:ring-primary/25"
+              className="h-12 rounded-lg border-glass-border bg-card/65 px-4 text-sm shadow-sm focus-visible:ring-primary/30"
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-foreground">
+            <Label htmlFor="password" className="block text-sm font-medium text-foreground">
               كلمة المرور
-            </label>
-            <input
+            </Label>
+            <Input
               id="password"
               type="password"
               value={password}
@@ -129,41 +110,42 @@ function AuthPage() {
               placeholder="••••••••"
               required
               dir="ltr"
-              className="w-full rounded-xl border border-glass-border bg-white/60 px-4 py-3 text-sm text-foreground shadow-sm outline-none transition placeholder:text-muted-foreground/70 focus:border-primary/50 focus:ring-2 focus:ring-primary/25"
+              className="h-12 rounded-lg border-glass-border bg-card/65 px-4 text-sm shadow-sm focus-visible:ring-primary/30"
             />
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={busy}
-            className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-glass transition hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-12 w-full rounded-lg text-sm font-semibold shadow-glass"
           >
             {busy ? "جارٍ المعالجة..." : mode === "signin" ? "دخول" : "إنشاء حساب"}
-          </button>
+          </Button>
         </form>
 
         {message ? (
           <p
             className={
               messageType === "error"
-                ? "mt-5 rounded-xl bg-destructive/10 px-4 py-3 text-center text-sm text-destructive"
-                : "mt-5 rounded-xl bg-primary/10 px-4 py-3 text-center text-sm text-primary"
+                ? "mt-5 rounded-lg bg-destructive/10 px-4 py-3 text-center text-sm text-destructive"
+                : "mt-5 rounded-lg bg-primary/10 px-4 py-3 text-center text-sm text-primary"
             }
           >
             {message}
           </p>
         ) : null}
 
-        <button
+        <Button
           type="button"
           onClick={() => {
             setMode(mode === "signin" ? "signup" : "signin");
             setMessage("");
           }}
-          className="mt-6 w-full text-center text-sm font-medium text-primary underline-offset-4 transition hover:underline"
+          variant="link"
+          className="mt-4 w-full text-center text-sm font-medium"
         >
           {mode === "signin" ? "إنشاء حساب جديد" : "لدي حساب بالفعل"}
-        </button>
+        </Button>
       </div>
     </div>
   );
