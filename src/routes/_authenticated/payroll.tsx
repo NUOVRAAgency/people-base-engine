@@ -1,19 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-
-export const Route = createFileRoute("/_authenticated/payroll")({
-  head: () => ({
-    meta: [
-      { title: "الرواتب | نظام الموارد البشرية" },
-      { name: "description", content: "إدارة رواتب الموظفين" },
-      { property: "og:title", content: "الرواتب | نظام الموارد البشرية" },
-      { property: "og:description", content: "إدارة رواتب الموظفين" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: PayrollPage,
-});
-
-function PayrollPage() {
-  return <div className="min-h-dvh bg-white" dir="rtl" />;
-}
+import { ArrowDownLeft, ArrowUpRight, Banknote, WalletCards } from "lucide-react";
+import { useEffect, useState } from "react";
+import { MobilePage, PageHeader, SectionTitle } from "@/components/mobile-hr";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+export const Route=createFileRoute("/_authenticated/payroll")({head:()=>({meta:[{title:"الرواتب | نظام الموارد البشرية"},{name:"description",content:"ملخص الرواتب الشهري للمدير"},{property:"og:title",content:"الرواتب | نظام الموارد البشرية"},{property:"og:description",content:"ملخص الرواتب الشهري للمدير"},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:PayrollPage});
+function PayrollPage(){const [rows,setRows]=useState<Tables<"payroll">[]>([]);useEffect(()=>{let active=true;void supabase.from("payroll").select("*").order("month",{ascending:false}).then(({data})=>{if(active)setRows(data??[])});return()=>{active=false}},[]);const total=rows.reduce((s,r)=>s+Number(r.net_salary),0);const bonuses=rows.reduce((s,r)=>s+Number(r.bonuses),0);const deductions=rows.reduce((s,r)=>s+Number(r.deductions),0);return <MobilePage><PageHeader eyebrow="الملخص المالي" title="الرواتب"/><section className="mt-3 rounded-xl bg-primary p-5 text-primary-foreground shadow-card"><div className="flex items-center justify-between"><span className="grid size-11 place-items-center rounded-xl bg-primary-foreground/15"><WalletCards/></span><span className="text-xs text-primary-foreground/70">هذا الشهر</span></div><p className="mt-7 text-xs text-primary-foreground/70">إجمالي صافي الرواتب</p><strong className="mt-1 block text-3xl">{total.toLocaleString("ar")} ر.س</strong></section><div className="mt-3 grid grid-cols-2 gap-3"><article className="rounded-xl bg-card p-4 shadow-card"><ArrowUpRight className="size-5 text-success"/><p className="mt-4 text-xs text-muted-foreground">البدلات</p><b className="mt-1 block">{bonuses.toLocaleString("ar")} ر.س</b></article><article className="rounded-xl bg-card p-4 shadow-card"><ArrowDownLeft className="size-5 text-destructive"/><p className="mt-4 text-xs text-muted-foreground">الخصومات</p><b className="mt-1 block">{deductions.toLocaleString("ar")} ر.س</b></article></div><SectionTitle>السجلات الأخيرة</SectionTitle><div className="space-y-3">{rows.length?rows.slice(0,8).map(r=><article key={r.id} className="flex items-center gap-3 rounded-xl bg-card p-4 shadow-card"><span className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary"><Banknote/></span><div className="min-w-0 flex-1"><h2 className="text-sm font-bold">راتب موظف</h2><p className="mt-1 text-xs text-muted-foreground">{new Date(r.month).toLocaleDateString("ar",{month:"long",year:"numeric"})}</p></div><b className="text-sm">{Number(r.net_salary).toLocaleString("ar")} ر.س</b></article>):<div className="rounded-xl bg-card p-8 text-center shadow-card"><Banknote className="mx-auto size-7 text-primary"/><p className="mt-3 text-sm font-semibold">لا توجد سجلات رواتب</p></div>}</div></MobilePage>}

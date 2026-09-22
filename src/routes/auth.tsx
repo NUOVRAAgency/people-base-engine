@@ -1,69 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { LockKeyhole, Mail } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-
-export const Route = createFileRoute("/auth")({
-  ssr: false,
-  head: () => ({
-    meta: [
-      { title: "تسجيل الدخول | HR System" },
-      { name: "description", content: "تسجيل الدخول إلى نظام إدارة الموارد البشرية" },
-      { property: "og:title", content: "تسجيل الدخول | HR System" },
-      { property: "og:description", content: "تسجيل الدخول إلى نظام إدارة الموارد البشرية" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: AuthPage,
-});
-
-function AuthPage() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
-    });
-  }, [navigate]);
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setMessage("");
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setMessage(error.message);
-    else navigate({ to: "/dashboard", replace: true });
-    setBusy(false);
-  }
-
-  return (
-    <main className="min-h-dvh bg-white p-4" dir="rtl">
-      <form onSubmit={onSubmit}>
-        <input
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="اسم المستخدم"
-          autoComplete="username"
-          required
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="كلمة المرور"
-          autoComplete="current-password"
-          required
-        />
-        {message ? <p role="alert">{message}</p> : null}
-        <button type="submit" disabled={busy}>
-          {busy ? "..." : "دخول"}
-        </button>
-      </form>
-    </main>
-  );
+export const Route = createFileRoute("/auth")({ ssr: false, head: () => ({ meta: [{ title: "تسجيل الدخول | نظام الموارد البشرية" }, { name: "description", content: "الدخول الآمن إلى مساحة عمل الموارد البشرية" }, { property: "og:title", content: "تسجيل الدخول | نظام الموارد البشرية" }, { property: "og:description", content: "الدخول الآمن إلى مساحة عمل الموارد البشرية" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }), component: AuthPage });
+function AuthPage() { const navigate=useNavigate(); const [email,setEmail]=useState(""); const [password,setPassword]=useState(""); const [message,setMessage]=useState(""); const [busy,setBusy]=useState(false);
+ useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(data.session) navigate({to:"/dashboard",replace:true});});},[navigate]);
+ async function onSubmit(e:React.FormEvent){e.preventDefault();setBusy(true);setMessage("");const {error}=await supabase.auth.signInWithPassword({email,password});if(error)setMessage("تعذر تسجيل الدخول، تحقق من البيانات");else navigate({to:"/dashboard",replace:true});setBusy(false);}
+ return <main className="grid min-h-dvh place-items-center bg-page px-5" dir="rtl"><form onSubmit={onSubmit} className="w-full max-w-[390px] rounded-xl bg-card p-6 shadow-login"><div className="mb-7"><span className="grid size-12 place-items-center rounded-xl bg-primary text-primary-foreground"><LockKeyhole/></span><h1 className="mt-5 text-2xl font-bold">مرحباً بعودتك</h1><p className="mt-2 text-sm text-muted-foreground">سجّل الدخول إلى مساحة عملك</p></div><label className="mb-2 block text-xs font-semibold">البريد الإلكتروني</label><div className="relative mb-4"><Mail className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input className="h-13 rounded-xl bg-page pr-11" type="email" value={email} onChange={e=>setEmail(e.target.value)} required autoComplete="username"/></div><label className="mb-2 block text-xs font-semibold">كلمة المرور</label><div className="relative"><LockKeyhole className="absolute right-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"/><Input className="h-13 rounded-xl bg-page pr-11" type="password" value={password} onChange={e=>setPassword(e.target.value)} required autoComplete="current-password"/></div>{message?<p role="alert" className="mt-3 text-xs text-destructive">{message}</p>:null}<Button className="mt-6 h-13 w-full rounded-xl text-base" disabled={busy}>{busy?"جارٍ الدخول...":"دخول"}</Button></form></main>;
 }

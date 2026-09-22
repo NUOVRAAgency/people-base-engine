@@ -1,19 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-
-export const Route = createFileRoute("/_authenticated/attendance")({
-  head: () => ({
-    meta: [
-      { title: "الحضور | نظام الموارد البشرية" },
-      { name: "description", content: "متابعة حضور وغياب الموظفين" },
-      { property: "og:title", content: "الحضور | نظام الموارد البشرية" },
-      { property: "og:description", content: "متابعة حضور وغياب الموظفين" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: AttendancePage,
-});
-
-function AttendancePage() {
-  return <div className="min-h-dvh bg-white" dir="rtl" />;
-}
+import { CalendarDays, Clock3 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { MobilePage, PageHeader, SectionTitle } from "@/components/mobile-hr";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/integrations/supabase/types";
+export const Route=createFileRoute("/_authenticated/attendance")({head:()=>({meta:[{title:"الحضور والجدولة | نظام الموارد البشرية"},{name:"description",content:"تقويم الدوام وسجلات الحضور"},{property:"og:title",content:"الحضور والجدولة | نظام الموارد البشرية"},{property:"og:description",content:"تقويم الدوام وسجلات الحضور"},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:AttendancePage});
+function AttendancePage(){const [date,setDate]=useState<Date|undefined>(new Date());const [rows,setRows]=useState<Tables<"attendance">[]>([]);useEffect(()=>{let active=true;const day=(date??new Date()).toISOString().slice(0,10);void supabase.from("attendance").select("*").eq("date",day).then(({data})=>{if(active)setRows(data??[])});return()=>{active=false}},[date]);return <MobilePage><PageHeader eyebrow="الحضور والدوام" title="الجدولة" action={<Button size="icon" variant="ghost" className="rounded-full bg-card shadow-sm"><CalendarDays/></Button>}/><section className="mt-3 overflow-hidden rounded-xl bg-card shadow-card"><Calendar mode="single" selected={date} onSelect={setDate} className="w-full bg-transparent p-4 [--cell-size:2.55rem]" formatters={{formatCaption:d=>d.toLocaleDateString("ar",{month:"long",year:"numeric"}),formatWeekdayName:d=>d.toLocaleDateString("ar",{weekday:"narrow"})}}/></section><SectionTitle action={<span className="text-[11px] text-muted-foreground">{date?.toLocaleDateString("ar",{day:"numeric",month:"long"})}</span>}>سجلات اليوم</SectionTitle><div className="space-y-3">{rows.length?rows.map((row,index)=><article key={row.id} className="relative overflow-hidden rounded-xl bg-card p-4 shadow-card"><span className={`absolute inset-y-0 right-0 w-1 ${row.status==="present"?"bg-success":row.status==="late"?"bg-warning":"bg-destructive"}`}/><div className="flex items-center gap-3"><Avatar className="size-10"><AvatarFallback className="bg-primary/10 text-xs text-primary">{index+1}</AvatarFallback></Avatar><div className="min-w-0 flex-1"><h2 className="text-sm font-bold">سجل حضور</h2><p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><Clock3 className="size-3"/>08:00 ص — 04:00 م</p></div><span className="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-bold text-primary">{row.status==="present"?"حاضر":row.status==="late"?"متأخر":"غائب"}</span></div></article>):<div className="rounded-xl bg-card p-8 text-center shadow-card"><Clock3 className="mx-auto size-7 text-primary"/><h3 className="mt-3 text-sm font-semibold">لا توجد سجلات لهذا اليوم</h3><p className="mt-1 text-xs text-muted-foreground">ستظهر سجلات الحضور والدوام هنا.</p></div>}</div></MobilePage>}
