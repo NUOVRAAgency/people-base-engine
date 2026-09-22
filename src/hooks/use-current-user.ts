@@ -1,0 +1,52 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+export type AppRole = "admin" | "operator" | "viewer";
+
+export const ROLE_LABELS: Record<AppRole, string> = {
+  admin: "مدير النظام",
+  operator: "مشغّل",
+  viewer: "مشاهد",
+};
+
+export function useCurrentUser() {
+  const [email, setEmail] = useState<string>("");
+  const [fullName, setFullName] = useState<string>("");
+  const [role, setRole] = useState<AppRole | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
+      if (!mounted) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+      setEmail(user.email ?? "");
+      const meta = user.user_metadata as Record<string, unknown> | null;
+      const name = (meta?.["full_name"] as string | undefined) ?? (user.email ?? "").split("@")[0];
+      setFullName(name ?? "");
+
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      if (!mounted) return;
+      const list = (roles ?? []).map((r) => r.role as AppRole);
+      setRole(list.includes("admin") ? "admin" : (list[0] ?? "viewer"));
+      setLoading(false);
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const initials = (fullName || email || "؟").trim().slice(0, 2).toUpperCase();
+
+  return { email, fullName, role, initials, loading, isAdmin: role === "admin" };
+}
