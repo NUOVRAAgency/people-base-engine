@@ -56,19 +56,23 @@ function Dashboard() {
   const [today, setToday] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) return;
+      if (!data.user || !isMounted) return;
       const email = data.user?.email ?? "";
       const metadataName = data.user.user_metadata?.["full_name"];
       const name = typeof metadataName === "string" && metadataName.trim()
         ? metadataName.trim()
         : email.split("@")[0] || "مستخدم النظام";
-      setUserName(name);
 
       const { data: roleRows } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", data.user.id);
+      if (!isMounted) return;
+
+      setUserName(name);
       const roles = roleRows?.map((row) => row.role) ?? [];
       setRole(roles.includes("admin") ? "admin" : roles.includes("operator") ? "operator" : "viewer");
     });
@@ -80,6 +84,10 @@ function Dashboard() {
         year: "numeric",
       }).format(new Date())
     );
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const navigation = useMemo(
