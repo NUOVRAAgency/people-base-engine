@@ -70,9 +70,9 @@ export function MobileShell({ children }: { children: ReactNode }) {
         className="fixed inset-x-0 top-0 z-30 flex h-[62px] items-center justify-between px-4 text-primary-foreground shadow-nav"
         style={{ background: "var(--header-gradient)" }}
       >
-        <div className="flex min-w-0 items-center gap-2.5">
+        <div className="flex min-w-0 flex-col items-start justify-center gap-0.5">
           {logoUrl ? (
-            <img src={logoUrl} alt="شعار المؤسسة" className="h-9 w-9 shrink-0 rounded-md bg-primary-foreground object-contain p-1" />
+            <img src={logoUrl} alt="شعار المؤسسة" className="h-6 w-6 shrink-0 rounded-sm bg-primary-foreground object-contain p-0.5" />
           ) : null}
           <h1 className="truncate text-[18px] font-bold leading-none">{title}</h1>
         </div>
