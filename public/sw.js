@@ -1,5 +1,5 @@
 // App Shell caching: الواجهة تعمل بدون إنترنت، أما الحفظ والتعديل فيتطلبان اتصالًا فعليًا.
-const CACHE = "hr-shell-v1";
+const CACHE = "hr-shell-v2";
 const SHELL = ["/", "/manifest.json", "/favicon.ico"];
 
 self.addEventListener("install", (event) => {
@@ -30,7 +30,14 @@ self.addEventListener("fetch", (event) => {
     url.origin !== self.location.origin ||
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/_serverFn") ||
-    url.pathname.startsWith("/~oauth")
+    url.pathname.startsWith("/~oauth") ||
+    // ملفات التطوير غير الثابتة: تخزينها يخلط بين نسخ مختلفة ويسبب شاشة بيضاء
+    url.pathname.startsWith("/node_modules/") ||
+    url.pathname.startsWith("/@vite") ||
+    url.pathname.startsWith("/@id/") ||
+    url.pathname.startsWith("/@fs/") ||
+    url.pathname.startsWith("/src/") ||
+    url.search.includes("v=")
   ) {
     return;
   }
