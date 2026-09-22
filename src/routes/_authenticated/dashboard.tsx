@@ -6,5 +6,5 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function DashboardPage() {
-  return <main dir="rtl" className="min-h-[calc(100dvh-98px)] bg-background" />;
+  return <main dir="rtl" className="min-h-dvh bg-white" />;
 }
