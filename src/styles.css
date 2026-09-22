@@ -28,6 +28,7 @@
   --radius-4xl: calc(var(--radius) + 16px);
   --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
   --color-header-blue: var(--header-blue);
+  --color-page: var(--page);
   --color-glass: var(--glass);
   --color-glass-border: var(--glass-border);
   --color-ink: var(--ink);
@@ -83,7 +84,8 @@
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.502 0.244 262.6);
+  --primary: oklch(0.52 0.262 263.5);
+  --page: oklch(0.984 0.003 247.858);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.968 0.007 247.896);
   --secondary-foreground: oklch(0.208 0.042 265.755);
@@ -121,6 +123,7 @@
 
 .dark {
   --background: oklch(0.129 0.042 264.695);
+  --page: oklch(0.15 0.04 264);
   --foreground: oklch(0.984 0.003 247.858);
   --card: oklch(0.208 0.042 265.755);
   --card-foreground: oklch(0.984 0.003 247.858);
