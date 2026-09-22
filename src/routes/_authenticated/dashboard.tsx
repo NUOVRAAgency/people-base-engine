@@ -164,7 +164,7 @@ function DashboardPage() {
                 variant={index === 0 ? "default" : "ghost"}
                 className="h-11 w-full justify-start gap-3 rounded-lg px-3 text-sm"
               >
-                <Icon className="size-5 shrink-0" aria-hidden="true" />
+                <Icon className="size-5 shrink-0" />
                 {item.label}
                 {index === 0 ? <ChevronLeft className="mr-auto size-4" aria-hidden="true" /> : null}
               </Button>
@@ -211,7 +211,7 @@ function DashboardPage() {
               const Icon = item.icon;
               return (
                 <Button key={item.label} type="button" variant={index === 0 ? "default" : "outline"} size="sm" className="shrink-0 gap-2 rounded-lg">
-                  <Icon className="size-4" aria-hidden="true" />
+                  <Icon className="size-4" />
                   {item.label}
                 </Button>
               );
