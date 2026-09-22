@@ -16,18 +16,21 @@ export type Database = {
     Tables: {
       app_settings: {
         Row: {
+          company_name: string | null
           id: string
           logo_path: string | null
           updated_at: string
           updated_by: string | null
         }
         Insert: {
+          company_name?: string | null
           id?: string
           logo_path?: string | null
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
+          company_name?: string | null
           id?: string
           logo_path?: string | null
           updated_at?: string

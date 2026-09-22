@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { ChevronLeft, ShieldCheck, UserCog, Users } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
@@ -18,7 +18,10 @@ export const Route = createFileRoute("/_authenticated/settings")({
 
 function SettingsPage() {
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { isAdmin } = useCurrentUser();
+
+  if (pathname !== "/settings") return <Outlet />;
 
   const sections = [
     { to: "/account", label: "الملف الشخصي", description: "بيانات حسابك وصلاحيتك", icon: UserCog },

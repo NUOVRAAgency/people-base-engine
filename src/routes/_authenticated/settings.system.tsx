@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ImageUp } from "lucide-react";
-import { useRef, useState } from "react";
+import { Building2, Save } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
@@ -12,32 +13,45 @@ export const Route = createFileRoute("/_authenticated/settings/system")({
 
 function SystemSettingsPage() {
   const { isAdmin } = useCurrentUser();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
+  const [companyName, setCompanyName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  async function uploadLogo(file: File) {
-    if (!file.type.startsWith("image/") || !isAdmin) return;
-    setUploading(true);
+  useEffect(() => {
+    if (!isAdmin) return;
+    void supabase
+      .from("app_settings")
+      .select("company_name")
+      .eq("id", "organization")
+      .maybeSingle()
+      .then(({ data }) => setCompanyName(data?.company_name ?? ""));
+  }, [isAdmin]);
+
+  async function saveCompanyName() {
+    if (!isAdmin) return;
+    setSaving(true);
+    setSaved(false);
     const { data } = await supabase.auth.getUser();
-    const extension = file.name.split(".").pop()?.toLowerCase() || "png";
-    const path = `organization/logo.${extension}`;
-    const { error } = await supabase.storage.from("hr-branding").upload(path, file, { upsert: true, contentType: file.type });
+    const { error } = await supabase.from("app_settings").update({ company_name: companyName.trim() || null, updated_by: data.user?.id ?? null }).eq("id", "organization");
     if (!error) {
-      await supabase.from("app_settings").update({ logo_path: path, updated_by: data.user?.id ?? null }).eq("id", "organization");
       window.dispatchEvent(new Event("hr-header-refresh"));
+      setSaved(true);
     }
-    setUploading(false);
+    setSaving(false);
   }
 
-  if (!isAdmin) return <p className="py-8 text-center text-sm text-muted-foreground">إعدادات الشعار متاحة لمدير النظام فقط</p>;
+  if (!isAdmin) return <p className="py-8 text-center text-sm text-muted-foreground">إعدادات الشركة متاحة لمدير النظام فقط</p>;
 
   return (
     <section className="rounded-lg bg-card p-5 shadow-sm">
-      <h2 className="text-base font-bold text-foreground">شعار المؤسسة</h2>
-      <p className="mt-1 text-sm leading-6 text-muted-foreground">ارفع صورة مربعة واضحة لتظهر تلقائياً بجانب عنوان كل قسم.</p>
-      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadLogo(file); event.target.value = ""; }} />
-      <Button type="button" className="mt-4 w-full" disabled={uploading} onClick={() => inputRef.current?.click()}>
-        <ImageUp aria-hidden /> {uploading ? "جارٍ رفع الشعار..." : "رفع شعار المؤسسة"}
+      <div className="flex items-center gap-2">
+        <Building2 className="h-5 w-5 text-primary" aria-hidden />
+        <h2 className="text-base font-bold text-foreground">اسم الشركة</h2>
+      </div>
+      <p className="mt-1 text-sm leading-6 text-muted-foreground">يظهر الاسم في منتصف الهيدر، ويختفي تماماً عند ترك الحقل فارغاً.</p>
+      <Input dir="auto" value={companyName} onChange={(event) => { setCompanyName(event.target.value); setSaved(false); }} maxLength={50} placeholder="اكتب اسم الشركة" className="mt-4 h-11" />
+      <Button type="button" className="mt-3 w-full" disabled={saving} onClick={() => void saveCompanyName()}>
+        <Save aria-hidden /> {saving ? "جارٍ الحفظ..." : saved ? "تم الحفظ" : "حفظ اسم الشركة"}
       </Button>
     </section>
   );

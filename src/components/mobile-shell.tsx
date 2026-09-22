@@ -13,7 +13,7 @@ import {
 import { useEffect, useRef, type ReactNode } from "react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useHeaderData } from "@/hooks/use-header-data";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -52,7 +52,8 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const title = TITLES[pathname] ?? "نظام الموارد البشرية";
   const { isAdmin, initials, fullName } = useCurrentUser();
-  const { avatarUrl, logoUrl, notifications } = useHeaderData();
+  const { companyName, notifications } = useHeaderData();
+  const companyNameIsArabic = /[\u0600-\u06ff]/.test(companyName);
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
@@ -70,16 +71,21 @@ export function MobileShell({ children }: { children: ReactNode }) {
         className="fixed inset-x-0 top-0 z-30 flex h-[62px] items-center justify-between px-4 text-primary-foreground shadow-nav"
         style={{ background: "var(--header-gradient)" }}
       >
-        <div className="flex min-w-0 flex-col items-start justify-center gap-0.5">
-          {logoUrl ? (
-            <img src={logoUrl} alt="شعار المؤسسة" className="h-6 w-6 shrink-0 rounded-sm bg-primary-foreground object-contain p-0.5" />
-          ) : null}
+        <div className="flex min-w-0 items-center">
           <h1 className="truncate text-[18px] font-bold leading-none">{title}</h1>
         </div>
 
+        {companyName ? (
+          <p
+            dir="auto"
+            className={`pointer-events-none absolute left-1/2 max-w-[42%] -translate-x-1/2 truncate text-center text-[15px] font-bold text-primary-foreground ${companyNameIsArabic ? "font-kufi" : "font-sans"}`}
+          >
+            {companyName}
+          </p>
+        ) : null}
+
         <div className="flex shrink-0 items-center gap-1.5">
           <Avatar className="h-9 w-9 border-2 border-primary-foreground/80 bg-primary-foreground/15">
-            {avatarUrl ? <AvatarImage src={avatarUrl} alt={fullName || "صورة المستخدم"} className="object-cover" /> : null}
             <AvatarFallback className="bg-primary-foreground/15 text-xs font-bold text-primary-foreground">{initials}</AvatarFallback>
           </Avatar>
 
