@@ -1,19 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-
-export const Route = createFileRoute("/_authenticated/users")({
-  head: () => ({
-    meta: [
-      { title: "المستخدمون | نظام الموارد البشرية" },
-      { name: "description", content: "إدارة مستخدمي النظام وصلاحياتهم" },
-      { property: "og:title", content: "المستخدمون | نظام الموارد البشرية" },
-      { property: "og:description", content: "إدارة مستخدمي النظام وصلاحياتهم" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: UsersPage,
-});
-
-function UsersPage() {
-  return <div className="min-h-dvh bg-white" dir="rtl" />;
-}
+import { Bot, Check, ClipboardList, Mic, SendHorizontal } from "lucide-react";
+import { useState } from "react";
+import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
+import { PromptInput, PromptInputButton, PromptInputFooter, PromptInputSubmit, PromptInputTextarea, PromptInputTools, type PromptInputMessage } from "@/components/ai-elements/prompt-input";
+import { MobilePage, PageHeader } from "@/components/mobile-hr";
+import { Button } from "@/components/ui/button";
+export const Route=createFileRoute("/_authenticated/users")({head:()=>({meta:[{title:"المساعد الذكي | نظام الموارد البشرية"},{name:"description",content:"مساعد الموارد البشرية وملخص طلبات الإجازة"},{property:"og:title",content:"المساعد الذكي | نظام الموارد البشرية"},{property:"og:description",content:"مساعد الموارد البشرية وملخص طلبات الإجازة"},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary_large_image"}]}),component:AssistantPage});
+function AssistantPage(){const [sent,setSent]=useState("");function handleSubmit(message:PromptInputMessage){const text=message.text?.trim();if(!text)return;setSent(text); // TODO: ربط الإرسال لاحقاً بدالة Supabase Edge Function وسيطة، دون أي طلب خارجي حالياً.
+}return <MobilePage className="flex h-dvh flex-col overflow-hidden pb-26"><PageHeader eyebrow="متاح لمساعدتك" title="مساعد الموارد البشرية" action={<span className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground shadow-nav"><Bot className="size-5"/></span>}/><Conversation className="min-h-0 flex-1"><ConversationContent className="gap-5 px-0 py-4"><Message from="assistant"><MessageContent className="max-w-[88%]"><MessageResponse>مرحباً، أنا مساعد الموارد البشرية. يمكنني مساعدتك في تلخيص طلبات الإجازة وقراءة مؤشرات الفريق.</MessageResponse></MessageContent></Message>{sent?<Message from="user"><MessageContent className="bg-primary text-primary-foreground"><MessageResponse>{sent}</MessageResponse></MessageContent></Message>:null}<Message from="assistant"><MessageContent className="w-full max-w-full"><section className="rounded-xl bg-card p-4 shadow-card"><div className="flex items-center gap-2"><span className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary"><ClipboardList className="size-4"/></span><div><h2 className="text-sm font-bold">ملخص طلبات الإجازة</h2><p className="text-[10px] text-muted-foreground">الحالة الحالية</p></div></div><div className="mt-4 grid grid-cols-3 gap-2">{[["معلّق","12","bg-warning/15 text-warning-foreground"],["عاجل","3","bg-destructive/10 text-destructive"],["مقبول","8","bg-success/10 text-success"]].map(([l,v,c])=><div key={l} className={`rounded-lg p-3 text-center ${c}`}><strong className="text-xl">{v}</strong><p className="mt-1 text-[10px]">{l}</p></div>)}</div><div className="mt-4 grid grid-cols-2 gap-2"><Button size="sm" className="rounded-lg"><Check/>اعتماد</Button><Button size="sm" variant="outline" className="rounded-lg">عرض الطلبات</Button></div></section></MessageContent></Message></ConversationContent><ConversationScrollButton/></Conversation><PromptInput onSubmit={handleSubmit} className="mb-1 rounded-xl bg-card shadow-card"><PromptInputTextarea placeholder="اكتب رسالتك..." className="min-h-16"/><PromptInputFooter><PromptInputTools><PromptInputButton tooltip="إدخال صوتي"><Mic className="size-4"/></PromptInputButton></PromptInputTools><PromptInputSubmit aria-label="إرسال"><SendHorizontal className="size-4"/></PromptInputFooter></PromptInput></MobilePage>}
