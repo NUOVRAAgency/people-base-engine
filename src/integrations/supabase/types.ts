@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          id: string
+          logo_path: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          logo_path?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          logo_path?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       attendance: {
         Row: {
           created_at: string
@@ -208,18 +229,21 @@ export type Database = {
       }
       users: {
         Row: {
+          avatar_path: string | null
           branch_id: string | null
           created_at: string
           email: string
           id: string
         }
         Insert: {
+          avatar_path?: string | null
           branch_id?: string | null
           created_at?: string
           email: string
           id: string
         }
         Update: {
+          avatar_path?: string | null
           branch_id?: string | null
           created_at?: string
           email?: string

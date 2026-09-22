@@ -1,52 +1,56 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Camera, LogOut } from "lucide-react";
+import { useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABELS, useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/account")({
-  head: () => ({
-    meta: [
-      { title: "الحساب | نظام الموارد البشرية" },
-      { name: "description", content: "بيانات حسابك وصلاحيتك في نظام الموارد البشرية" },
-      { property: "og:title", content: "الحساب | نظام الموارد البشرية" },
-      { property: "og:description", content: "بيانات حسابك وصلاحيتك في نظام الموارد البشرية" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: () => ({ meta: [{ title: "الحساب | نظام الموارد البشرية" }, { name: "description", content: "بيانات حسابك وصلاحيتك في نظام الموارد البشرية" }, { property: "og:title", content: "الحساب | نظام الموارد البشرية" }, { property: "og:description", content: "بيانات حسابك وصلاحيتك في نظام الموارد البشرية" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: AccountPage,
 });
 
 function AccountPage() {
   const navigate = useNavigate();
   const { email, fullName, role, initials } = useCurrentUser();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  async function uploadAvatar(file: File) {
+    if (!file.type.startsWith("image/")) return;
+    setUploading(true);
+    const { data } = await supabase.auth.getUser();
+    const user = data.user;
+    if (!user) { setUploading(false); return; }
+    const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `avatars/${user.id}/profile.${extension}`;
+    const { error } = await supabase.storage.from("hr-branding").upload(path, file, { upsert: true, contentType: file.type });
+    if (!error) {
+      await supabase.from("users").update({ avatar_path: path }).eq("id", user.id);
+      window.dispatchEvent(new Event("hr-header-refresh"));
+    }
+    setUploading(false);
+  }
 
   return (
     <div className="space-y-4">
-      <section className="rounded-2xl bg-card p-5 shadow-sm">
+      <section className="rounded-lg bg-card p-5 shadow-sm">
         <div className="flex items-center gap-3">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
-            {initials}
-          </span>
-          <div className="min-w-0">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">{initials}</span>
+          <div className="min-w-0 flex-1">
             <p className="truncate text-base font-bold text-foreground">{fullName || "مستخدم"}</p>
             <p className="truncate text-sm text-muted-foreground">{email}</p>
           </div>
+          <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadAvatar(file); event.target.value = ""; }} />
+          <Button type="button" variant="outline" size="icon" aria-label="تغيير الصورة الشخصية" disabled={uploading} onClick={() => inputRef.current?.click()}>
+            <Camera aria-hidden />
+          </Button>
         </div>
-        <p className="mt-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-          {role ? ROLE_LABELS[role] : "—"}
-        </p>
+        <p className="mt-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">{role ? ROLE_LABELS[role] : "—"}</p>
       </section>
 
-      <Button
-        variant="outline"
-        className="w-full"
-        onClick={async () => {
-          await supabase.auth.signOut();
-          navigate({ to: "/auth", replace: true });
-        }}
-      >
-        تسجيل الخروج
+      <Button variant="outline" className="w-full" onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth", replace: true }); }}>
+        <LogOut aria-hidden /> تسجيل الخروج
       </Button>
     </div>
   );
