@@ -16,9 +16,12 @@ import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAttendanceRouteImport } from './routes/_authenticated/attendance'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEmployeesRouteImport } from './routes/_authenticated/employees'
+import { Route as AuthenticatedLeavesRouteImport } from './routes/_authenticated/leaves'
 import { Route as AuthenticatedPayrollRouteImport } from './routes/_authenticated/payroll'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
+import { Route as AuthenticatedSettingsSystemRouteImport } from './routes/_authenticated/settings.system'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -54,9 +57,19 @@ const AuthenticatedEmployeesRoute = AuthenticatedEmployeesRouteImport.update({
   path: '/employees',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLeavesRoute = AuthenticatedLeavesRouteImport.update({
+  id: '/leaves',
+  path: '/leaves',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPayrollRoute = AuthenticatedPayrollRouteImport.update({
   id: '/payroll',
   path: '/payroll',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
@@ -69,6 +82,12 @@ const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSettingsSystemRoute =
+  AuthenticatedSettingsSystemRouteImport.update({
+    id: '/system',
+    path: '/system',
+    getParentRoute: () => AuthenticatedSettingsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -77,9 +96,12 @@ export interface FileRoutesByFullPath {
   '/attendance': typeof AuthenticatedAttendanceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employees': typeof AuthenticatedEmployeesRoute
+  '/leaves': typeof AuthenticatedLeavesRoute
   '/payroll': typeof AuthenticatedPayrollRoute
-  '/settings': typeof AuthenticatedSettingsRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/users': typeof AuthenticatedUsersRoute
+  '/settings/system': typeof AuthenticatedSettingsSystemRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -88,9 +110,12 @@ export interface FileRoutesByTo {
   '/attendance': typeof AuthenticatedAttendanceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employees': typeof AuthenticatedEmployeesRoute
+  '/leaves': typeof AuthenticatedLeavesRoute
   '/payroll': typeof AuthenticatedPayrollRoute
-  '/settings': typeof AuthenticatedSettingsRoute
+  '/reports': typeof AuthenticatedReportsRoute
+  '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/users': typeof AuthenticatedUsersRoute
+  '/settings/system': typeof AuthenticatedSettingsSystemRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -101,9 +126,12 @@ export interface FileRoutesById {
   '/_authenticated/attendance': typeof AuthenticatedAttendanceRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/employees': typeof AuthenticatedEmployeesRoute
+  '/_authenticated/leaves': typeof AuthenticatedLeavesRoute
   '/_authenticated/payroll': typeof AuthenticatedPayrollRoute
-  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/_authenticated/settings/system': typeof AuthenticatedSettingsSystemRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -114,9 +142,12 @@ export interface FileRouteTypes {
     | '/attendance'
     | '/dashboard'
     | '/employees'
+    | '/leaves'
     | '/payroll'
+    | '/reports'
     | '/settings'
     | '/users'
+    | '/settings/system'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -125,9 +156,12 @@ export interface FileRouteTypes {
     | '/attendance'
     | '/dashboard'
     | '/employees'
+    | '/leaves'
     | '/payroll'
+    | '/reports'
     | '/settings'
     | '/users'
+    | '/settings/system'
   id:
     | '__root__'
     | '/'
@@ -137,9 +171,12 @@ export interface FileRouteTypes {
     | '/_authenticated/attendance'
     | '/_authenticated/dashboard'
     | '/_authenticated/employees'
+    | '/_authenticated/leaves'
     | '/_authenticated/payroll'
+    | '/_authenticated/reports'
     | '/_authenticated/settings'
     | '/_authenticated/users'
+    | '/_authenticated/settings/system'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -199,11 +236,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEmployeesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/leaves': {
+      id: '/_authenticated/leaves'
+      path: '/leaves'
+      fullPath: '/leaves'
+      preLoaderRoute: typeof AuthenticatedLeavesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/payroll': {
       id: '/_authenticated/payroll'
       path: '/payroll'
       fullPath: '/payroll'
       preLoaderRoute: typeof AuthenticatedPayrollRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings': {
@@ -220,16 +271,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings/system': {
+      id: '/_authenticated/settings/system'
+      path: '/system'
+      fullPath: '/settings/system'
+      preLoaderRoute: typeof AuthenticatedSettingsSystemRouteImport
+      parentRoute: typeof AuthenticatedSettingsRoute
+    }
   }
 }
+
+interface AuthenticatedSettingsRouteChildren {
+  AuthenticatedSettingsSystemRoute: typeof AuthenticatedSettingsSystemRoute
+}
+
+const AuthenticatedSettingsRouteChildren: AuthenticatedSettingsRouteChildren = {
+  AuthenticatedSettingsSystemRoute: AuthenticatedSettingsSystemRoute,
+}
+
+const AuthenticatedSettingsRouteWithChildren =
+  AuthenticatedSettingsRoute._addFileChildren(
+    AuthenticatedSettingsRouteChildren,
+  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedAttendanceRoute: typeof AuthenticatedAttendanceRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEmployeesRoute: typeof AuthenticatedEmployeesRoute
+  AuthenticatedLeavesRoute: typeof AuthenticatedLeavesRoute
   AuthenticatedPayrollRoute: typeof AuthenticatedPayrollRoute
-  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
 }
 
@@ -238,8 +311,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAttendanceRoute: AuthenticatedAttendanceRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEmployeesRoute: AuthenticatedEmployeesRoute,
+  AuthenticatedLeavesRoute: AuthenticatedLeavesRoute,
   AuthenticatedPayrollRoute: AuthenticatedPayrollRoute,
-  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
 }
 
