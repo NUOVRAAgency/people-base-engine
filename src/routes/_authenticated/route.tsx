@@ -32,8 +32,8 @@ function AuthenticatedLayout() {
   }
 
   return (
-    <div dir="rtl" className="min-h-dvh bg-white">
+    <MobileShell>
       <Outlet />
-    </div>
+    </MobileShell>
   );
 }
