@@ -4,7 +4,14 @@ import { ar } from "date-fns/locale";
 import { CalendarDays } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -21,8 +28,8 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
   const min = minDate ? parseISO(minDate) : undefined;
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
         <Button
           type="button"
           variant="outline"
@@ -42,15 +49,16 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
             </span>
           </span>
         </Button>
-      </PopoverTrigger>
-      <PopoverContent
-        align="center"
-        sideOffset={8}
-        collisionPadding={12}
+      </DialogTrigger>
+      <DialogContent
         dir="rtl"
-        className="z-[70] w-[min(20rem,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-primary/15 bg-card/90 p-2 text-foreground shadow-card backdrop-blur-xl"
+        className="z-[80] w-[calc(100vw-1.5rem)] max-w-xs overflow-hidden rounded-xl border border-primary/15 bg-card/95 p-3 font-sans text-foreground shadow-card backdrop-blur-xl sm:max-w-xs"
       >
         <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-primary/25" aria-hidden />
+        <DialogHeader className="px-2 pt-1 text-right sm:text-right">
+          <DialogTitle className="font-kufi text-sm font-normal leading-8">{ariaLabel}</DialogTitle>
+          <DialogDescription className="text-xs leading-6 text-muted-foreground">اختر اليوم المناسب من التقويم</DialogDescription>
+        </DialogHeader>
         <Calendar
           mode="single"
           locale={ar}
@@ -64,7 +72,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
             onChange(format(date, "yyyy-MM-dd"));
             setOpen(false);
           }}
-          className="pointer-events-auto w-full bg-transparent p-2 [--cell-size:2.25rem] [&_button]:text-inherit [&_button[data-selected-single=true]]:!rounded-full [&_button[data-selected-single=true]]:!bg-primary [&_button[data-selected-single=true]]:!text-primary-foreground [&_button[data-selected-single=true]]:shadow-md [&_button:hover]:bg-primary/10"
+          className="pointer-events-auto mx-auto w-full bg-transparent p-1 [--cell-size:2.25rem] [&_button]:text-inherit [&_button[data-selected-single=true]]:!rounded-full [&_button[data-selected-single=true]]:!bg-primary [&_button[data-selected-single=true]]:!text-primary-foreground [&_button[data-selected-single=true]]:shadow-md [&_button:hover]:bg-primary/10"
           classNames={{
             root: "w-full",
             month: "w-full gap-3",
@@ -76,7 +84,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
             today: "rounded-full bg-primary/5 text-primary",
           }}
         />
-      </PopoverContent>
-    </Popover>
+      </DialogContent>
+    </Dialog>
   );
 }
