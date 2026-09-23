@@ -643,6 +643,15 @@ $function$;
 REVOKE ALL ON FUNCTION public.payroll_set_net_salary() FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.payroll_set_net_salary() TO service_role;
 
+-- ترقية البيانات البنكية والتحقق المالي
+ALTER TABLE public.payroll
+  ADD COLUMN bank_name text,
+  ADD CONSTRAINT payroll_base_salary_nonnegative_check CHECK (base_salary >= 0),
+  ADD CONSTRAINT payroll_bonuses_nonnegative_check CHECK (bonuses >= 0),
+  ADD CONSTRAINT payroll_deductions_nonnegative_check CHECK (deductions >= 0),
+  ADD CONSTRAINT payroll_bank_name_length_check CHECK (bank_name IS NULL OR char_length(btrim(bank_name)) BETWEEN 2 AND 100),
+  ADD CONSTRAINT payroll_iban_format_check CHECK (iban IS NULL OR iban ~ '^SA[0-9]{22}$');
+
 -- =====================================================================
 --  نهاية المرجع
 -- =====================================================================

@@ -1,17 +1,10 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { ar } from "date-fns/locale";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -28,8 +21,8 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
   const min = minDate ? parseISO(minDate) : undefined;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <Button
           type="button"
           variant="outline"
@@ -49,16 +42,19 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
             </span>
           </span>
         </Button>
-      </DialogTrigger>
-      <DialogContent
+      </PopoverTrigger>
+      <PopoverContent
         dir="rtl"
-        className="z-[80] w-[calc(100vw-1.5rem)] max-w-xs overflow-hidden rounded-xl border border-primary/15 bg-card/95 p-3 font-sans text-foreground shadow-card backdrop-blur-xl sm:max-w-xs [&>button]:hidden"
+        align="center"
+        side="bottom"
+        collisionPadding={12}
+        className="z-[120] w-[calc(100vw-1.5rem)] max-w-xs overflow-hidden rounded-xl border border-primary/15 bg-card p-3 font-sans text-foreground shadow-card"
       >
         <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-primary/25" aria-hidden />
-        <DialogHeader className="mb-2 border-b border-border/60 px-2 pb-2 pt-1 text-right sm:text-right">
-          <DialogTitle className="font-kufi text-sm font-normal leading-7">{ariaLabel}</DialogTitle>
-          <DialogDescription className="text-xs leading-6 text-muted-foreground">اختر اليوم المناسب من التقويم</DialogDescription>
-        </DialogHeader>
+        <div className="mb-2 border-b border-border/60 px-2 pb-2 pt-1 text-right">
+          <p className="font-kufi text-sm font-normal leading-7">{ariaLabel}</p>
+          <p className="text-xs leading-6 text-muted-foreground">اختر اليوم المناسب من التقويم</p>
+        </div>
         <Calendar
           mode="single"
           locale={ar}
@@ -79,7 +75,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
           className="pointer-events-auto mx-auto w-full bg-transparent p-1 [--cell-size:2.25rem] [&_button]:text-inherit [&_button[data-selected-single=true]]:!rounded-full [&_button[data-selected-single=true]]:!bg-primary [&_button[data-selected-single=true]]:!text-primary-foreground [&_button[data-selected-single=true]]:shadow-md [&_button:hover]:bg-primary/10"
           classNames={{
             root: "w-full [direction:rtl]",
-            table: "w-full border-collapse [direction:rtl]",
+            table: "w-full table-fixed border-collapse [direction:rtl]",
             month: "w-full gap-3",
             month_caption: "mx-12 flex h-11 items-center justify-center pt-1.5",
             caption_label: "font-kufi text-sm font-normal leading-7",
@@ -89,12 +85,17 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
             button_next:
               "grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
             chevron: "size-4 fill-header-deep",
-            weekday: "p-0 text-center",
-            week: "mt-1 flex w-full",
+            weekdays: "grid w-full grid-cols-7",
+            weekday: "grid min-w-0 place-items-center p-0 text-center",
+            week: "mt-1 grid w-full grid-cols-7",
+            day: "grid aspect-square min-w-0 place-items-center p-0 text-center",
             disabled: "opacity-20",
             today: "rounded-full bg-header-deep/5 text-header-deep",
           }}
           components={{
+            Chevron: ({ orientation, className, ...props }) => orientation === "left"
+              ? <ChevronRight className={cn("size-4", className)} {...props} />
+              : <ChevronLeft className={cn("size-4", className)} {...props} />,
             Weekday: ({ className, children, ...props }) => (
               <th {...props} className={cn("p-0 text-center", className)}>
                 <span className="mx-auto grid size-7 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] font-sans text-[11px] font-medium text-header-deep shadow-sm backdrop-blur-md">
@@ -104,7 +105,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
             ),
           }}
         />
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
   );
 }
