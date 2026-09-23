@@ -104,7 +104,6 @@ type EmployeeForm = {
   housingAllowance: string;
   transportAllowance: string;
   bankName: string;
-  iban: string;
 };
 
 const EMPTY_FORM: EmployeeForm = {
@@ -127,7 +126,6 @@ const EMPTY_FORM: EmployeeForm = {
   housingAllowance: "",
   transportAllowance: "",
   bankName: "",
-  iban: "",
 };
 
 const employmentSchema = z.object({
@@ -152,7 +150,6 @@ const financialSchema = z.object({
   housingAllowance: z.string().trim().min(1, "أدخل بدل السكن أو صفراً").transform(Number).refine((value) => Number.isFinite(value) && value >= 0, "لا يمكن أن يكون بدل السكن سالباً"),
   transportAllowance: z.string().trim().min(1, "أدخل بدل النقل أو صفراً").transform(Number).refine((value) => Number.isFinite(value) && value >= 0, "لا يمكن أن يكون بدل النقل سالباً"),
   bankName: z.string().trim().min(2, "اسم البنك مطلوب").max(100),
-  iban: z.string().transform((value) => value.replace(/\s/g, "").toUpperCase()).refine((value) => /^SA\d{22}$/.test(value), "الآيبان السعودي يبدأ بـ SA ويتكون من 24 خانة"),
 });
 
 const EMPLOYMENT_LABELS: Record<string, string> = {
@@ -252,11 +249,11 @@ function EmployeesPage() {
     setEditingId(employee.id);
     setStep(1);
     setFeedback(null);
-    let payroll = { base_salary: 0, housing_allowance: 0, transport_allowance: 0, bank_name: null as string | null, iban: null as string | null };
+    let payroll = { base_salary: 0, housing_allowance: 0, transport_allowance: 0, bank_name: null as string | null };
     if (isAdmin) {
       const result = await supabase
         .from("payroll")
-        .select("base_salary,housing_allowance,transport_allowance,bank_name,iban")
+        .select("base_salary,housing_allowance,transport_allowance,bank_name")
         .eq("employee_id", employee.id)
         .order("month", { ascending: false })
         .limit(1)
@@ -283,7 +280,6 @@ function EmployeesPage() {
       housingAllowance: String(payroll.housing_allowance || ""),
       transportAllowance: String(payroll.transport_allowance || ""),
       bankName: payroll.bank_name ?? "",
-      iban: payroll.iban ?? "",
     });
     setWizardOpen(true);
   }
@@ -398,7 +394,6 @@ function EmployeesPage() {
         housing_allowance: Number(form.housingAllowance || 0),
         transport_allowance: Number(form.transportAllowance || 0),
         bank_name: form.bankName.trim() || null,
-        iban: form.iban.replace(/\s/g, "").toUpperCase() || null,
       }, { onConflict: "employee_id,month" });
       if (financialResult.error) {
         setSaving(false);
@@ -659,7 +654,7 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
 function EmploymentFields({ form, setField, branches, managers, isAdmin, errors }: { form: EmployeeForm; setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void; branches: Branch[]; managers: Employee[]; isAdmin: boolean; errors: FieldErrors }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="الرقم الوظيفي" hint="اتركه فارغاً للتوليد التلقائي"><Input dir="ltr" value={form.employeeNumber} onChange={(event) => setField("employeeNumber", event.target.value)} placeholder="EMP-1006" className="h-11 text-right" /></Field>
+      <Field label="الرقم الوظيفي" hint="اتركه فارغاً للتوليد التلقائي"><Input dir="ltr" value={form.employeeNumber} onChange={(event) => setField("employeeNumber", event.target.value)} placeholder="يُولّد تلقائياً" className="h-11 text-right" /></Field>
       <Field label="البريد الإلكتروني العملي" required error={errors.workEmail}><Input dir="ltr" type="email" value={form.workEmail} onChange={(event) => setField("workEmail", event.target.value)} placeholder="name@company.com" aria-invalid={Boolean(errors.workEmail)} className="h-11 text-left" /></Field>
       <Field label="القسم" required error={errors.department}><Input value={form.department} onChange={(event) => setField("department", event.target.value)} placeholder="مثال: الموارد البشرية" aria-invalid={Boolean(errors.department)} className="h-11" /></Field>
       <Field label="المسمى الوظيفي" required error={errors.position}><Input value={form.position} onChange={(event) => setField("position", event.target.value)} placeholder="مثال: أخصائي موارد بشرية" aria-invalid={Boolean(errors.position)} className="h-11" /></Field>
@@ -693,7 +688,6 @@ function FinancialFields({ form, setField, isAdmin, errors }: { form: EmployeeFo
       <Field label="بدل السكن" required error={errors.housingAllowance}><MoneyInput value={form.housingAllowance} onChange={(value) => setField("housingAllowance", value)} invalid={Boolean(errors.housingAllowance)} /></Field>
       <Field label="بدل النقل" required error={errors.transportAllowance}><MoneyInput value={form.transportAllowance} onChange={(value) => setField("transportAllowance", value)} invalid={Boolean(errors.transportAllowance)} /></Field>
       <Field label="اسم البنك" required error={errors.bankName}><Input value={form.bankName} onChange={(event) => setField("bankName", event.target.value)} placeholder="اسم البنك" aria-invalid={Boolean(errors.bankName)} className="h-11" /></Field>
-      <Field label="رقم الآيبان" required error={errors.iban} className="sm:col-span-2"><Input dir="ltr" maxLength={29} value={formatIbanInput(form.iban)} onChange={(event) => setField("iban", event.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 24))} placeholder="SA00 0000 0000 0000 0000 0000" aria-invalid={Boolean(errors.iban)} className="h-11 text-left" /></Field>
     </div>
   );
 }
@@ -703,11 +697,7 @@ function Field({ label, hint, required, error, className, children }: { label: s
 }
 
 function MoneyInput({ value, onChange, invalid }: { value: string; onChange: (value: string) => void; invalid?: boolean }) {
-  return <div className="relative"><Input dir="ltr" type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(event.target.value)} placeholder="0.00" aria-invalid={invalid} className="h-11 pe-14 text-left" /><span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ر.س</span></div>;
-}
-
-function formatIbanInput(value: string) {
-  return value.replace(/\s/g, "").match(/.{1,4}/g)?.join(" ") ?? "";
+  return <div className="relative"><Input dir="ltr" type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(event.target.value)} placeholder="" aria-invalid={invalid} className="h-11 pe-14 text-left" /><span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ر.ي</span></div>;
 }
 
 function EmployeeDetails({ employee, open, onOpenChange }: { employee: Employee | null; open: boolean; onOpenChange: (open: boolean) => void }) {
@@ -727,5 +717,5 @@ function Detail({ label, value }: { label: string; value: string | null | undefi
 
 function formatArabicDate(value: string | null) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("ar-SA", { year: "numeric", month: "short", day: "numeric" }).format(new Date(`${value}T12:00:00`));
+  return new Intl.DateTimeFormat("ar-YE-u-nu-latn", { year: "numeric", month: "short", day: "numeric" }).format(new Date(`${value}T12:00:00`));
 }

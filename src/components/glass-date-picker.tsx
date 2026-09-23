@@ -38,7 +38,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
               <CalendarDays className="size-4 text-header-deep" aria-hidden />
             </span>
             <span dir="rtl" className={cn("min-w-0 flex-1 whitespace-nowrap text-sm leading-7", selected && "font-medium text-foreground")}>
-              {selected ? format(selected, "d MMMM yyyy", { locale: ar }) : placeholder}
+              {selected ? new Intl.DateTimeFormat("ar-YE-u-nu-latn", { day: "numeric", month: "long", year: "numeric" }).format(selected) : placeholder}
             </span>
           </span>
         </Button>
