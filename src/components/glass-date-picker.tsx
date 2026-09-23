@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { ar } from "date-fns/locale";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,7 +79,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
           className="pointer-events-auto mx-auto w-full bg-transparent p-1 [--cell-size:2.25rem] [&_button]:text-inherit [&_button[data-selected-single=true]]:!rounded-full [&_button[data-selected-single=true]]:!bg-primary [&_button[data-selected-single=true]]:!text-primary-foreground [&_button[data-selected-single=true]]:shadow-md [&_button:hover]:bg-primary/10"
           classNames={{
             root: "w-full [direction:rtl]",
-            table: "w-full border-collapse [direction:rtl]",
+            table: "w-full table-fixed border-collapse [direction:rtl]",
             month: "w-full gap-3",
             month_caption: "mx-12 flex h-11 items-center justify-center pt-1.5",
             caption_label: "font-kufi text-sm font-normal leading-7",
@@ -89,12 +89,17 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
             button_next:
               "grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
             chevron: "size-4 fill-header-deep",
-            weekday: "p-0 text-center",
-            week: "mt-1 flex w-full",
+            weekdays: "grid w-full grid-cols-7",
+            weekday: "grid min-w-0 place-items-center p-0 text-center",
+            week: "mt-1 grid w-full grid-cols-7",
+            day: "grid aspect-square min-w-0 place-items-center p-0 text-center",
             disabled: "opacity-20",
             today: "rounded-full bg-header-deep/5 text-header-deep",
           }}
           components={{
+            Chevron: ({ orientation, className, ...props }) => orientation === "left"
+              ? <ChevronRight className={cn("size-4", className)} {...props} />
+              : <ChevronLeft className={cn("size-4", className)} {...props} />,
             Weekday: ({ className, children, ...props }) => (
               <th {...props} className={cn("p-0 text-center", className)}>
                 <span className="mx-auto grid size-7 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] font-sans text-[11px] font-medium text-header-deep shadow-sm backdrop-blur-md">

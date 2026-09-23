@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { z } from "zod";
 import { GlassDatePicker } from "@/components/glass-date-picker";
 import {
   AlertDialog,
@@ -39,7 +40,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -82,6 +82,7 @@ type Employee = {
 
 type Branch = { id: string; name: string };
 type Feedback = { kind: "success" | "error"; message: string } | null;
+type FieldErrors = Partial<Record<keyof EmployeeForm, string>>;
 
 type EmployeeForm = {
   employeeNumber: string;
@@ -102,6 +103,7 @@ type EmployeeForm = {
   baseSalary: string;
   housingAllowance: string;
   transportAllowance: string;
+  bankName: string;
   iban: string;
 };
 
@@ -124,8 +126,34 @@ const EMPTY_FORM: EmployeeForm = {
   baseSalary: "",
   housingAllowance: "",
   transportAllowance: "",
+  bankName: "",
   iban: "",
 };
+
+const employmentSchema = z.object({
+  workEmail: z.string().trim().email("أدخل بريداً عملياً صحيحاً").max(255),
+  department: z.string().trim().min(1, "القسم مطلوب").max(100),
+  position: z.string().trim().min(1, "المسمى الوظيفي مطلوب").max(100),
+  branchId: z.string().uuid("اختر الفرع"),
+  hireDate: z.string().date("اختر تاريخ التعيين"),
+});
+
+const personalSchema = z.object({
+  fullName: z.string().trim().min(3, "أدخل الاسم الكامل").max(150),
+  nationalId: z.string().trim().min(5, "أدخل رقم هوية أو جواز صحيحاً").max(30).regex(/^[\p{L}\p{N}-]+$/u, "استخدم الحروف والأرقام والشرطة فقط"),
+  phone: z.string().trim().regex(/^\+?[0-9]{8,15}$/, "أدخل رقم جوال صحيحاً من 8 إلى 15 رقماً"),
+  birthDate: z.string().date("اختر تاريخ الميلاد").refine((value) => new Date(`${value}T12:00:00`) < new Date(), "تاريخ الميلاد يجب أن يكون في الماضي"),
+  gender: z.enum(["male", "female"], { message: "اختر الجنس" }),
+  nationality: z.string().trim().min(2, "الجنسية مطلوبة").max(80),
+});
+
+const financialSchema = z.object({
+  baseSalary: z.coerce.number({ invalid_type_error: "أدخل الراتب الأساسي" }).nonnegative("لا يمكن أن يكون الراتب سالباً"),
+  housingAllowance: z.coerce.number().nonnegative("لا يمكن أن يكون بدل السكن سالباً"),
+  transportAllowance: z.coerce.number().nonnegative("لا يمكن أن يكون بدل النقل سالباً"),
+  bankName: z.string().trim().min(2, "اسم البنك مطلوب").max(100),
+  iban: z.string().transform((value) => value.replace(/\s/g, "").toUpperCase()).refine((value) => /^SA\d{22}$/.test(value), "الآيبان السعودي يبدأ بـ SA ويتكون من 24 خانة"),
+});
 
 const EMPLOYMENT_LABELS: Record<string, string> = {
   full_time: "دوام كامل",
@@ -158,6 +186,7 @@ function EmployeesPage() {
   const [form, setForm] = useState<EmployeeForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   const canWrite = role === "admin" || role === "operator";
 
@@ -211,6 +240,7 @@ function EmployeesPage() {
     setStep(1);
     setForm({ ...EMPTY_FORM, branchId: isAdmin ? (branches[0]?.id ?? "") : myBranchId });
     setFeedback(null);
+    setFieldErrors({});
     setWizardOpen(true);
   }
 
@@ -218,11 +248,11 @@ function EmployeesPage() {
     setEditingId(employee.id);
     setStep(1);
     setFeedback(null);
-    let payroll = { base_salary: 0, housing_allowance: 0, transport_allowance: 0, iban: null as string | null };
+    let payroll = { base_salary: 0, housing_allowance: 0, transport_allowance: 0, bank_name: null as string | null, iban: null as string | null };
     if (isAdmin) {
       const result = await supabase
         .from("payroll")
-        .select("base_salary,housing_allowance,transport_allowance,iban")
+        .select("base_salary,housing_allowance,transport_allowance,bank_name,iban")
         .eq("employee_id", employee.id)
         .order("month", { ascending: false })
         .limit(1)
@@ -248,6 +278,7 @@ function EmployeesPage() {
       baseSalary: String(payroll.base_salary || ""),
       housingAllowance: String(payroll.housing_allowance || ""),
       transportAllowance: String(payroll.transport_allowance || ""),
+      bankName: payroll.bank_name ?? "",
       iban: payroll.iban ?? "",
     });
     setWizardOpen(true);
@@ -255,27 +286,34 @@ function EmployeesPage() {
 
   function setField<K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) {
     setForm((current) => ({ ...current, [field]: value }));
+    setFieldErrors((current) => ({ ...current, [field]: undefined }));
   }
 
   function validateStep(currentStep: number) {
-    if (currentStep === 1 && (!form.workEmail.trim() || !form.department.trim() || !form.position.trim() || !form.branchId || !form.hireDate)) {
-      setFeedback({ kind: "error", message: "أكمل جميع البيانات الوظيفية المطلوبة" });
+    const schema = currentStep === 1 ? employmentSchema : currentStep === 2 ? personalSchema : isAdmin ? financialSchema : null;
+    if (!schema) return true;
+    const result = schema.safeParse(form);
+    if (!result.success) {
+      const errors: FieldErrors = {};
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof EmployeeForm | undefined;
+        if (field && !errors[field]) errors[field] = issue.message;
+      });
+      setFieldErrors(errors);
+      setFeedback({ kind: "error", message: "راجع الحقول الموضحة قبل المتابعة" });
       return false;
     }
-    if (currentStep === 2 && (!form.fullName.trim() || !form.fullNameEn.trim() || !form.nationalId.trim() || !form.birthDate || !form.nationality.trim() || !form.phone.trim())) {
-      setFeedback({ kind: "error", message: "أكمل جميع البيانات الشخصية المطلوبة" });
-      return false;
-    }
-    if (currentStep === 3 && isAdmin && (!form.baseSalary || Number(form.baseSalary) < 0 || Number(form.housingAllowance || 0) < 0 || Number(form.transportAllowance || 0) < 0)) {
-      setFeedback({ kind: "error", message: "تحقق من البيانات المالية المطلوبة" });
-      return false;
-    }
+    setFieldErrors({});
     setFeedback(null);
     return true;
   }
 
   function nextStep() {
     if (validateStep(step)) setStep((current) => Math.min(3, current + 1));
+  }
+
+  function selectStep(target: number) {
+    if (target <= step || validateStep(step)) setStep(target);
   }
 
   async function saveEmployee(event: FormEvent<HTMLFormElement>) {
@@ -328,7 +366,8 @@ function EmployeesPage() {
         base_salary: Number(form.baseSalary),
         housing_allowance: Number(form.housingAllowance || 0),
         transport_allowance: Number(form.transportAllowance || 0),
-        iban: form.iban.trim() || null,
+        bank_name: form.bankName.trim() || null,
+        iban: form.iban.replace(/\s/g, "").toUpperCase() || null,
       }, { onConflict: "employee_id,month" });
       if (financialResult.error) {
         setSaving(false);
@@ -467,7 +506,9 @@ function EmployeesPage() {
         saving={saving}
         editing={Boolean(editingId)}
         feedback={feedback}
+        fieldErrors={fieldErrors}
         onNext={nextStep}
+        onSelectStep={selectStep}
         onSubmit={saveEmployee}
       />
 
@@ -521,7 +562,7 @@ function EmployeeActions({ employee, canEdit, canDelete, onView, onEdit, onDelet
   );
 }
 
-function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, branches, managers, isAdmin, saving, editing, feedback, onNext, onSubmit }: {
+function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, branches, managers, isAdmin, saving, editing, feedback, fieldErrors, onNext, onSelectStep, onSubmit }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   step: number;
@@ -534,7 +575,9 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
   saving: boolean;
   editing: boolean;
   feedback: Feedback;
+  fieldErrors: FieldErrors;
   onNext: () => void;
+  onSelectStep: (step: number) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
@@ -545,7 +588,7 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
           <DialogDescription className="text-xs leading-6">أدخل بيانات الموظف على ثلاث خطوات متتالية</DialogDescription>
         </DialogHeader>
 
-        <div className="px-5 pt-4">
+        <div className="shrink-0 px-4 pt-3 sm:px-5 sm:pt-4">
           <ol className="grid grid-cols-3 gap-2">
             {STEPS.map((item, index) => {
               const number = index + 1;
@@ -554,10 +597,10 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
               const done = step > number;
               return (
                 <li key={item.label} className="min-w-0">
-                  <button type="button" onClick={() => done && setStep(number)} className={cn("flex w-full flex-col items-center gap-1.5 rounded-lg border px-1 py-2 transition-colors", current ? "border-primary/25 bg-primary/8 text-primary" : done ? "border-success/20 bg-success/5 text-success" : "border-border bg-background text-muted-foreground")}>
+                  <Button type="button" variant="ghost" onClick={() => onSelectStep(number)} className={cn("flex h-auto w-full flex-col items-center gap-1 rounded-lg border px-1 py-2 transition-colors", current ? "border-primary/25 bg-primary/8 text-primary" : done ? "border-success/20 bg-success/5 text-success" : "border-border bg-background text-muted-foreground")}>
                     <span className="grid size-7 place-items-center rounded-full border border-current/20">{done ? <Check className="size-3.5" /> : <Icon className="size-3.5" />}</span>
                     <span className="truncate text-[10px] font-medium sm:text-xs">{item.label}</span>
-                  </button>
+                  </Button>
                 </li>
               );
             })}
@@ -565,14 +608,14 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
         </div>
 
         <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-            {step === 1 ? <EmploymentFields form={form} setField={setField} branches={branches} managers={managers} isAdmin={isAdmin} /> : null}
-            {step === 2 ? <PersonalFields form={form} setField={setField} /> : null}
-            {step === 3 ? <FinancialFields form={form} setField={setField} isAdmin={isAdmin} /> : null}
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+            {step === 1 ? <EmploymentFields form={form} setField={setField} branches={branches} managers={managers} isAdmin={isAdmin} errors={fieldErrors} /> : null}
+            {step === 2 ? <PersonalFields form={form} setField={setField} errors={fieldErrors} /> : null}
+            {step === 3 ? <FinancialFields form={form} setField={setField} isAdmin={isAdmin} errors={fieldErrors} /> : null}
             {feedback?.kind === "error" ? <p className="mt-4 flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/8 px-3 py-2 text-xs text-destructive"><CircleAlert className="size-4" />{feedback.message}</p> : null}
           </div>
 
-          <div className="flex items-center justify-between gap-2 border-t border-border bg-muted/20 px-5 py-4">
+          <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
             <Button type="button" variant="outline" onClick={() => step === 1 ? onOpenChange(false) : setStep(step - 1)}>{step === 1 ? "إلغاء" : <><ChevronRight />السابق</>}</Button>
             {step < 3 ? <Button type="button" onClick={onNext}>التالي<ChevronLeft /></Button> : <Button type="submit" disabled={saving}>{saving ? <LoaderCircle className="animate-spin" /> : <Check />}{editing ? "حفظ التعديلات" : "حفظ الموظف"}</Button>}
           </div>
@@ -582,53 +625,58 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
   );
 }
 
-function EmploymentFields({ form, setField, branches, managers, isAdmin }: { form: EmployeeForm; setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void; branches: Branch[]; managers: Employee[]; isAdmin: boolean }) {
+function EmploymentFields({ form, setField, branches, managers, isAdmin, errors }: { form: EmployeeForm; setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void; branches: Branch[]; managers: Employee[]; isAdmin: boolean; errors: FieldErrors }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <Field label="الرقم الوظيفي" hint="اتركه فارغاً للتوليد التلقائي"><Input dir="ltr" value={form.employeeNumber} onChange={(event) => setField("employeeNumber", event.target.value)} placeholder="EMP-1006" className="h-11 text-right" /></Field>
-      <Field label="البريد الإلكتروني العملي" required><Input dir="ltr" type="email" required value={form.workEmail} onChange={(event) => setField("workEmail", event.target.value)} placeholder="name@company.com" className="h-11 text-left" /></Field>
-      <Field label="القسم" required><Input required value={form.department} onChange={(event) => setField("department", event.target.value)} placeholder="مثال: الموارد البشرية" className="h-11" /></Field>
-      <Field label="المسمى الوظيفي" required><Input required value={form.position} onChange={(event) => setField("position", event.target.value)} placeholder="مثال: أخصائي موارد بشرية" className="h-11" /></Field>
+      <Field label="البريد الإلكتروني العملي" required error={errors.workEmail}><Input dir="ltr" type="email" value={form.workEmail} onChange={(event) => setField("workEmail", event.target.value)} placeholder="name@company.com" aria-invalid={Boolean(errors.workEmail)} className="h-11 text-left" /></Field>
+      <Field label="القسم" required error={errors.department}><Input value={form.department} onChange={(event) => setField("department", event.target.value)} placeholder="مثال: الموارد البشرية" aria-invalid={Boolean(errors.department)} className="h-11" /></Field>
+      <Field label="المسمى الوظيفي" required error={errors.position}><Input value={form.position} onChange={(event) => setField("position", event.target.value)} placeholder="مثال: أخصائي موارد بشرية" aria-invalid={Boolean(errors.position)} className="h-11" /></Field>
       <Field label="المدير المباشر"><Select dir="rtl" value={form.managerId} onValueChange={(value) => setField("managerId", value)}><SelectTrigger className="h-11"><SelectValue placeholder="اختر المدير" /></SelectTrigger><SelectContent className="z-[80]"><SelectItem value="none">بدون مدير مباشر</SelectItem>{managers.map((manager) => <SelectItem key={manager.id} value={manager.id}>{manager.full_name}</SelectItem>)}</SelectContent></Select></Field>
-      <Field label="الفرع" required><Select dir="rtl" value={form.branchId} onValueChange={(value) => setField("branchId", value)} disabled={!isAdmin}><SelectTrigger className="h-11"><SelectValue placeholder="اختر الفرع" /></SelectTrigger><SelectContent className="z-[80]">{branches.map((branch) => <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>)}</SelectContent></Select></Field>
-      <Field label="تاريخ التعيين" required><GlassDatePicker ariaLabel="تاريخ التعيين" value={form.hireDate} onChange={(value) => setField("hireDate", value)} /></Field>
+      <Field label="الفرع" required error={errors.branchId}><Select dir="rtl" value={form.branchId} onValueChange={(value) => setField("branchId", value)} disabled={!isAdmin}><SelectTrigger aria-invalid={Boolean(errors.branchId)} className="h-11"><SelectValue placeholder="اختر الفرع" /></SelectTrigger><SelectContent className="z-[80]">{branches.map((branch) => <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>)}</SelectContent></Select></Field>
+      <Field label="تاريخ التعيين" required error={errors.hireDate}><GlassDatePicker ariaLabel="تاريخ التعيين" value={form.hireDate} onChange={(value) => setField("hireDate", value)} /></Field>
       <Field label="نوع الدوام" required><Select dir="rtl" value={form.employmentType} onValueChange={(value) => setField("employmentType", value)}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent className="z-[80]">{Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></Field>
     </div>
   );
 }
 
-function PersonalFields({ form, setField }: { form: EmployeeForm; setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void }) {
+function PersonalFields({ form, setField, errors }: { form: EmployeeForm; setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void; errors: FieldErrors }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="الاسم الكامل بالعربية" required><Input required value={form.fullName} onChange={(event) => setField("fullName", event.target.value)} placeholder="الاسم الثلاثي" className="h-11" /></Field>
-      <Field label="الاسم الكامل بالإنجليزية" required><Input dir="ltr" required value={form.fullNameEn} onChange={(event) => setField("fullNameEn", event.target.value)} placeholder="Full name" className="h-11 text-left" /></Field>
-      <Field label="رقم الهوية / الإقامة" required><Input dir="ltr" required inputMode="numeric" value={form.nationalId} onChange={(event) => setField("nationalId", event.target.value)} placeholder="0000000000" className="h-11 text-right" /></Field>
-      <Field label="تاريخ الميلاد" required><GlassDatePicker ariaLabel="تاريخ الميلاد" value={form.birthDate} onChange={(value) => setField("birthDate", value)} /></Field>
-      <Field label="الجنسية" required><Input required value={form.nationality} onChange={(event) => setField("nationality", event.target.value)} placeholder="الجنسية" className="h-11" /></Field>
-      <Field label="رقم الهاتف الشخصي" required><Input dir="ltr" type="tel" required value={form.phone} onChange={(event) => setField("phone", event.target.value)} placeholder="05xxxxxxxx" className="h-11 text-right" /></Field>
-      <Field label="الجنس" required className="sm:col-span-2"><RadioGroup dir="rtl" value={form.gender} onValueChange={(value) => setField("gender", value)} className="grid grid-cols-2 gap-3"><Label className={cn("flex h-11 cursor-pointer items-center gap-2 rounded-lg border px-3", form.gender === "male" && "border-primary/30 bg-primary/8 text-primary")}><RadioGroupItem value="male" />ذكر</Label><Label className={cn("flex h-11 cursor-pointer items-center gap-2 rounded-lg border px-3", form.gender === "female" && "border-primary/30 bg-primary/8 text-primary")}><RadioGroupItem value="female" />أنثى</Label></RadioGroup></Field>
+      <Field label="الاسم الكامل" required error={errors.fullName}><Input value={form.fullName} onChange={(event) => setField("fullName", event.target.value)} placeholder="الاسم الكامل" aria-invalid={Boolean(errors.fullName)} className="h-11" /></Field>
+      <Field label="الاسم بالإنجليزية" hint="اختياري"><Input dir="ltr" value={form.fullNameEn} onChange={(event) => setField("fullNameEn", event.target.value)} placeholder="Full name" className="h-11 text-left" /></Field>
+      <Field label="رقم الهوية / الجواز" required error={errors.nationalId}><Input dir="ltr" value={form.nationalId} onChange={(event) => setField("nationalId", event.target.value)} placeholder="رقم الهوية أو الجواز" aria-invalid={Boolean(errors.nationalId)} className="h-11 text-left" /></Field>
+      <Field label="رقم الجوال" required error={errors.phone}><Input dir="ltr" type="tel" inputMode="tel" value={form.phone} onChange={(event) => setField("phone", event.target.value.replace(/[\s()-]/g, ""))} placeholder="05xxxxxxxx" aria-invalid={Boolean(errors.phone)} className="h-11 text-left" /></Field>
+      <Field label="تاريخ الميلاد" required error={errors.birthDate}><GlassDatePicker ariaLabel="تاريخ الميلاد" value={form.birthDate} onChange={(value) => setField("birthDate", value)} /></Field>
+      <Field label="الجنس" required error={errors.gender}><Select dir="rtl" value={form.gender} onValueChange={(value) => setField("gender", value)}><SelectTrigger aria-invalid={Boolean(errors.gender)} className="h-11"><SelectValue placeholder="اختر الجنس" /></SelectTrigger><SelectContent className="z-[80]"><SelectItem value="male">ذكر</SelectItem><SelectItem value="female">أنثى</SelectItem></SelectContent></Select></Field>
+      <Field label="الجنسية" required error={errors.nationality} className="sm:col-span-2"><Input value={form.nationality} onChange={(event) => setField("nationality", event.target.value)} placeholder="الجنسية" aria-invalid={Boolean(errors.nationality)} className="h-11" /></Field>
     </div>
   );
 }
 
-function FinancialFields({ form, setField, isAdmin }: { form: EmployeeForm; setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void; isAdmin: boolean }) {
+function FinancialFields({ form, setField, isAdmin, errors }: { form: EmployeeForm; setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void; isAdmin: boolean; errors: FieldErrors }) {
   if (!isAdmin) return <div className="grid min-h-52 place-items-center rounded-xl border border-dashed border-primary/20 bg-primary/5 px-6 text-center"><div><WalletCards className="mx-auto mb-3 size-9 text-primary" /><p className="font-medium">البيانات المالية محمية</p><p className="mt-1 text-sm leading-6 text-muted-foreground">يمكن للمدير فقط إدخال الراتب والبدلات. يمكنك حفظ الموظف الآن وسيضيف المدير بياناته المالية لاحقاً.</p></div></div>;
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="الراتب الأساسي" required><MoneyInput value={form.baseSalary} onChange={(value) => setField("baseSalary", value)} /></Field>
-      <Field label="بدل السكن"><MoneyInput value={form.housingAllowance} onChange={(value) => setField("housingAllowance", value)} /></Field>
-      <Field label="بدل المواصلات"><MoneyInput value={form.transportAllowance} onChange={(value) => setField("transportAllowance", value)} /></Field>
-      <Field label="رقم الحساب البنكي (IBAN)"><Input dir="ltr" value={form.iban} onChange={(event) => setField("iban", event.target.value.toUpperCase())} placeholder="SA00 0000 0000 0000 0000 0000" className="h-11 text-left" /></Field>
+      <Field label="الراتب الأساسي" required error={errors.baseSalary}><MoneyInput value={form.baseSalary} onChange={(value) => setField("baseSalary", value)} invalid={Boolean(errors.baseSalary)} /></Field>
+      <Field label="بدل السكن" required error={errors.housingAllowance}><MoneyInput value={form.housingAllowance} onChange={(value) => setField("housingAllowance", value)} invalid={Boolean(errors.housingAllowance)} /></Field>
+      <Field label="بدل النقل" required error={errors.transportAllowance}><MoneyInput value={form.transportAllowance} onChange={(value) => setField("transportAllowance", value)} invalid={Boolean(errors.transportAllowance)} /></Field>
+      <Field label="اسم البنك" required error={errors.bankName}><Input value={form.bankName} onChange={(event) => setField("bankName", event.target.value)} placeholder="اسم البنك" aria-invalid={Boolean(errors.bankName)} className="h-11" /></Field>
+      <Field label="رقم الآيبان" required error={errors.iban} className="sm:col-span-2"><Input dir="ltr" maxLength={29} value={formatIbanInput(form.iban)} onChange={(event) => setField("iban", event.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 24))} placeholder="SA00 0000 0000 0000 0000 0000" aria-invalid={Boolean(errors.iban)} className="h-11 text-left" /></Field>
     </div>
   );
 }
 
-function Field({ label, hint, required, className, children }: { label: string; hint?: string; required?: boolean; className?: string; children: ReactNode }) {
-  return <div className={cn("space-y-1.5", className)}><Label className="text-xs font-medium">{label}{required ? <span className="me-1 text-destructive">*</span> : null}</Label>{children}{hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}</div>;
+function Field({ label, hint, required, error, className, children }: { label: string; hint?: string; required?: boolean; error?: string; className?: string; children: ReactNode }) {
+  return <div className={cn("space-y-1.5", className)}><div className="flex items-center justify-between gap-2"><Label className="text-xs font-medium">{label}</Label>{required ? <span className="text-[10px] text-muted-foreground">مطلوب</span> : null}</div>{children}{error ? <p className="text-[11px] leading-5 text-destructive">{error}</p> : hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}</div>;
 }
 
-function MoneyInput({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  return <div className="relative"><Input dir="ltr" type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(event.target.value)} placeholder="0.00" className="h-11 pe-14 text-left" /><span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ر.س</span></div>;
+function MoneyInput({ value, onChange, invalid }: { value: string; onChange: (value: string) => void; invalid?: boolean }) {
+  return <div className="relative"><Input dir="ltr" type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(event.target.value)} placeholder="0.00" aria-invalid={invalid} className="h-11 pe-14 text-left" /><span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ر.س</span></div>;
+}
+
+function formatIbanInput(value: string) {
+  return value.replace(/\s/g, "").match(/.{1,4}/g)?.join(" ") ?? "";
 }
 
 function EmployeeDetails({ employee, open, onOpenChange }: { employee: Employee | null; open: boolean; onOpenChange: (open: boolean) => void }) {
