@@ -4,14 +4,7 @@ import { ar } from "date-fns/locale";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -28,8 +21,8 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
   const min = minDate ? parseISO(minDate) : undefined;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
         <Button
           type="button"
           variant="outline"
@@ -49,16 +42,19 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
             </span>
           </span>
         </Button>
-      </DialogTrigger>
-      <DialogContent
+      </PopoverTrigger>
+      <PopoverContent
         dir="rtl"
-        className="z-[120] w-[calc(100vw-1.5rem)] max-w-xs overflow-hidden rounded-xl border border-primary/15 bg-card p-3 font-sans text-foreground shadow-card sm:max-w-xs [&>button]:hidden"
+        align="center"
+        side="bottom"
+        collisionPadding={12}
+        className="z-[120] w-[calc(100vw-1.5rem)] max-w-xs overflow-hidden rounded-xl border border-primary/15 bg-card p-3 font-sans text-foreground shadow-card"
       >
         <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-primary/25" aria-hidden />
-        <DialogHeader className="mb-2 border-b border-border/60 px-2 pb-2 pt-1 text-right sm:text-right">
-          <DialogTitle className="font-kufi text-sm font-normal leading-7">{ariaLabel}</DialogTitle>
-          <DialogDescription className="text-xs leading-6 text-muted-foreground">اختر اليوم المناسب من التقويم</DialogDescription>
-        </DialogHeader>
+        <div className="mb-2 border-b border-border/60 px-2 pb-2 pt-1 text-right">
+          <p className="font-kufi text-sm font-normal leading-7">{ariaLabel}</p>
+          <p className="text-xs leading-6 text-muted-foreground">اختر اليوم المناسب من التقويم</p>
+        </div>
         <Calendar
           mode="single"
           locale={ar}
@@ -109,7 +105,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
             ),
           }}
         />
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
   );
 }
