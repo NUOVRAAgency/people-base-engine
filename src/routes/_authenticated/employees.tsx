@@ -17,7 +17,7 @@ import {
   WalletCards,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { GlassDatePicker } from "@/components/glass-date-picker";
 import {
   AlertDialog,
@@ -623,7 +623,7 @@ function FinancialFields({ form, setField, isAdmin }: { form: EmployeeForm; setF
   );
 }
 
-function Field({ label, hint, required, className, children }: { label: string; hint?: string; required?: boolean; className?: string; children: React.ReactNode }) {
+function Field({ label, hint, required, className, children }: { label: string; hint?: string; required?: boolean; className?: string; children: ReactNode }) {
   return <div className={cn("space-y-1.5", className)}><Label className="text-xs font-medium">{label}{required ? <span className="me-1 text-destructive">*</span> : null}</Label>{children}{hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}</div>;
 }
 
