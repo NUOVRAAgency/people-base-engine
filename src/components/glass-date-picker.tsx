@@ -41,8 +41,8 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
         >
           <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-primary/20" aria-hidden />
           <span className="flex min-w-0 flex-1 items-center gap-3">
-            <span className="grid size-9 shrink-0 place-items-center rounded-md border border-primary/15 bg-primary/5 shadow-sm transition-colors group-hover:bg-primary/10">
-              <CalendarDays className="size-4 text-primary" aria-hidden />
+            <span className="grid size-9 shrink-0 place-items-center rounded-md border border-header-deep/15 bg-header-deep/5 shadow-sm transition-colors group-hover:bg-header-deep/10">
+              <CalendarDays className="size-4 text-header-deep" aria-hidden />
             </span>
             <span dir="rtl" className={cn("min-w-0 flex-1 whitespace-nowrap text-sm leading-7", selected && "font-medium text-foreground")}>
               {selected ? format(selected, "d MMMM yyyy", { locale: ar }) : placeholder}
@@ -77,12 +77,27 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
           classNames={{
             root: "w-full",
             month: "w-full gap-3",
-            month_caption: "h-10",
+            month_caption: "mx-12 flex h-11 items-center justify-center pt-1.5",
             caption_label: "font-kufi text-sm font-normal leading-7",
-            weekday: "text-xs leading-8 text-muted-foreground",
+            nav: "absolute inset-x-0 top-0 flex h-11 items-center justify-between px-1",
+            button_previous:
+              "grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
+            button_next:
+              "grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
+            chevron: "size-4 fill-header-deep",
+            weekday: "p-0 text-center",
             week: "mt-1 flex w-full",
             disabled: "opacity-20",
-            today: "rounded-full bg-primary/5 text-primary",
+            today: "rounded-full bg-header-deep/5 text-header-deep",
+          }}
+          components={{
+            Weekday: ({ className, children, ...props }) => (
+              <th {...props} className={cn("p-0 text-center", className)}>
+                <span className="mx-auto grid size-7 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] font-sans text-[11px] font-medium text-header-deep shadow-sm backdrop-blur-md">
+                  {children}
+                </span>
+              </th>
+            ),
           }}
         />
       </DialogContent>

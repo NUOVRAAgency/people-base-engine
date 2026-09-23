@@ -45,6 +45,7 @@
   --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
   --font-kufi: "Droid Arabic Kufi", "IBM Plex Sans Arabic", ui-sans-serif, sans-serif;
   --color-header-blue: var(--header-blue);
+  --color-header-deep: var(--header-deep);
   --color-page: var(--page);
   --color-glass: var(--glass);
   --color-glass-border: var(--glass-border);
@@ -138,6 +139,7 @@
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
   --header-blue: oklch(0.502 0.244 262.6 / 88%);
+  --header-deep: #0c4bbc;
   --glass: oklch(1 0 0 / 55%);
   --glass-border: oklch(1 0 0 / 70%);
   --ink: oklch(0.2 0.025 260);
