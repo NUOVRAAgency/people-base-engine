@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 type Props = {
   value: string; // yyyy-MM-dd
   onChange: (value: string) => void;
-  minDate?: string;
+  minDate?: string | undefined;
   placeholder?: string;
   ariaLabel: string;
 };
@@ -43,9 +43,9 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
           mode="single"
           locale={ar}
           dir="rtl"
-          selected={selected}
-          defaultMonth={selected ?? min}
-          disabled={min ? { before: min } : undefined}
+          {...(selected ? { selected } : {})}
+          {...((selected ?? min) ? { defaultMonth: (selected ?? min) as Date } : {})}
+          {...(min ? { disabled: { before: min } } : {})}
           onSelect={(date) => {
             if (!date) return;
             onChange(format(date, "yyyy-MM-dd"));
