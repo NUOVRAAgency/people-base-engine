@@ -16,8 +16,13 @@ export const generateSmartReport = createServerFn({ method: "POST" })
     z.object({ month: z.string(), prompt: z.string().optional() }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { data: isAdmin } = await context.supabase.rpc("is_admin");
-    if (!isAdmin) {
+    const { data: role, error: roleError } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (roleError || !role) {
       throw new Error("Forbidden: تقارير الذكاء الاصطناعي متاحة للمدير فقط");
     }
 
