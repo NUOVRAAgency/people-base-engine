@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CalendarDays, Check, LoaderCircle, Plus, UserRound, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -192,7 +192,7 @@ function LeavesPage() {
       ) : (
         <div className="space-y-3">
           {visibleRequests.map((request) => {
-            const status = STATUS[request.status] ?? STATUS.pending;
+            const status = request.status === "approved" ? STATUS.approved : request.status === "rejected" ? STATUS.rejected : STATUS.pending;
             const employee = Array.isArray(request.employees) ? request.employees[0] : request.employees;
             return (
               <GlassSurface key={request.id} className={cn("relative overflow-hidden rounded-lg border-s-0 p-4", status.border)}>
@@ -239,16 +239,16 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "rejected", label: "مرفوض" },
 ];
 const LEAVE_TYPES: Record<string, string> = { annual: "إجازة سنوية", sick: "إجازة مرضية", emergency: "إجازة طارئة", unpaid: "إجازة بدون راتب" };
-const STATUS: Record<string, { label: string; dot: string; text: string; border: string }> = {
+const STATUS = {
   pending: { label: "معلّق", dot: "bg-leave-pending", text: "text-leave-pending", border: "border-s-2 border-s-leave-pending" },
   approved: { label: "معتمد", dot: "bg-leave-approved", text: "text-leave-approved", border: "border-s-2 border-s-leave-approved" },
   rejected: { label: "مرفوض", dot: "bg-leave-rejected", text: "text-leave-rejected", border: "border-s-2 border-s-leave-rejected" },
-};
+} as const;
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("ar", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return <label className="block space-y-1.5"><span className="text-xs font-medium text-glass-muted">{label}</span>{children}</label>;
 }
