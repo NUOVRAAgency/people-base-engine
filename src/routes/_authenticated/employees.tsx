@@ -148,9 +148,9 @@ const personalSchema = z.object({
 });
 
 const financialSchema = z.object({
-  baseSalary: z.coerce.number({ invalid_type_error: "أدخل الراتب الأساسي" }).nonnegative("لا يمكن أن يكون الراتب سالباً"),
-  housingAllowance: z.coerce.number().nonnegative("لا يمكن أن يكون بدل السكن سالباً"),
-  transportAllowance: z.coerce.number().nonnegative("لا يمكن أن يكون بدل النقل سالباً"),
+  baseSalary: z.string().trim().min(1, "أدخل الراتب الأساسي").transform(Number).refine((value) => Number.isFinite(value) && value >= 0, "لا يمكن أن يكون الراتب سالباً"),
+  housingAllowance: z.string().trim().min(1, "أدخل بدل السكن أو صفراً").transform(Number).refine((value) => Number.isFinite(value) && value >= 0, "لا يمكن أن يكون بدل السكن سالباً"),
+  transportAllowance: z.string().trim().min(1, "أدخل بدل النقل أو صفراً").transform(Number).refine((value) => Number.isFinite(value) && value >= 0, "لا يمكن أن يكون بدل النقل سالباً"),
   bankName: z.string().trim().min(2, "اسم البنك مطلوب").max(100),
   iban: z.string().transform((value) => value.replace(/\s/g, "").toUpperCase()).refine((value) => /^SA\d{22}$/.test(value), "الآيبان السعودي يبدأ بـ SA ويتكون من 24 خانة"),
 });
@@ -313,7 +313,11 @@ function EmployeesPage() {
   }
 
   function selectStep(target: number) {
-    if (target <= step || validateStep(step)) setStep(target);
+    if (target <= step) {
+      setStep(target);
+      return;
+    }
+    if (target === step + 1 && validateStep(step)) setStep(target);
   }
 
   async function saveEmployee(event: FormEvent<HTMLFormElement>) {
