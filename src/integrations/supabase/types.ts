@@ -155,6 +155,7 @@ export type Database = {
           end_date: string
           id: string
           leave_type: string
+          leave_type_other: string | null
           reason: string | null
           requested_by: string | null
           start_date: string
@@ -168,6 +169,7 @@ export type Database = {
           end_date: string
           id?: string
           leave_type?: string
+          leave_type_other?: string | null
           reason?: string | null
           requested_by?: string | null
           start_date: string
@@ -181,6 +183,7 @@ export type Database = {
           end_date?: string
           id?: string
           leave_type?: string
+          leave_type_other?: string | null
           reason?: string | null
           requested_by?: string | null
           start_date?: string
