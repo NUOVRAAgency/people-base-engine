@@ -52,11 +52,11 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
       </DialogTrigger>
       <DialogContent
         dir="rtl"
-        className="z-[80] w-[calc(100vw-1.5rem)] max-w-xs overflow-hidden rounded-xl border border-primary/15 bg-card/95 p-3 font-sans text-foreground shadow-card backdrop-blur-xl sm:max-w-xs"
+        className="z-[80] w-[calc(100vw-1.5rem)] max-w-xs overflow-hidden rounded-xl border border-primary/15 bg-card/95 p-3 font-sans text-foreground shadow-card backdrop-blur-xl sm:max-w-xs [&>button]:hidden"
       >
         <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-primary/25" aria-hidden />
-        <DialogHeader className="px-2 pt-1 text-right sm:text-right">
-          <DialogTitle className="font-kufi text-sm font-normal leading-8">{ariaLabel}</DialogTitle>
+        <DialogHeader className="mb-2 border-b border-border/60 px-2 pb-2 pt-1 text-right sm:text-right">
+          <DialogTitle className="font-kufi text-sm font-normal leading-7">{ariaLabel}</DialogTitle>
           <DialogDescription className="text-xs leading-6 text-muted-foreground">اختر اليوم المناسب من التقويم</DialogDescription>
         </DialogHeader>
         <Calendar
