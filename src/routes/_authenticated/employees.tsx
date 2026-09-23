@@ -139,7 +139,7 @@ const employmentSchema = z.object({
 const personalSchema = z.object({
   fullName: z.string().trim().min(3, "أدخل الاسم الكامل").max(150),
   nationalId: z.string().trim().min(5, "أدخل رقم هوية أو جواز صحيحاً").max(30).regex(/^[\p{L}\p{N}-]+$/u, "استخدم الحروف والأرقام والشرطة فقط"),
-  phone: z.string().trim().regex(/^\+?[0-9]{8,15}$/, "أدخل رقم جوال صحيحاً من 8 إلى 15 رقماً"),
+  phone: z.string().trim().regex(/^\+967[0-9]{7,10}$/, "أدخل الرقم بعد مفتاح اليمن +967"),
   birthDate: z.string().date("اختر تاريخ الميلاد").refine((value) => new Date(`${value}T12:00:00`) < new Date(), "تاريخ الميلاد يجب أن يكون في الماضي"),
   gender: z.enum(["male", "female"], { message: "اختر الجنس" }),
   nationality: z.string().trim().min(2, "الجنسية مطلوبة").max(80),
@@ -654,14 +654,14 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
 function EmploymentFields({ form, setField, branches, managers, isAdmin, errors }: { form: EmployeeForm; setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void; branches: Branch[]; managers: Employee[]; isAdmin: boolean; errors: FieldErrors }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="الرقم الوظيفي" hint="اتركه فارغاً للتوليد التلقائي"><Input dir="ltr" value={form.employeeNumber} onChange={(event) => setField("employeeNumber", event.target.value)} placeholder="يُولّد تلقائياً" className="h-11 text-right" /></Field>
+      <Field label="الرقم الوظيفي" hint="اتركه فارغاً للتوليد التلقائي"><Input dir="ltr" value={form.employeeNumber} onChange={(event) => setField("employeeNumber", event.target.value)} placeholder="تلقائي" className="h-11 text-right" /></Field>
       <Field label="البريد الإلكتروني العملي" required error={errors.workEmail}><Input dir="ltr" type="email" value={form.workEmail} onChange={(event) => setField("workEmail", event.target.value)} placeholder="name@company.com" aria-invalid={Boolean(errors.workEmail)} className="h-11 text-left" /></Field>
       <Field label="القسم" required error={errors.department}><Input value={form.department} onChange={(event) => setField("department", event.target.value)} placeholder="مثال: الموارد البشرية" aria-invalid={Boolean(errors.department)} className="h-11" /></Field>
       <Field label="المسمى الوظيفي" required error={errors.position}><Input value={form.position} onChange={(event) => setField("position", event.target.value)} placeholder="مثال: أخصائي موارد بشرية" aria-invalid={Boolean(errors.position)} className="h-11" /></Field>
-      <Field label="المدير المباشر"><Select dir="rtl" value={form.managerId} onValueChange={(value) => setField("managerId", value)}><SelectTrigger className="h-11"><SelectValue placeholder="اختر المدير" /></SelectTrigger><SelectContent className="z-[80]"><SelectItem value="none">بدون مدير مباشر</SelectItem>{managers.map((manager) => <SelectItem key={manager.id} value={manager.id}>{manager.full_name}</SelectItem>)}</SelectContent></Select></Field>
-      <Field label="الفرع" required error={errors.branchId}><Select dir="rtl" value={form.branchId} onValueChange={(value) => setField("branchId", value)} disabled={!isAdmin}><SelectTrigger aria-invalid={Boolean(errors.branchId)} className="h-11"><SelectValue placeholder="اختر الفرع" /></SelectTrigger><SelectContent className="z-[80]">{branches.map((branch) => <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>)}</SelectContent></Select></Field>
+      <Field label="المدير المباشر"><Select dir="rtl" value={form.managerId} onValueChange={(value) => setField("managerId", value)}><SelectTrigger className="h-11"><SelectValue placeholder="اختر المدير" /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64"><SelectItem value="none">بدون مدير مباشر</SelectItem>{managers.map((manager) => <SelectItem key={manager.id} value={manager.id}>{manager.full_name}</SelectItem>)}</SelectContent></Select></Field>
+      <Field label="الفرع" required error={errors.branchId}><Select dir="rtl" value={form.branchId} onValueChange={(value) => setField("branchId", value)} disabled={!isAdmin}><SelectTrigger aria-invalid={Boolean(errors.branchId)} className="h-11"><SelectValue placeholder="اختر الفرع" /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">{branches.map((branch) => <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>)}</SelectContent></Select></Field>
       <Field label="تاريخ التعيين" required error={errors.hireDate}><GlassDatePicker ariaLabel="تاريخ التعيين" value={form.hireDate} onChange={(value) => setField("hireDate", value)} /></Field>
-      <Field label="نوع الدوام" required><Select dir="rtl" value={form.employmentType} onValueChange={(value) => setField("employmentType", value)}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent className="z-[80]">{Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></Field>
+      <Field label="نوع الدوام" required><Select dir="rtl" value={form.employmentType} onValueChange={(value) => setField("employmentType", value)}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">{Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></Field>
     </div>
   );
 }
@@ -672,9 +672,27 @@ function PersonalFields({ form, setField, errors }: { form: EmployeeForm; setFie
       <Field label="الاسم الكامل" required error={errors.fullName}><Input value={form.fullName} onChange={(event) => setField("fullName", event.target.value)} placeholder="الاسم الكامل" aria-invalid={Boolean(errors.fullName)} className="h-11" /></Field>
       <Field label="الاسم بالإنجليزية" hint="اختياري"><Input dir="ltr" value={form.fullNameEn} onChange={(event) => setField("fullNameEn", event.target.value)} placeholder="Full name" className="h-11 text-left" /></Field>
       <Field label="رقم الهوية / الجواز" required error={errors.nationalId}><Input dir="ltr" value={form.nationalId} onChange={(event) => setField("nationalId", event.target.value)} placeholder="رقم الهوية أو الجواز" aria-invalid={Boolean(errors.nationalId)} className="h-11 text-left" /></Field>
-      <Field label="رقم الجوال" required error={errors.phone}><Input dir="ltr" type="tel" inputMode="tel" value={form.phone} onChange={(event) => setField("phone", event.target.value.replace(/[\s()-]/g, ""))} placeholder="05xxxxxxxx" aria-invalid={Boolean(errors.phone)} className="h-11 text-left" /></Field>
+      <Field label="رقم الجوال" required error={errors.phone}>
+        <div dir="ltr" className="relative">
+          <span className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-sm text-foreground">+967</span>
+          <Input
+            dir="ltr"
+            type="tel"
+            inputMode="numeric"
+            value={form.phone.startsWith("+967") ? form.phone.slice(4) : form.phone.replace(/\D/g, "")}
+            onChange={(event) => {
+              const localNumber = event.target.value.replace(/\D/g, "").slice(0, 10);
+              setField("phone", localNumber ? `+967${localNumber}` : "");
+            }}
+            placeholder=""
+            aria-label="رقم الجوال بعد مفتاح اليمن +967"
+            aria-invalid={Boolean(errors.phone)}
+            className="h-11 ps-16 text-left"
+          />
+        </div>
+      </Field>
       <Field label="تاريخ الميلاد" required error={errors.birthDate}><GlassDatePicker ariaLabel="تاريخ الميلاد" value={form.birthDate} onChange={(value) => setField("birthDate", value)} /></Field>
-      <Field label="الجنس" required error={errors.gender}><Select dir="rtl" value={form.gender} onValueChange={(value) => setField("gender", value)}><SelectTrigger aria-invalid={Boolean(errors.gender)} className="h-11"><SelectValue placeholder="اختر الجنس" /></SelectTrigger><SelectContent className="z-[80]"><SelectItem value="male">ذكر</SelectItem><SelectItem value="female">أنثى</SelectItem></SelectContent></Select></Field>
+      <Field label="الجنس" required error={errors.gender}><Select dir="rtl" value={form.gender} onValueChange={(value) => setField("gender", value)}><SelectTrigger aria-invalid={Boolean(errors.gender)} className="h-11"><SelectValue placeholder="اختر الجنس" /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64"><SelectItem value="male">ذكر</SelectItem><SelectItem value="female">أنثى</SelectItem></SelectContent></Select></Field>
       <Field label="الجنسية" required error={errors.nationality} className="sm:col-span-2"><Input value={form.nationality} onChange={(event) => setField("nationality", event.target.value)} placeholder="الجنسية" aria-invalid={Boolean(errors.nationality)} className="h-11" /></Field>
     </div>
   );
