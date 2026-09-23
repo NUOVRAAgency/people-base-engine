@@ -51,16 +51,8 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
             onChange(format(date, "yyyy-MM-dd"));
             setOpen(false);
           }}
-          className="pointer-events-auto p-2"
-          classNames={{
-            day_selected: "!rounded-full !bg-primary !text-primary-foreground",
-            day_today: "rounded-full border border-background/40",
-            day_disabled: "opacity-25",
-          }}
-          modifiersClassNames={{
-            selected: "[&>button]:!rounded-full [&>button]:!bg-primary [&>button]:!text-primary-foreground",
-            today: "[&>button]:rounded-full [&>button]:ring-1 [&>button]:ring-background/40",
-          }}
+          className="pointer-events-auto p-2 text-background [&_button]:text-inherit [&_button[data-selected-single=true]]:!rounded-full [&_button[data-selected-single=true]]:!bg-primary [&_button[data-selected-single=true]]:!text-primary-foreground [&_button:hover]:bg-background/10"
+          classNames={{ disabled: "opacity-25" }}
         />
       </PopoverContent>
     </Popover>

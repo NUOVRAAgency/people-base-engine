@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { GlassDatePicker } from "@/components/glass-date-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,7 +42,7 @@ function LeavesPage() {
   const [saving, setSaving] = useState(false);
   const [actingId, setActingId] = useState("");
   const [feedback, setFeedback] = useState<{ kind: "success" | "error"; message: string } | null>(null);
-  const [form, setForm] = useState({ employeeId: "", leaveType: "annual", startDate: "", endDate: "" });
+  const [form, setForm] = useState({ employeeId: "", leaveType: "annual", leaveTypeOther: "", startDate: "", endDate: "" });
 
   const canCreate = role === "admin" || role === "operator";
 
@@ -51,7 +52,7 @@ function LeavesPage() {
     const [requestsResult, employeesResult] = await Promise.all([
       supabase
         .from("leave_requests")
-        .select("id,employee_id,leave_type,start_date,end_date,status,created_at,employees(full_name)")
+        .select("id,employee_id,leave_type,leave_type_other,start_date,end_date,status,created_at,employees(full_name)")
         .order("created_at", { ascending: false }),
       supabase.from("employees").select("id,full_name").eq("status", "active").order("full_name"),
     ]);
@@ -83,6 +84,10 @@ function LeavesPage() {
       setFeedback({ kind: "error", message: "أكمل جميع الحقول المطلوبة" });
       return;
     }
+    if (form.leaveType === "other" && !form.leaveTypeOther.trim()) {
+      setFeedback({ kind: "error", message: "اكتب اسم نوع الإجازة" });
+      return;
+    }
     if (form.endDate < form.startDate) {
       setFeedback({ kind: "error", message: "تاريخ النهاية يجب أن يكون بعد تاريخ البداية" });
       return;
@@ -91,6 +96,7 @@ function LeavesPage() {
     const { error: insertError } = await supabase.from("leave_requests").insert({
       employee_id: form.employeeId,
       leave_type: form.leaveType,
+      leave_type_other: form.leaveType === "other" ? form.leaveTypeOther.trim() : null,
       start_date: form.startDate,
       end_date: form.endDate,
       status: "pending",
@@ -101,7 +107,7 @@ function LeavesPage() {
       return;
     }
     setDialogOpen(false);
-    setForm({ employeeId: "", leaveType: "annual", startDate: "", endDate: "" });
+    setForm({ employeeId: "", leaveType: "annual", leaveTypeOther: "", startDate: "", endDate: "" });
     setFeedback({ kind: "success", message: "تم إرسال طلب الإجازة" });
     window.dispatchEvent(new Event("hr-header-refresh"));
     await loadData();
@@ -146,23 +152,31 @@ function LeavesPage() {
                     <SelectTrigger className="h-11 border-input bg-background text-foreground focus:ring-ring">
                       <SelectValue placeholder="اختر الموظف" />
                     </SelectTrigger>
-                    <SelectContent className="border-border bg-popover">
-                      {employees.map((employee) => <SelectItem key={employee.id} value={employee.id}>{employee.full_name}</SelectItem>)}
+                    <SelectContent position="popper" dir="rtl" className="z-[60] max-h-64 border-border bg-popover">
+                      {employees.length === 0 ? (
+                        <p className="px-3 py-4 text-center text-sm text-muted-foreground">لا يوجد موظفون نشطون متاحون لك بعد</p>
+                      ) : employees.map((employee) => <SelectItem key={employee.id} value={employee.id}>{employee.full_name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </Field>
                 <Field label="نوع الإجازة">
                   <Select value={form.leaveType} onValueChange={(leaveType) => setForm((value) => ({ ...value, leaveType }))}>
                     <SelectTrigger className="h-11 border-input bg-background text-foreground focus:ring-ring"><SelectValue /></SelectTrigger>
-                    <SelectContent>{Object.entries(LEAVE_TYPES).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent>
+                    <SelectContent position="popper" dir="rtl" className="z-[60]">{Object.entries(LEAVE_TYPES).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent>
                   </Select>
+                  {form.leaveType === "other" ? (
+                    <div className="mt-2 animate-in fade-in-0 slide-in-from-top-2 duration-200 space-y-1.5">
+                      <label htmlFor="leave-type-other" className="text-xs text-muted-foreground">اسم نوع الإجازة</label>
+                      <Input id="leave-type-other" required maxLength={60} value={form.leaveTypeOther} onChange={(event) => setForm((value) => ({ ...value, leaveTypeOther: event.target.value }))} className="h-10 border-input bg-background" />
+                    </div>
+                  ) : null}
                 </Field>
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="من">
-                    <Input required type="date" value={form.startDate} onChange={(event) => setForm((value) => ({ ...value, startDate: event.target.value }))} className="h-11 border-input bg-background text-foreground focus-visible:ring-ring" />
+                    <GlassDatePicker ariaLabel="تاريخ البداية" value={form.startDate} onChange={(startDate) => setForm((value) => ({ ...value, startDate, endDate: value.endDate && value.endDate < startDate ? "" : value.endDate }))} />
                   </Field>
                   <Field label="إلى">
-                    <Input required type="date" min={form.startDate} value={form.endDate} onChange={(event) => setForm((value) => ({ ...value, endDate: event.target.value }))} className="h-11 border-input bg-background text-foreground focus-visible:ring-ring" />
+                    <GlassDatePicker ariaLabel="تاريخ النهاية" value={form.endDate} minDate={form.startDate || undefined} onChange={(endDate) => setForm((value) => ({ ...value, endDate }))} />
                   </Field>
                 </div>
                 <Button type="submit" disabled={saving || employees.length === 0} className="h-11 w-full bg-primary text-primary-foreground hover:bg-primary/90">
@@ -206,7 +220,7 @@ function LeavesPage() {
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
                   <div className="min-w-0">
                     {isAdmin ? <p className="flex min-w-0 items-center gap-2 text-sm font-medium"><UserRound className="size-4 shrink-0 text-muted-foreground" aria-hidden /><span className="truncate">{employee?.full_name ?? "موظف"}</span></p> : null}
-                    <p className={cn("font-medium", isAdmin ? "mt-3 text-[15px]" : "text-[15px]")}>{LEAVE_TYPES[request.leave_type] ?? request.leave_type}</p>
+                    <p className={cn("font-medium", isAdmin ? "mt-3 text-[15px]" : "text-[15px]")}>{request.leave_type === "other" && request.leave_type_other ? request.leave_type_other : (LEAVE_TYPES[request.leave_type] ?? request.leave_type)}</p>
                     <p className="mt-2 flex items-center gap-2 text-xs leading-6 text-muted-foreground"><CalendarDays className="size-4 shrink-0" aria-hidden /><span>{formatDate(request.start_date)} — {formatDate(request.end_date)}</span></p>
                   </div>
                    <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-background px-2.5 py-1 text-[11px]", status.text)}><span className={cn("size-1.5 rounded-full", status.dot)} />{status.label}</span>
@@ -229,6 +243,7 @@ function LeavesPage() {
 type Filter = "all" | "pending" | "approved" | "rejected";
 type Employee = { id: string; full_name: string };
 type LeaveRequest = {
+  leave_type_other?: string | null;
   id: string;
   employee_id: string;
   leave_type: string;
@@ -245,7 +260,7 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "approved", label: "معتمد" },
   { value: "rejected", label: "مرفوض" },
 ];
-const LEAVE_TYPES: Record<string, string> = { annual: "إجازة سنوية", sick: "إجازة مرضية", emergency: "إجازة طارئة", unpaid: "إجازة بدون راتب" };
+const LEAVE_TYPES: Record<string, string> = { annual: "إجازة سنوية", sick: "إجازة مرضية", emergency: "إجازة طارئة", unpaid: "إجازة بدون راتب", other: "أخرى" };
 const STATUS = {
   pending: { label: "معلّق", dot: "bg-leave-pending", text: "text-leave-pending", border: "border-s-2 border-s-leave-pending" },
   approved: { label: "معتمد", dot: "bg-leave-approved", text: "text-leave-approved", border: "border-s-2 border-s-leave-approved" },
