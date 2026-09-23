@@ -55,7 +55,6 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const { isAdmin } = useCurrentUser();
   const { companyName, notifications } = useHeaderData();
   const companyNameIsArabic = /[\u0600-\u06ff]/.test(companyName);
-  const glassMode = pathname === "/leaves";
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
@@ -68,12 +67,9 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
 
   return (
-    <div dir="rtl" className={cn("min-h-dvh font-kufi", glassMode ? "app-night" : "bg-background")}>
+    <div dir="rtl" className="min-h-dvh bg-background font-kufi">
       <header
-        className={cn(
-          "fixed inset-x-0 top-0 z-30 flex h-[62px] items-center justify-between px-4 text-primary-foreground",
-          glassMode ? "glass-header" : "shadow-nav [background:var(--header-gradient)]",
-        )}
+        className="fixed inset-x-0 top-0 z-30 flex h-[62px] items-center justify-between px-4 text-primary-foreground shadow-nav [background:var(--header-gradient)]"
       >
         <div className="flex min-w-0 items-center">
           <h1 className="truncate py-1 text-[18px] font-bold leading-[1.6]">{title}</h1>
@@ -140,17 +136,17 @@ export function MobileShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className={cn("min-h-dvh px-4 pb-[96px] pt-[78px]", glassMode ? "app-night" : "bg-background")}>{children}</main>
+      <main className="min-h-dvh bg-background px-4 pb-[96px] pt-[78px]">{children}</main>
 
-      <nav className={cn("fixed inset-x-0 bottom-0 z-30", glassMode ? "glass-nav" : "border-t border-border bg-card/95 backdrop-blur-md")}>
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur-md">
         <ul ref={listRef} className="scrollbar-hide mx-auto flex max-w-[480px] items-stretch gap-1 overflow-x-auto px-3 pb-[env(safe-area-inset-bottom)]">
           {visibleItems.map((item) => {
             const active = pathname === item.to;
             const Icon = item.icon;
             return (
               <li key={item.to} className="shrink-0">
-                <Link to={item.to} data-active={active} className={cn("flex w-[68px] flex-col items-center gap-1 py-2.5 text-[12px] transition-colors", glassMode ? (active ? "text-glass-foreground" : "text-glass-muted") : (active ? "text-primary" : "text-muted-foreground"))}>
-                  <span className={cn("flex h-9 w-14 items-center justify-center rounded-full transition-colors", active ? (glassMode ? "bg-glass-surface ring-1 ring-glass-line" : "bg-primary/10") : "bg-transparent")}>
+                <Link to={item.to} data-active={active} className={cn("flex w-[68px] flex-col items-center gap-1 py-2.5 text-[12px] transition-colors", active ? "text-primary" : "text-muted-foreground")}>
+                  <span className={cn("flex h-9 w-14 items-center justify-center rounded-full transition-colors", active ? "bg-primary/10" : "bg-transparent")}>
                     <Icon className="h-5 w-5" aria-hidden />
                   </span>
                   <span className="font-medium leading-[1.5]">{item.label}</span>

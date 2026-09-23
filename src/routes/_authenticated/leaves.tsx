@@ -10,7 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { GlassSurface } from "@/components/ui/glass-surface";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -123,50 +122,50 @@ function LeavesPage() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-xl space-y-4 text-glass-foreground" aria-labelledby="leaves-heading">
+    <section className="mx-auto w-full max-w-xl space-y-4 font-sans text-foreground" aria-labelledby="leaves-heading">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <div className="min-w-0">
-          <p className="text-xs text-glass-muted">إدارة الطلبات</p>
-          <h2 id="leaves-heading" className="truncate text-xl font-bold leading-relaxed">إجازات الفريق</h2>
+          <p className="text-xs font-normal text-muted-foreground">إدارة الطلبات</p>
+          <h2 id="leaves-heading" className="truncate text-xl font-semibold leading-relaxed">إجازات الفريق</h2>
         </div>
         {canCreate ? (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button aria-label="إضافة طلب إجازة" size="icon" className="app-glass min-h-11 min-w-11 rounded-full text-glass-foreground shadow-none hover:bg-glass-surface">
+              <Button aria-label="إضافة طلب إجازة" size="icon" className="min-h-11 min-w-11 rounded-full bg-primary text-primary-foreground shadow-nav hover:bg-primary/90">
                 <Plus className="size-5" aria-hidden />
               </Button>
             </DialogTrigger>
-            <DialogContent dir="rtl" className="app-night app-glass left-3 right-3 top-auto bottom-3 w-auto max-w-none translate-x-0 translate-y-0 rounded-lg border-glass-line p-5 text-glass-foreground sm:left-1/2 sm:right-auto sm:top-1/2 sm:bottom-auto sm:w-[min(430px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+            <DialogContent dir="rtl" className="left-3 right-3 top-auto bottom-3 w-auto max-w-none translate-x-0 translate-y-0 rounded-lg border-border bg-card p-5 font-sans text-foreground shadow-card sm:left-1/2 sm:right-auto sm:top-1/2 sm:bottom-auto sm:w-[min(430px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
               <DialogHeader className="text-right sm:text-right">
                 <DialogTitle className="text-lg leading-relaxed">طلب إجازة جديد</DialogTitle>
-                <DialogDescription className="text-glass-muted">يُرسل الطلب بحالة معلّق للمراجعة.</DialogDescription>
+                <DialogDescription className="text-muted-foreground">يُرسل الطلب بحالة معلّق للمراجعة.</DialogDescription>
               </DialogHeader>
               <form className="space-y-4" onSubmit={submitRequest}>
                 <Field label="الموظف">
                   <Select value={form.employeeId} onValueChange={(employeeId) => setForm((value) => ({ ...value, employeeId }))}>
-                    <SelectTrigger className="h-11 border-glass-line bg-glass-surface text-glass-foreground focus:ring-glass-line">
+                    <SelectTrigger className="h-11 border-input bg-background text-foreground focus:ring-ring">
                       <SelectValue placeholder="اختر الموظف" />
                     </SelectTrigger>
-                    <SelectContent className="border-glass-line bg-popover">
+                    <SelectContent className="border-border bg-popover">
                       {employees.map((employee) => <SelectItem key={employee.id} value={employee.id}>{employee.full_name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </Field>
                 <Field label="نوع الإجازة">
                   <Select value={form.leaveType} onValueChange={(leaveType) => setForm((value) => ({ ...value, leaveType }))}>
-                    <SelectTrigger className="h-11 border-glass-line bg-glass-surface text-glass-foreground focus:ring-glass-line"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-11 border-input bg-background text-foreground focus:ring-ring"><SelectValue /></SelectTrigger>
                     <SelectContent>{Object.entries(LEAVE_TYPES).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent>
                   </Select>
                 </Field>
                 <div className="grid grid-cols-2 gap-3">
                   <Field label="من">
-                    <Input required type="date" value={form.startDate} onChange={(event) => setForm((value) => ({ ...value, startDate: event.target.value }))} className="h-11 border-glass-line bg-glass-surface text-glass-foreground scheme-dark focus-visible:ring-glass-line" />
+                    <Input required type="date" value={form.startDate} onChange={(event) => setForm((value) => ({ ...value, startDate: event.target.value }))} className="h-11 border-input bg-background text-foreground focus-visible:ring-ring" />
                   </Field>
                   <Field label="إلى">
-                    <Input required type="date" min={form.startDate} value={form.endDate} onChange={(event) => setForm((value) => ({ ...value, endDate: event.target.value }))} className="h-11 border-glass-line bg-glass-surface text-glass-foreground scheme-dark focus-visible:ring-glass-line" />
+                    <Input required type="date" min={form.startDate} value={form.endDate} onChange={(event) => setForm((value) => ({ ...value, endDate: event.target.value }))} className="h-11 border-input bg-background text-foreground focus-visible:ring-ring" />
                   </Field>
                 </div>
-                <Button type="submit" disabled={saving || employees.length === 0} className="h-11 w-full bg-glass-foreground text-background hover:bg-glass-foreground/90">
+                <Button type="submit" disabled={saving || employees.length === 0} className="h-11 w-full bg-primary text-primary-foreground hover:bg-primary/90">
                   {saving ? <LoaderCircle className="animate-spin" aria-hidden /> : null}
                   إرسال الطلب
                 </Button>
@@ -176,49 +175,49 @@ function LeavesPage() {
         ) : null}
       </div>
 
-      <GlassSurface className="grid grid-cols-4 gap-1 rounded-lg p-1.5 shadow-none" role="tablist" aria-label="تصفية طلبات الإجازة">
+      <div className="grid grid-cols-4 gap-1 rounded-lg border border-border bg-card p-1.5 shadow-sm" role="tablist" aria-label="تصفية طلبات الإجازة">
         {FILTERS.map((item) => (
-          <Button key={item.value} type="button" role="tab" aria-selected={filter === item.value} variant="ghost" onClick={() => setFilter(item.value)} className={cn("h-10 min-w-0 gap-1 rounded-md px-1 text-[11px] text-glass-muted hover:bg-glass-surface hover:text-glass-foreground", filter === item.value && "bg-glass-surface text-glass-foreground ring-1 ring-glass-line")}>
+          <Button key={item.value} type="button" role="tab" aria-selected={filter === item.value} variant="ghost" onClick={() => setFilter(item.value)} className={cn("h-10 min-w-0 gap-1 rounded-md px-1 text-[11px] font-normal text-muted-foreground hover:bg-accent hover:text-foreground", filter === item.value && "bg-primary/10 font-medium text-primary")}> 
             <span className="truncate">{item.label}</span>
             <span className="text-[10px] opacity-70">{counts[item.value]}</span>
           </Button>
         ))}
-      </GlassSurface>
+      </div>
 
       {feedback ? (
-        <div role="status" className={cn("rounded-md border border-glass-line bg-glass-surface px-3 py-2 text-xs", feedback.kind === "success" ? "text-leave-approved" : "text-leave-rejected")}>
+        <div role="status" className={cn("rounded-md border border-border bg-card px-3 py-2 text-xs", feedback.kind === "success" ? "text-leave-approved" : "text-leave-rejected")}> 
           {feedback.message}
         </div>
       ) : null}
 
       {loading || roleLoading ? (
-        <div className="flex min-h-52 items-center justify-center text-glass-muted"><LoaderCircle className="size-6 animate-spin" aria-label="جارٍ تحميل الطلبات" /></div>
+        <div className="flex min-h-52 items-center justify-center text-muted-foreground"><LoaderCircle className="size-6 animate-spin" aria-label="جارٍ تحميل الطلبات" /></div>
       ) : error ? (
-        <GlassSurface className="rounded-lg p-6 text-center"><p className="text-sm text-glass-muted">{error}</p><Button variant="ghost" className="mt-3 text-glass-foreground" onClick={() => void loadData()}>إعادة المحاولة</Button></GlassSurface>
+        <div className="rounded-lg border border-border bg-card p-6 text-center shadow-sm"><p className="text-sm text-muted-foreground">{error}</p><Button variant="ghost" className="mt-3 text-foreground" onClick={() => void loadData()}>إعادة المحاولة</Button></div>
       ) : visibleRequests.length === 0 ? (
-        <GlassSurface className="rounded-lg px-5 py-10 text-center"><CalendarDays className="mx-auto size-7 text-glass-muted" aria-hidden /><p className="mt-3 text-sm font-medium">لا توجد طلبات هنا</p><p className="mt-1 text-xs text-glass-muted">ستظهر الطلبات عند إضافتها.</p></GlassSurface>
+        <div className="rounded-lg border border-border bg-card px-5 py-10 text-center shadow-sm"><CalendarDays className="mx-auto size-7 text-muted-foreground" aria-hidden /><p className="mt-3 text-sm font-medium">لا توجد طلبات هنا</p><p className="mt-1 text-xs text-muted-foreground">ستظهر الطلبات عند إضافتها.</p></div>
       ) : (
         <div className="space-y-3">
           {visibleRequests.map((request) => {
             const status = request.status === "approved" ? STATUS.approved : request.status === "rejected" ? STATUS.rejected : STATUS.pending;
             const employee = Array.isArray(request.employees) ? request.employees[0] : request.employees;
             return (
-              <GlassSurface key={request.id} className={cn("relative overflow-hidden rounded-lg border-s-0 p-4", status.border)}>
+              <div key={request.id} className={cn("relative overflow-hidden rounded-lg border border-border bg-card p-4 shadow-sm", status.border)}>
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
                   <div className="min-w-0">
-                    {isAdmin ? <p className="flex min-w-0 items-center gap-2 text-sm font-bold"><UserRound className="size-4 shrink-0 text-glass-muted" aria-hidden /><span className="truncate">{employee?.full_name ?? "موظف"}</span></p> : null}
-                    <p className={cn("font-semibold", isAdmin ? "mt-3 text-[15px]" : "text-[15px]")}>{LEAVE_TYPES[request.leave_type] ?? request.leave_type}</p>
-                    <p className="mt-2 flex items-center gap-2 text-xs leading-6 text-glass-muted"><CalendarDays className="size-4 shrink-0" aria-hidden /><span>{formatDate(request.start_date)} — {formatDate(request.end_date)}</span></p>
+                    {isAdmin ? <p className="flex min-w-0 items-center gap-2 text-sm font-medium"><UserRound className="size-4 shrink-0 text-muted-foreground" aria-hidden /><span className="truncate">{employee?.full_name ?? "موظف"}</span></p> : null}
+                    <p className={cn("font-medium", isAdmin ? "mt-3 text-[15px]" : "text-[15px]")}>{LEAVE_TYPES[request.leave_type] ?? request.leave_type}</p>
+                    <p className="mt-2 flex items-center gap-2 text-xs leading-6 text-muted-foreground"><CalendarDays className="size-4 shrink-0" aria-hidden /><span>{formatDate(request.start_date)} — {formatDate(request.end_date)}</span></p>
                   </div>
-                  <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-glass-line bg-glass-surface px-2.5 py-1 text-[11px]", status.text)}><span className={cn("size-1.5 rounded-full", status.dot)} />{status.label}</span>
+                   <span className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-background px-2.5 py-1 text-[11px]", status.text)}><span className={cn("size-1.5 rounded-full", status.dot)} />{status.label}</span>
                 </div>
                 {isAdmin && request.status === "pending" ? (
-                  <div className="mt-4 grid grid-cols-2 gap-2 border-t border-glass-line pt-3">
-                    <Button type="button" variant="ghost" disabled={actingId === request.id} onClick={() => void updateStatus(request.id, "approved")} className="h-10 text-leave-approved hover:bg-glass-surface hover:text-leave-approved"><Check aria-hidden />اعتماد</Button>
-                    <Button type="button" variant="ghost" disabled={actingId === request.id} onClick={() => void updateStatus(request.id, "rejected")} className="h-10 text-leave-rejected hover:bg-glass-surface hover:text-leave-rejected"><X aria-hidden />رفض</Button>
+                  <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-3">
+                    <Button type="button" variant="ghost" disabled={actingId === request.id} onClick={() => void updateStatus(request.id, "approved")} className="h-10 text-leave-approved hover:bg-accent hover:text-leave-approved"><Check aria-hidden />اعتماد</Button>
+                    <Button type="button" variant="ghost" disabled={actingId === request.id} onClick={() => void updateStatus(request.id, "rejected")} className="h-10 text-leave-rejected hover:bg-accent hover:text-leave-rejected"><X aria-hidden />رفض</Button>
                   </div>
                 ) : null}
-              </GlassSurface>
+              </div>
             );
           })}
         </div>
@@ -258,5 +257,5 @@ function formatDate(value: string) {
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
-  return <label className="block space-y-1.5"><span className="text-xs font-medium text-glass-muted">{label}</span>{children}</label>;
+  return <label className="block space-y-1.5"><span className="text-xs font-normal text-muted-foreground">{label}</span>{children}</label>;
 }
