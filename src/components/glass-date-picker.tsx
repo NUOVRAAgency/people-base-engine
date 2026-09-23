@@ -78,7 +78,8 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
           }}
           className="pointer-events-auto mx-auto w-full bg-transparent p-1 [--cell-size:2.25rem] [&_button]:text-inherit [&_button[data-selected-single=true]]:!rounded-full [&_button[data-selected-single=true]]:!bg-primary [&_button[data-selected-single=true]]:!text-primary-foreground [&_button[data-selected-single=true]]:shadow-md [&_button:hover]:bg-primary/10"
           classNames={{
-            root: "w-full",
+            root: "w-full [direction:rtl]",
+            table: "w-full border-collapse [direction:rtl]",
             month: "w-full gap-3",
             month_caption: "mx-12 flex h-11 items-center justify-center pt-1.5",
             caption_label: "font-kufi text-sm font-normal leading-7",
