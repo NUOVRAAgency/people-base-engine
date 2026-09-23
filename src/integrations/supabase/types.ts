@@ -236,6 +236,7 @@ export type Database = {
       }
       payroll: {
         Row: {
+          bank_name: string | null
           base_salary: number
           bonuses: number
           created_at: string
@@ -249,6 +250,7 @@ export type Database = {
           transport_allowance: number
         }
         Insert: {
+          bank_name?: string | null
           base_salary?: number
           bonuses?: number
           created_at?: string
@@ -262,6 +264,7 @@ export type Database = {
           transport_allowance?: number
         }
         Update: {
+          bank_name?: string | null
           base_salary?: number
           bonuses?: number
           created_at?: string
