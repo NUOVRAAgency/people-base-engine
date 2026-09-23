@@ -586,7 +586,7 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent dir="rtl" className="z-[60] flex max-h-[92dvh] w-[calc(100vw-1.25rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl border-primary/15 bg-card/95 p-0 font-sans shadow-card backdrop-blur-xl [&>button]:end-4 [&>button]:right-auto [&>button]:top-4">
+      <DialogContent dir="rtl" className="z-[100] flex max-h-[88dvh] w-[calc(100vw-1.25rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl border-primary/15 bg-card p-0 font-sans shadow-card [&>button]:end-4 [&>button]:right-auto [&>button]:top-4">
         <DialogHeader className="border-b border-border bg-muted/25 px-5 py-4 pe-12 text-right sm:text-right">
           <DialogTitle className="font-kufi text-base font-normal leading-7">{editing ? "تعديل بيانات الموظف" : "إضافة موظف جديد"}</DialogTitle>
           <DialogDescription className="text-xs leading-6">أدخل بيانات الموظف على ثلاث خطوات متتالية</DialogDescription>
