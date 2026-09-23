@@ -147,6 +147,56 @@ export type Database = {
           },
         ]
       }
+      leave_requests: {
+        Row: {
+          approved_by: string | null
+          created_at: string
+          employee_id: string
+          end_date: string
+          id: string
+          leave_type: string
+          reason: string | null
+          requested_by: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          created_at?: string
+          employee_id: string
+          end_date: string
+          id?: string
+          leave_type?: string
+          reason?: string | null
+          requested_by?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          created_at?: string
+          employee_id?: string
+          end_date?: string
+          id?: string
+          leave_type?: string
+          reason?: string | null
+          requested_by?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payroll: {
         Row: {
           base_salary: number
@@ -282,6 +332,10 @@ export type Database = {
         Returns: string
       }
       get_user_branch_id: { Args: never; Returns: string }
+      has_approved_leave: {
+        Args: { _date: string; _employee_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -297,6 +351,10 @@ export type Database = {
       is_operator: { Args: never; Returns: boolean }
       is_viewer: { Args: never; Returns: boolean }
       monthly_attendance_rate: {
+        Args: { _employee_id: string; _month: string }
+        Returns: number
+      }
+      unjustified_absent_days: {
         Args: { _employee_id: string; _month: string }
         Returns: number
       }

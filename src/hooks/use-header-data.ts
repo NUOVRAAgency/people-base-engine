@@ -5,8 +5,15 @@ export type HeaderNotification = {
   id: string;
   title: string;
   detail: string;
-  to: "/attendance" | "/reports";
-  kind: "attendance" | "report";
+  to: "/attendance" | "/reports" | "/leaves";
+  kind: "attendance" | "report" | "leave";
+};
+
+const LEAVE_TYPE_LABELS: Record<string, string> = {
+  annual: "إجازة سنوية",
+  sick: "إجازة مرضية",
+  emergency: "إجازة طارئة",
+  unpaid: "إجازة بدون راتب",
 };
 
 export function useHeaderData() {
@@ -18,8 +25,14 @@ export function useHeaderData() {
     const user = authData.user;
     if (!user) return;
 
-    const [settingsResult, attendanceResult, reportsResult] = await Promise.all([
+    const [settingsResult, leavesResult, attendanceResult, reportsResult] = await Promise.all([
       supabase.from("app_settings").select("company_name").eq("id", "organization").maybeSingle(),
+      supabase
+        .from("leave_requests")
+        .select("id,leave_type,start_date,end_date,employees(full_name)")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(5),
       supabase
         .from("attendance")
         .select("id,status,date,note,employees(full_name)")
@@ -48,7 +61,17 @@ export function useHeaderData() {
       to: "/reports",
       kind: "report",
     }));
-    setNotifications([...attendanceItems, ...reportItems].slice(0, 5));
+    const leaveItems: HeaderNotification[] = (leavesResult.data ?? []).map((item) => {
+      const employee = Array.isArray(item.employees) ? item.employees[0] : item.employees;
+      return {
+        id: `leave-${item.id}`,
+        title: "طلب إجازة بانتظار الاعتماد",
+        detail: `${employee?.full_name ?? "موظف"} — ${LEAVE_TYPE_LABELS[item.leave_type] ?? item.leave_type} (${item.start_date} → ${item.end_date})`,
+        to: "/leaves",
+        kind: "leave",
+      };
+    });
+    setNotifications([...leaveItems, ...attendanceItems, ...reportItems].slice(0, 6));
   }, []);
 
   useEffect(() => {
