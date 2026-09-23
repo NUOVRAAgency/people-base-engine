@@ -1,0 +1,1 @@
+ALTER SEQUENCE public.employee_number_seq RESTART WITH 1001;
