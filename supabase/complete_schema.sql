@@ -617,11 +617,9 @@ CREATE INDEX employees_department_idx ON public.employees (department);
 
 ALTER TABLE public.payroll
   ADD COLUMN housing_allowance numeric NOT NULL DEFAULT 0 CHECK (housing_allowance >= 0),
-  ADD COLUMN transport_allowance numeric NOT NULL DEFAULT 0 CHECK (transport_allowance >= 0),
-  ADD COLUMN iban text;
+  ADD COLUMN transport_allowance numeric NOT NULL DEFAULT 0 CHECK (transport_allowance >= 0);
 
 CREATE UNIQUE INDEX payroll_employee_month_unique_idx ON public.payroll (employee_id, month);
-CREATE INDEX payroll_iban_idx ON public.payroll (iban) WHERE iban IS NOT NULL;
 
 CREATE OR REPLACE FUNCTION public.payroll_set_net_salary()
 RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path TO 'public'
@@ -649,8 +647,7 @@ ALTER TABLE public.payroll
   ADD CONSTRAINT payroll_base_salary_nonnegative_check CHECK (base_salary >= 0),
   ADD CONSTRAINT payroll_bonuses_nonnegative_check CHECK (bonuses >= 0),
   ADD CONSTRAINT payroll_deductions_nonnegative_check CHECK (deductions >= 0),
-  ADD CONSTRAINT payroll_bank_name_length_check CHECK (bank_name IS NULL OR char_length(btrim(bank_name)) BETWEEN 2 AND 100),
-  ADD CONSTRAINT payroll_iban_format_check CHECK (iban IS NULL OR iban ~ '^SA[0-9]{22}$');
+  ADD CONSTRAINT payroll_bank_name_length_check CHECK (bank_name IS NULL OR char_length(btrim(bank_name)) BETWEEN 2 AND 100);
 
 -- =====================================================================
 --  نهاية المرجع

@@ -269,7 +269,7 @@ const STATUS = {
 } as const;
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("ar", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
+  return new Intl.DateTimeFormat("ar-YE-u-nu-latn", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {

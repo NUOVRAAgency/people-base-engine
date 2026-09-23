@@ -243,7 +243,6 @@ export type Database = {
           deductions: number
           employee_id: string
           housing_allowance: number
-          iban: string | null
           id: string
           month: string
           net_salary: number
@@ -257,7 +256,6 @@ export type Database = {
           deductions?: number
           employee_id: string
           housing_allowance?: number
-          iban?: string | null
           id?: string
           month: string
           net_salary?: number
@@ -271,7 +269,6 @@ export type Database = {
           deductions?: number
           employee_id?: string
           housing_allowance?: number
-          iban?: string | null
           id?: string
           month?: string
           net_salary?: number
