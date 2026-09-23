@@ -327,11 +327,6 @@ export type Database = {
         }
         Returns: number
       }
-      get_employee_branch_id: {
-        Args: { _employee_id: string }
-        Returns: string
-      }
-      get_user_branch_id: { Args: never; Returns: string }
       has_approved_leave: {
         Args: { _date: string; _employee_id: string }
         Returns: boolean
@@ -347,9 +342,6 @@ export type Database = {
         Args: { _role: string; _user_id: string }
         Returns: boolean
       }
-      is_admin: { Args: never; Returns: boolean }
-      is_operator: { Args: never; Returns: boolean }
-      is_viewer: { Args: never; Returns: boolean }
       monthly_attendance_rate: {
         Args: { _employee_id: string; _month: string }
         Returns: number
