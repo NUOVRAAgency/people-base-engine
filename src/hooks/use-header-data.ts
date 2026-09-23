@@ -5,8 +5,15 @@ export type HeaderNotification = {
   id: string;
   title: string;
   detail: string;
-  to: "/attendance" | "/reports";
-  kind: "attendance" | "report";
+  to: "/attendance" | "/reports" | "/leaves";
+  kind: "attendance" | "report" | "leave";
+};
+
+const LEAVE_TYPE_LABELS: Record<string, string> = {
+  annual: "إجازة سنوية",
+  sick: "إجازة مرضية",
+  emergency: "إجازة طارئة",
+  unpaid: "إجازة بدون راتب",
 };
 
 export function useHeaderData() {
