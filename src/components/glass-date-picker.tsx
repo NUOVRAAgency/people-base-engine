@@ -64,6 +64,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
           locale={ar}
           dir="rtl"
           showOutsideDays={false}
+          formatters={{ formatWeekdayName: (date) => format(date, "EEEEE", { locale: ar }) }}
           {...(selected ? { selected } : {})}
           {...((selected ?? min) ? { defaultMonth: (selected ?? min) as Date } : {})}
           {...(min ? { disabled: { before: min } } : {})}
