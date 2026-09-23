@@ -235,6 +235,10 @@ function EmployeesPage() {
     });
   }, [department, employees, employmentType, search, status]);
 
+  useEffect(() => {
+    if (department !== "all" && !departments.includes(department)) setDepartment("all");
+  }, [department, departments]);
+
   function openCreate() {
     setEditingId(null);
     setStep(1);
@@ -313,16 +317,39 @@ function EmployeesPage() {
   }
 
   function selectStep(target: number) {
-    if (target <= step) {
-      setStep(target);
-      return;
+    setFieldErrors({});
+    setFeedback(null);
+    setStep(target);
+  }
+
+  function validateAllSteps() {
+    const schemas = [employmentSchema, personalSchema, ...(isAdmin ? [financialSchema] : [])];
+    const errors: FieldErrors = {};
+    let firstInvalidStep: number | null = null;
+
+    schemas.forEach((schema, index) => {
+      const result = schema.safeParse(form);
+      if (result.success) return;
+      if (firstInvalidStep === null) firstInvalidStep = index + 1;
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof EmployeeForm | undefined;
+        if (field && !errors[field]) errors[field] = issue.message;
+      });
+    });
+
+    if (firstInvalidStep !== null) {
+      setFieldErrors(errors);
+      setFeedback({ kind: "error", message: "راجع الحقول الموضحة قبل حفظ الموظف" });
+      setStep(firstInvalidStep);
+      return false;
     }
-    if (target === step + 1 && validateStep(step)) setStep(target);
+    setFieldErrors({});
+    return true;
   }
 
   async function saveEmployee(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!validateStep(3)) return;
+    if (!validateAllSteps()) return;
     setSaving(true);
     setFeedback(null);
 
@@ -407,8 +434,8 @@ function EmployeesPage() {
           <p className="text-xs text-muted-foreground">دليل الفريق</p>
           <h2 id="employees-heading" className="truncate text-xl font-semibold leading-relaxed">إدارة الموظفين</h2>
         </div>
-        {canWrite && !roleLoading ? (
-          <Button type="button" onClick={openCreate} className="h-11 shrink-0 rounded-lg px-3 shadow-nav sm:px-4">
+        {!roleLoading && canWrite ? (
+          <Button type="button" onClick={openCreate} className="h-11 shrink-0 rounded-lg bg-primary px-3 text-primary-foreground shadow-nav hover:bg-primary/90 sm:px-4">
             <Plus aria-hidden />
             <span className="hidden sm:inline">إضافة موظف جديد</span>
             <span className="sm:hidden">إضافة موظف</span>
@@ -451,7 +478,7 @@ function EmployeesPage() {
           <div className="grid min-h-56 place-items-center"><LoaderCircle className="size-6 animate-spin text-primary" aria-label="جارٍ تحميل الموظفين" /></div>
         ) : filteredEmployees.length === 0 ? (
           <div className="grid min-h-56 place-items-center px-6 text-center">
-            <div><UserRound className="mx-auto mb-3 size-9 text-muted-foreground/60" /><p className="text-sm font-medium">لا توجد نتائج مطابقة</p><p className="mt-1 text-xs text-muted-foreground">جرّب تغيير البحث أو الفلاتر</p></div>
+            <div><UserRound className="mx-auto mb-3 size-9 text-muted-foreground/60" /><p className="text-sm font-medium">{employees.length ? "لا توجد نتائج مطابقة" : "لا يوجد موظفون بعد"}</p><p className="mt-1 text-xs text-muted-foreground">{employees.length ? "جرّب تغيير البحث أو الفلاتر" : "أضف أول موظف لبدء بناء دليل الفريق"}</p>{employees.length ? <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => { setSearch(""); setDepartment("all"); setStatus("all"); setEmploymentType("all"); }}>مسح البحث والفلاتر</Button> : null}</div>
           </div>
         ) : (
           <Table>
@@ -538,7 +565,7 @@ function FilterSelect({ label, value, onChange, options }: { label: string; valu
   return (
     <Select dir="rtl" value={value} onValueChange={onChange}>
       <SelectTrigger className="h-10 rounded-lg border-primary/10 bg-background"><SelectValue placeholder={label} /></SelectTrigger>
-      <SelectContent dir="rtl" className="z-[70]"><SelectItem value="all">كل {label === "القسم" ? "الأقسام" : label === "الحالة" ? "الحالات" : "أنواع الدوام"}</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
+      <SelectContent dir="rtl" position="popper" className="z-[120] max-h-64"><SelectItem value="all">كل {label === "القسم" ? "الأقسام" : label === "الحالة" ? "الحالات" : "أنواع الدوام"}</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
     </Select>
   );
 }
