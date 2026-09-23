@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CalendarDays, Check, LoaderCircle, Plus, UserRound, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -42,6 +41,7 @@ function LeavesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [actingId, setActingId] = useState("");
+  const [feedback, setFeedback] = useState<{ kind: "success" | "error"; message: string } | null>(null);
   const [form, setForm] = useState({ employeeId: "", leaveType: "annual", startDate: "", endDate: "" });
 
   const canCreate = role === "admin" || role === "operator";
@@ -79,12 +79,13 @@ function LeavesPage() {
 
   async function submitRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFeedback(null);
     if (!form.employeeId || !form.startDate || !form.endDate) {
-      toast.error("أكمل جميع الحقول المطلوبة");
+      setFeedback({ kind: "error", message: "أكمل جميع الحقول المطلوبة" });
       return;
     }
     if (form.endDate < form.startDate) {
-      toast.error("تاريخ النهاية يجب أن يكون بعد تاريخ البداية");
+      setFeedback({ kind: "error", message: "تاريخ النهاية يجب أن يكون بعد تاريخ البداية" });
       return;
     }
     setSaving(true);
@@ -97,25 +98,26 @@ function LeavesPage() {
     });
     setSaving(false);
     if (insertError) {
-      toast.error("لم يتم حفظ الطلب", { description: "تحقق من صلاحيات الموظف المختار ثم حاول مجدداً." });
+      setFeedback({ kind: "error", message: "لم يتم حفظ الطلب. تحقق من صلاحيات الموظف المختار." });
       return;
     }
     setDialogOpen(false);
     setForm({ employeeId: "", leaveType: "annual", startDate: "", endDate: "" });
-    toast.success("تم إرسال طلب الإجازة");
+    setFeedback({ kind: "success", message: "تم إرسال طلب الإجازة" });
     window.dispatchEvent(new Event("hr-header-refresh"));
     await loadData();
   }
 
   async function updateStatus(id: string, status: "approved" | "rejected") {
+    setFeedback(null);
     setActingId(id);
     const { error: updateError } = await supabase.from("leave_requests").update({ status }).eq("id", id);
     setActingId("");
     if (updateError) {
-      toast.error("تعذّر تحديث حالة الطلب");
+      setFeedback({ kind: "error", message: "تعذّر تحديث حالة الطلب" });
       return;
     }
-    toast.success(status === "approved" ? "تم اعتماد الطلب" : "تم رفض الطلب");
+    setFeedback({ kind: "success", message: status === "approved" ? "تم اعتماد الطلب" : "تم رفض الطلب" });
     window.dispatchEvent(new Event("hr-header-refresh"));
     await loadData();
   }
@@ -182,6 +184,12 @@ function LeavesPage() {
           </Button>
         ))}
       </GlassSurface>
+
+      {feedback ? (
+        <div role="status" className={cn("rounded-md border border-glass-line bg-glass-surface px-3 py-2 text-xs", feedback.kind === "success" ? "text-leave-approved" : "text-leave-rejected")}>
+          {feedback.message}
+        </div>
+      ) : null}
 
       {loading || roleLoading ? (
         <div className="flex min-h-52 items-center justify-center text-glass-muted"><LoaderCircle className="size-6 animate-spin" aria-label="جارٍ تحميل الطلبات" /></div>
