@@ -171,11 +171,12 @@ function LeavesPage() {
                     </div>
                   ) : null}
                 </Field>
-                <div className="grid grid-cols-2 gap-3">
-                  <Field label="من">
+                <div className="space-y-3 rounded-lg border border-primary/10 bg-primary/[0.025] p-3 shadow-sm backdrop-blur-md">
+                  <Field label="من تاريخ">
                     <GlassDatePicker ariaLabel="تاريخ البداية" value={form.startDate} onChange={(startDate) => setForm((value) => ({ ...value, startDate, endDate: value.endDate && value.endDate < startDate ? "" : value.endDate }))} />
                   </Field>
-                  <Field label="إلى">
+                  <div className="h-px bg-border/70" aria-hidden />
+                  <Field label="إلى تاريخ">
                     <GlassDatePicker ariaLabel="تاريخ النهاية" value={form.endDate} minDate={form.startDate || undefined} onChange={(endDate) => setForm((value) => ({ ...value, endDate }))} />
                   </Field>
                 </div>
