@@ -13,9 +13,9 @@ import {
 import { useEffect, useRef, type ReactNode } from "react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useHeaderData } from "@/hooks/use-header-data";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
 
 type NavItem = {
   to: "/dashboard" | "/employees" | "/attendance" | "/leaves" | "/payroll" | "/reports" | "/settings";
@@ -51,7 +51,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const title = TITLES[pathname] ?? "نظام الموارد البشرية";
-  const { isAdmin, initials, fullName } = useCurrentUser();
+  const { isAdmin } = useCurrentUser();
   const { companyName, notifications } = useHeaderData();
   const companyNameIsArabic = /[\u0600-\u06ff]/.test(companyName);
   const listRef = useRef<HTMLUListElement>(null);
@@ -72,22 +72,20 @@ export function MobileShell({ children }: { children: ReactNode }) {
         style={{ background: "var(--header-gradient)" }}
       >
         <div className="flex min-w-0 items-center">
-          <h1 className="truncate text-[18px] font-bold leading-none">{title}</h1>
+          <h1 className="truncate py-1 text-[18px] font-bold leading-[1.6]">{title}</h1>
         </div>
 
         {companyName ? (
           <p
             dir="auto"
-            className={`pointer-events-none absolute left-1/2 max-w-[42%] -translate-x-1/2 truncate text-center text-[15px] font-bold text-primary-foreground ${companyNameIsArabic ? "font-kufi" : "font-sans"}`}
+            className={`pointer-events-none absolute left-1/2 max-w-[42%] -translate-x-1/2 truncate py-1 text-center text-[15px] font-bold leading-[1.6] text-primary-foreground ${companyNameIsArabic ? "font-kufi" : "font-sans"}`}
           >
             {companyName}
           </p>
         ) : null}
 
         <div className="flex shrink-0 items-center gap-1.5">
-          <Avatar className="h-9 w-9 border-2 border-primary-foreground/80 bg-primary-foreground/15">
-            <AvatarFallback className="bg-primary-foreground/15 text-xs font-bold text-primary-foreground">{initials}</AvatarFallback>
-          </Avatar>
+
 
           <Popover>
             <PopoverTrigger asChild>
@@ -151,7 +149,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
                   <span className={`flex h-9 w-14 items-center justify-center rounded-full transition-colors ${active ? "bg-primary/10" : "bg-transparent"}`}>
                     <Icon className="h-5 w-5" aria-hidden />
                   </span>
-                  <span className="font-medium leading-none">{item.label}</span>
+                  <span className="font-medium leading-[1.5]">{item.label}</span>
                 </Link>
               </li>
             );
