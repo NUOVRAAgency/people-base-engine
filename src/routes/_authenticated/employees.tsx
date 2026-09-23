@@ -671,7 +671,7 @@ function FinancialFields({ form, setField, isAdmin, errors }: { form: EmployeeFo
   );
 }
 
-function Field({ label, hint, required, error, className, children }: { label: string; hint?: string; required?: boolean; error?: string; className?: string; children: ReactNode }) {
+function Field({ label, hint, required, error, className, children }: { label: string; hint?: string | undefined; required?: boolean | undefined; error?: string | undefined; className?: string | undefined; children: ReactNode }) {
   return <div className={cn("space-y-1.5", className)}><div className="flex items-center justify-between gap-2"><Label className="text-xs font-medium">{label}</Label>{required ? <span className="text-[10px] text-muted-foreground">مطلوب</span> : null}</div>{children}{error ? <p className="text-[11px] leading-5 text-destructive">{error}</p> : hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}</div>;
 }
 
