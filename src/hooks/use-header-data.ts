@@ -28,6 +28,12 @@ export function useHeaderData() {
     const [settingsResult, leavesResult, attendanceResult, reportsResult] = await Promise.all([
       supabase.from("app_settings").select("company_name").eq("id", "organization").maybeSingle(),
       supabase
+        .from("leave_requests")
+        .select("id,leave_type,start_date,end_date,employees(full_name)")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabase
         .from("attendance")
         .select("id,status,date,note,employees(full_name)")
         .in("status", ["absent", "late"])
