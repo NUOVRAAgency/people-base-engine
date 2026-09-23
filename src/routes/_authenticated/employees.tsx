@@ -651,17 +651,130 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
   );
 }
 
-function EmploymentFields({ form, setField, branches, managers, isAdmin, errors }: { form: EmployeeForm; setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void; branches: Branch[]; managers: Employee[]; isAdmin: boolean; errors: FieldErrors }) {
+const ADD_VALUE = "__add_new__";
+
+type QuickAddKind = "branch" | "department" | "manager";
+
+const QUICK_ADD_LABELS: Record<QuickAddKind, { title: string; field: string; trigger: string }> = {
+  branch: { title: "إضافة فرع جديد", field: "اسم الفرع الجديد", trigger: "+ إضافة فرع جديد" },
+  department: { title: "إضافة قسم جديد", field: "اسم القسم الجديد", trigger: "+ إضافة قسم جديد" },
+  manager: { title: "إضافة مدير مباشر", field: "اسم المدير المباشر", trigger: "+ إضافة مدير مباشر" },
+};
+
+function EmploymentFields({ form, setField, branches, managers, departments, isAdmin, errors, onCreateBranch, onCreateDepartment, onCreateManager }: {
+  form: EmployeeForm;
+  setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void;
+  branches: Branch[];
+  managers: Employee[];
+  departments: string[];
+  isAdmin: boolean;
+  errors: FieldErrors;
+  onCreateBranch: (name: string) => Promise<string | null>;
+  onCreateDepartment: (name: string) => void;
+  onCreateManager: (name: string) => Promise<string | null>;
+}) {
+  const [quickAdd, setQuickAdd] = useState<QuickAddKind | null>(null);
+  const [quickName, setQuickName] = useState("");
+  const [quickSaving, setQuickSaving] = useState(false);
+  const [quickError, setQuickError] = useState("");
+
+  function openQuickAdd(kind: QuickAddKind) {
+    setQuickAdd(kind);
+    setQuickName("");
+    setQuickError("");
+  }
+
+  async function submitQuickAdd() {
+    const name = quickName.trim();
+    if (name.length < 2) {
+      setQuickError("أدخل اسماً صحيحاً");
+      return;
+    }
+    setQuickSaving(true);
+    if (quickAdd === "department") {
+      onCreateDepartment(name);
+      setField("department", name);
+    } else if (quickAdd === "branch") {
+      const id = await onCreateBranch(name);
+      if (!id) {
+        setQuickSaving(false);
+        setQuickError("تعذّر إضافة الفرع. تأكد من صلاحياتك.");
+        return;
+      }
+      setField("branchId", id);
+    } else if (quickAdd === "manager") {
+      const id = await onCreateManager(name);
+      if (!id) {
+        setQuickSaving(false);
+        setQuickError("اختر الفرع أولاً ثم أضف المدير.");
+        return;
+      }
+      setField("managerId", id);
+    }
+    setQuickSaving(false);
+    setQuickAdd(null);
+  }
+
+  const addRowClass = "mt-1 cursor-pointer justify-center rounded-md border border-dashed border-primary/40 bg-primary/5 py-2 text-center text-xs font-medium text-primary";
+
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="الرقم الوظيفي" hint="اتركه فارغاً للتوليد التلقائي"><Input dir="ltr" value={form.employeeNumber} onChange={(event) => setField("employeeNumber", event.target.value)} placeholder="تلقائي" className="h-11 text-right" /></Field>
+      <Field label="الرقم الوظيفي" hint="يولّده النظام تلقائياً عند الحفظ">
+        <div className="flex h-11 items-center justify-between rounded-md border border-input bg-muted/40 px-3 text-sm text-muted-foreground">
+          <span>{form.employeeNumber || "تلقائي"}</span>
+          <span className="text-[10px]">غير قابل للتعديل</span>
+        </div>
+      </Field>
       <Field label="البريد الإلكتروني العملي" required error={errors.workEmail}><Input dir="ltr" type="email" value={form.workEmail} onChange={(event) => setField("workEmail", event.target.value)} placeholder="name@company.com" aria-invalid={Boolean(errors.workEmail)} className="h-11 text-left" /></Field>
-      <Field label="القسم" required error={errors.department}><Input value={form.department} onChange={(event) => setField("department", event.target.value)} placeholder="مثال: الموارد البشرية" aria-invalid={Boolean(errors.department)} className="h-11" /></Field>
+      <Field label="القسم" required error={errors.department}>
+        <Select dir="rtl" value={form.department} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("department") : setField("department", value)}>
+          <SelectTrigger aria-invalid={Boolean(errors.department)} className="h-11"><SelectValue placeholder="اختر القسم" /></SelectTrigger>
+          <SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">
+            {departments.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}
+            <SelectItem value={ADD_VALUE} className={addRowClass}>{QUICK_ADD_LABELS.department.trigger}</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
       <Field label="المسمى الوظيفي" required error={errors.position}><Input value={form.position} onChange={(event) => setField("position", event.target.value)} placeholder="مثال: أخصائي موارد بشرية" aria-invalid={Boolean(errors.position)} className="h-11" /></Field>
-      <Field label="المدير المباشر"><Select dir="rtl" value={form.managerId} onValueChange={(value) => setField("managerId", value)}><SelectTrigger className="h-11"><SelectValue placeholder="اختر المدير" /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64"><SelectItem value="none">بدون مدير مباشر</SelectItem>{managers.map((manager) => <SelectItem key={manager.id} value={manager.id}>{manager.full_name}</SelectItem>)}</SelectContent></Select></Field>
-      <Field label="الفرع" required error={errors.branchId}><Select dir="rtl" value={form.branchId} onValueChange={(value) => setField("branchId", value)} disabled={!isAdmin}><SelectTrigger aria-invalid={Boolean(errors.branchId)} className="h-11"><SelectValue placeholder="اختر الفرع" /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">{branches.map((branch) => <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>)}</SelectContent></Select></Field>
+      <Field label="المدير المباشر">
+        <Select dir="rtl" value={form.managerId} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("manager") : setField("managerId", value)}>
+          <SelectTrigger className="h-11"><SelectValue placeholder="اختر المدير" /></SelectTrigger>
+          <SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">
+            <SelectItem value="none">بدون مدير مباشر</SelectItem>
+            {managers.map((manager) => <SelectItem key={manager.id} value={manager.id}>{manager.full_name}</SelectItem>)}
+            <SelectItem value={ADD_VALUE} className={addRowClass}>{QUICK_ADD_LABELS.manager.trigger}</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
+      <Field label="الفرع" required error={errors.branchId}>
+        <Select dir="rtl" value={form.branchId} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("branch") : setField("branchId", value)} disabled={!isAdmin}>
+          <SelectTrigger aria-invalid={Boolean(errors.branchId)} className="h-11"><SelectValue placeholder="اختر الفرع" /></SelectTrigger>
+          <SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">
+            {branches.map((branch) => <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>)}
+            <SelectItem value={ADD_VALUE} className={addRowClass}>{QUICK_ADD_LABELS.branch.trigger}</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
       <Field label="تاريخ التعيين" required error={errors.hireDate}><GlassDatePicker ariaLabel="تاريخ التعيين" value={form.hireDate} onChange={(value) => setField("hireDate", value)} /></Field>
       <Field label="نوع الدوام" required><Select dir="rtl" value={form.employmentType} onValueChange={(value) => setField("employmentType", value)}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">{Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></Field>
+
+      <Dialog open={quickAdd !== null} onOpenChange={(open) => { if (!open) setQuickAdd(null); }}>
+        <DialogContent dir="rtl" className="z-[300] w-[calc(100vw-2.5rem)] max-w-sm rounded-xl font-sans">
+          <DialogHeader className="text-right sm:text-right">
+            <DialogTitle className="font-kufi text-base font-normal leading-7">{quickAdd ? QUICK_ADD_LABELS[quickAdd].title : ""}</DialogTitle>
+            <DialogDescription className="text-xs">سيُضاف مباشرة إلى خيارات النظام ويُحدد في النموذج</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium">{quickAdd ? QUICK_ADD_LABELS[quickAdd].field : ""}</Label>
+            <Input value={quickName} onChange={(event) => { setQuickName(event.target.value); setQuickError(""); }} className="h-11" autoFocus />
+            {quickError ? <p className="text-[11px] text-destructive">{quickError}</p> : null}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setQuickAdd(null)}>إلغاء</Button>
+            <Button type="button" onClick={() => void submitQuickAdd()} disabled={quickSaving}>{quickSaving ? <LoaderCircle className="animate-spin" /> : <Plus />}إضافة وحفظ</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -673,23 +786,17 @@ function PersonalFields({ form, setField, errors }: { form: EmployeeForm; setFie
       <Field label="الاسم بالإنجليزية" hint="اختياري"><Input dir="ltr" value={form.fullNameEn} onChange={(event) => setField("fullNameEn", event.target.value)} placeholder="Full name" className="h-11 text-left" /></Field>
       <Field label="رقم الهوية / الجواز" required error={errors.nationalId}><Input dir="ltr" value={form.nationalId} onChange={(event) => setField("nationalId", event.target.value)} placeholder="رقم الهوية أو الجواز" aria-invalid={Boolean(errors.nationalId)} className="h-11 text-left" /></Field>
       <Field label="رقم الجوال" required error={errors.phone}>
-        <div dir="ltr" className="relative">
-          <span className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-sm text-foreground">+967</span>
-          <Input
-            dir="ltr"
-            type="tel"
-            inputMode="numeric"
-            value={form.phone.startsWith("+967") ? form.phone.slice(4) : form.phone.replace(/\D/g, "")}
-            onChange={(event) => {
-              const localNumber = event.target.value.replace(/\D/g, "").slice(0, 10);
-              setField("phone", localNumber ? `+967${localNumber}` : "");
-            }}
-            placeholder=""
-            aria-label="رقم الجوال بعد مفتاح اليمن +967"
-            aria-invalid={Boolean(errors.phone)}
-            className="h-11 ps-16 text-left"
-          />
-        </div>
+        <Input
+          dir="ltr"
+          type="tel"
+          inputMode="tel"
+          value={form.phone}
+          onChange={(event) => setField("phone", event.target.value.replace(/[^\d+\s-]/g, ""))}
+          placeholder="+967 7XXXXXXXX"
+          aria-label="رقم الجوال"
+          aria-invalid={Boolean(errors.phone)}
+          className="h-11 text-left"
+        />
       </Field>
       <Field label="تاريخ الميلاد" required error={errors.birthDate}><GlassDatePicker ariaLabel="تاريخ الميلاد" value={form.birthDate} onChange={(value) => setField("birthDate", value)} /></Field>
       <Field label="الجنس" required error={errors.gender}><Select dir="rtl" value={form.gender} onValueChange={(value) => setField("gender", value)}><SelectTrigger aria-invalid={Boolean(errors.gender)} className="h-11"><SelectValue placeholder="اختر الجنس" /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64"><SelectItem value="male">ذكر</SelectItem><SelectItem value="female">أنثى</SelectItem></SelectContent></Select></Field>
