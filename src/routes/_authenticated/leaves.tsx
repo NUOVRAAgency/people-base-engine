@@ -141,7 +141,7 @@ function LeavesPage() {
                 <Plus className="size-5" aria-hidden />
               </Button>
             </DialogTrigger>
-            <DialogContent dir="rtl" className="left-3 right-3 top-auto bottom-3 w-auto max-w-none translate-x-0 translate-y-0 rounded-lg border-border bg-card p-5 font-sans text-foreground shadow-card sm:left-1/2 sm:right-auto sm:top-1/2 sm:bottom-auto sm:w-[min(430px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+            <DialogContent dir="rtl" className="inset-x-3 bottom-3 top-auto w-auto max-w-none translate-x-0 translate-y-0 rounded-lg border-border bg-card p-5 font-sans text-foreground shadow-card sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(430px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
               <DialogHeader className="text-right sm:text-right">
                 <DialogTitle className="text-lg leading-relaxed">طلب إجازة جديد</DialogTitle>
                 <DialogDescription className="text-muted-foreground">يُرسل الطلب بحالة معلّق للمراجعة.</DialogDescription>
