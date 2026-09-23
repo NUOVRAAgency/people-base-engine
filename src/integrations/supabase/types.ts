@@ -102,40 +102,67 @@ export type Database = {
       }
       employees: {
         Row: {
+          birth_date: string | null
           branch_id: string | null
           created_at: string
           department: string | null
+          employee_number: string
+          employment_type: string
           full_name: string
+          full_name_en: string | null
+          gender: string | null
           hire_date: string | null
           id: string
+          manager_id: string | null
+          national_id: string | null
+          nationality: string | null
           phone: string | null
           position: string | null
           status: string
           updated_at: string
+          work_email: string | null
         }
         Insert: {
+          birth_date?: string | null
           branch_id?: string | null
           created_at?: string
           department?: string | null
+          employee_number?: string
+          employment_type?: string
           full_name: string
+          full_name_en?: string | null
+          gender?: string | null
           hire_date?: string | null
           id?: string
+          manager_id?: string | null
+          national_id?: string | null
+          nationality?: string | null
           phone?: string | null
           position?: string | null
           status?: string
           updated_at?: string
+          work_email?: string | null
         }
         Update: {
+          birth_date?: string | null
           branch_id?: string | null
           created_at?: string
           department?: string | null
+          employee_number?: string
+          employment_type?: string
           full_name?: string
+          full_name_en?: string | null
+          gender?: string | null
           hire_date?: string | null
           id?: string
+          manager_id?: string | null
+          national_id?: string | null
+          nationality?: string | null
           phone?: string | null
           position?: string | null
           status?: string
           updated_at?: string
+          work_email?: string | null
         }
         Relationships: [
           {
@@ -143,6 +170,13 @@ export type Database = {
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -207,9 +241,12 @@ export type Database = {
           created_at: string
           deductions: number
           employee_id: string
+          housing_allowance: number
+          iban: string | null
           id: string
           month: string
           net_salary: number
+          transport_allowance: number
         }
         Insert: {
           base_salary?: number
@@ -217,9 +254,12 @@ export type Database = {
           created_at?: string
           deductions?: number
           employee_id: string
+          housing_allowance?: number
+          iban?: string | null
           id?: string
           month: string
           net_salary?: number
+          transport_allowance?: number
         }
         Update: {
           base_salary?: number
@@ -227,9 +267,12 @@ export type Database = {
           created_at?: string
           deductions?: number
           employee_id?: string
+          housing_allowance?: number
+          iban?: string | null
           id?: string
           month?: string
           net_salary?: number
+          transport_allowance?: number
         }
         Relationships: [
           {
