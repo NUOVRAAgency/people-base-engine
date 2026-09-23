@@ -25,7 +25,7 @@ export function useHeaderData() {
     const user = authData.user;
     if (!user) return;
 
-    const [settingsResult, attendanceResult, reportsResult] = await Promise.all([
+    const [settingsResult, leavesResult, attendanceResult, reportsResult] = await Promise.all([
       supabase.from("app_settings").select("company_name").eq("id", "organization").maybeSingle(),
       supabase
         .from("attendance")
