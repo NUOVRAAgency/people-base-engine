@@ -169,6 +169,7 @@ function EmployeesPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [myBranchId, setMyBranchId] = useState("");
+  const [customDepartments, setCustomDepartments] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [department, setDepartment] = useState("all");
@@ -215,8 +216,11 @@ function EmployeesPage() {
   }, [loadData]);
 
   const departments = useMemo(
-    () => Array.from(new Set(employees.map((employee) => employee.department).filter((value): value is string => Boolean(value)))).sort(),
-    [employees],
+    () => Array.from(new Set([
+      ...employees.map((employee) => employee.department).filter((value): value is string => Boolean(value)),
+      ...customDepartments,
+    ])).sort(),
+    [customDepartments, employees],
   );
 
   const filteredEmployees = useMemo(() => {
@@ -422,6 +426,33 @@ function EmployeesPage() {
     await loadData();
   }
 
+  async function createBranch(name: string) {
+    const result = await supabase.from("branches").insert({ name }).select("id,name").single();
+    if (result.error || !result.data) return null;
+    const branch = result.data as Branch;
+    setBranches((current) => [...current, branch].sort((a, b) => a.name.localeCompare(b.name, "ar")));
+    return branch.id;
+  }
+
+  function createDepartment(name: string) {
+    setCustomDepartments((current) => (current.includes(name) ? current : [...current, name]));
+  }
+
+  async function createManager(name: string) {
+    if (!form.branchId) return null;
+    const result = await supabase
+      .from("employees")
+      .insert({ full_name: name, branch_id: form.branchId })
+      .select("id,employee_number,full_name,full_name_en,work_email,department,position,manager_id,hire_date,employment_type,national_id,birth_date,nationality,gender,phone,status,branch_id")
+      .single();
+    if (result.error || !result.data) return null;
+    const manager = result.data as Employee;
+    setEmployees((current) => [manager, ...current]);
+    return manager.id;
+  }
+
+
+
   return (
     <section className="mx-auto w-full max-w-6xl space-y-4 font-sans text-foreground" aria-labelledby="employees-heading">
       <div className="flex items-center justify-between gap-3">
@@ -528,6 +559,10 @@ function EmployeesPage() {
         setField={setField}
         branches={branches}
         managers={employees.filter((employee) => employee.id !== editingId && employee.status === "active")}
+        departments={departments}
+        onCreateBranch={createBranch}
+        onCreateDepartment={createDepartment}
+        onCreateManager={createManager}
         isAdmin={isAdmin}
         saving={saving}
         editing={Boolean(editingId)}
@@ -588,7 +623,7 @@ function EmployeeActions({ employee, canEdit, canDelete, onView, onEdit, onDelet
   );
 }
 
-function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, branches, managers, isAdmin, saving, editing, feedback, fieldErrors, onNext, onSelectStep, onSubmit }: {
+function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, branches, managers, departments, isAdmin, saving, editing, feedback, fieldErrors, onNext, onSelectStep, onSubmit, onCreateBranch, onCreateDepartment, onCreateManager }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   step: number;
@@ -597,6 +632,10 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
   setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void;
   branches: Branch[];
   managers: Employee[];
+  departments: string[];
+  onCreateBranch: (name: string) => Promise<string | null>;
+  onCreateDepartment: (name: string) => void;
+  onCreateManager: (name: string) => Promise<string | null>;
   isAdmin: boolean;
   saving: boolean;
   editing: boolean;
@@ -635,7 +674,7 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
 
         <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
           <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-5">
-            {step === 1 ? <EmploymentFields form={form} setField={setField} branches={branches} managers={managers} isAdmin={isAdmin} errors={fieldErrors} /> : null}
+            {step === 1 ? <EmploymentFields form={form} setField={setField} branches={branches} managers={managers} departments={departments} isAdmin={isAdmin} errors={fieldErrors} onCreateBranch={onCreateBranch} onCreateDepartment={onCreateDepartment} onCreateManager={onCreateManager} /> : null}
             {step === 2 ? <PersonalFields form={form} setField={setField} errors={fieldErrors} /> : null}
             {step === 3 ? <FinancialFields form={form} setField={setField} isAdmin={isAdmin} errors={fieldErrors} /> : null}
             {feedback?.kind === "error" ? <p className="mt-4 flex items-center gap-2 rounded-lg border border-destructive/20 bg-destructive/8 px-3 py-2 text-xs text-destructive"><CircleAlert className="size-4" />{feedback.message}</p> : null}
