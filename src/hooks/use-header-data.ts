@@ -61,7 +61,17 @@ export function useHeaderData() {
       to: "/reports",
       kind: "report",
     }));
-    setNotifications([...attendanceItems, ...reportItems].slice(0, 5));
+    const leaveItems: HeaderNotification[] = (leavesResult.data ?? []).map((item) => {
+      const employee = Array.isArray(item.employees) ? item.employees[0] : item.employees;
+      return {
+        id: `leave-${item.id}`,
+        title: "طلب إجازة بانتظار الاعتماد",
+        detail: `${employee?.full_name ?? "موظف"} — ${LEAVE_TYPE_LABELS[item.leave_type] ?? item.leave_type} (${item.start_date} → ${item.end_date})`,
+        to: "/leaves",
+        kind: "leave",
+      };
+    });
+    setNotifications([...leaveItems, ...attendanceItems, ...reportItems].slice(0, 6));
   }, []);
 
   useEffect(() => {
