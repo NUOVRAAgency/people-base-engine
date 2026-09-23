@@ -68,9 +68,9 @@ export function MobileShell({ children }: { children: ReactNode }) {
 
   return (
     <div dir="rtl" className="min-h-dvh bg-background font-kufi">
-      <header
-        className="fixed inset-x-0 top-0 z-30 flex h-[62px] items-center justify-between px-4 text-primary-foreground shadow-nav [background:var(--header-gradient)]"
-      >
+      <header className="fixed inset-x-0 top-0 z-30 shadow-nav">
+        <div className="h-[7px] w-full bg-white" />
+        <div className="relative flex h-[62px] items-center justify-between px-4 text-primary-foreground [background:var(--header-gradient)]">
         <div className="flex min-w-0 items-center">
           <h1 className="truncate py-1 text-[18px] font-bold leading-[1.6]">{title}</h1>
         </div>
@@ -134,9 +134,10 @@ export function MobileShell({ children }: { children: ReactNode }) {
             </PopoverContent>
           </Popover>
         </div>
+        </div>
       </header>
 
-      <main className="min-h-dvh bg-background px-4 pb-[96px] pt-[78px]">{children}</main>
+      <main className="min-h-dvh bg-background px-4 pb-[96px] pt-[85px]">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur-md">
         <ul ref={listRef} className="scrollbar-hide mx-auto flex max-w-[480px] items-stretch gap-1 overflow-x-auto px-3 pb-[env(safe-area-inset-bottom)]">

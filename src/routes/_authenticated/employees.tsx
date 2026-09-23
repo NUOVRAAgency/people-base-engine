@@ -139,7 +139,7 @@ const employmentSchema = z.object({
 const personalSchema = z.object({
   fullName: z.string().trim().min(3, "أدخل الاسم الكامل").max(150),
   nationalId: z.string().trim().min(5, "أدخل رقم هوية أو جواز صحيحاً").max(30).regex(/^[\p{L}\p{N}-]+$/u, "استخدم الحروف والأرقام والشرطة فقط"),
-  phone: z.string().trim().regex(/^\+967[0-9]{7,10}$/, "أدخل الرقم بعد مفتاح اليمن +967"),
+  phone: z.string().trim().regex(/^\+?[0-9\s-]{7,18}$/, "أدخل رقم جوال صحيحاً"),
   birthDate: z.string().date("اختر تاريخ الميلاد").refine((value) => new Date(`${value}T12:00:00`) < new Date(), "تاريخ الميلاد يجب أن يكون في الماضي"),
   gender: z.enum(["male", "female"], { message: "اختر الجنس" }),
   nationality: z.string().trim().min(2, "الجنسية مطلوبة").max(80),
