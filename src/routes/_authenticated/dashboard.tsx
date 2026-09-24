@@ -345,7 +345,8 @@ function DashboardPage() {
                   dataKey="label"
                   tickLine={false}
                   axisLine={false}
-                  interval={0}
+                  interval="preserveStartEnd"
+                  minTickGap={8}
                   tick={{ fontSize: 9, fill: "#9aa4b4" }}
                 />
                 <YAxis
