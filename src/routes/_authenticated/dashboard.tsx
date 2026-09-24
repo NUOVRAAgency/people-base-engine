@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
+  Check,
   CalendarCheck,
   LoaderCircle,
   Plane,
@@ -537,10 +538,10 @@ function KpiCard({
   icon: ReactNode;
   title: string;
   value: string;
-  to?: string;
-  pressed?: boolean;
-  onPress?: () => void;
-  compact?: boolean;
+  to?: string | undefined;
+  pressed?: boolean | undefined;
+  onPress?: (() => void) | undefined;
+  compact?: boolean | undefined;
 }) {
   const content = (
     <>
