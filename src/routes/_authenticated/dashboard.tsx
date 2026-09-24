@@ -1,8 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Check,
   CalendarCheck,
-  CheckCircle2,
   LoaderCircle,
   Plane,
   Users,
@@ -109,7 +108,16 @@ type LeaveRow = {
 type PayrollRow = { employee_id: string; net_salary: number; status: string };
 
 function DashboardPage() {
-  const { fullName, isAdmin, loading: roleLoading } = useCurrentUser();
+  const { isAdmin, loading: roleLoading } = useCurrentUser();
+  const navigate = useNavigate();
+  const [pressed, setPressed] = useState<string | null>(null);
+  const openSection = useCallback((to: "/employees" | "/attendance" | "/leaves" | "/payroll") => {
+    setPressed(to);
+    window.setTimeout(() => {
+      setPressed(null);
+      void navigate({ to });
+    }, 280);
+  }, [navigate]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [employees, setEmployees] = useState<EmployeeRow[]>([]);
@@ -241,37 +249,48 @@ function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-3 pb-6">
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border/40 bg-card/75 p-3 shadow-glass backdrop-blur-sm">
+      <header className="rounded-none border border-border/40 bg-card/75 px-3 py-2">
         <div className="min-w-0">
-          <h2 className="truncate text-base font-medium leading-[1.6] text-foreground md:text-lg">
-            أهلا بك {fullName.trim()}
-          </h2>
+          <h2 className="truncate text-base font-medium leading-[1.6] text-foreground md:text-lg">أهلا بك</h2>
           <p className="mt-0.5 truncate text-[12px] leading-[1.7] text-muted-foreground md:text-sm">
             {dateFormatter.format(today)}
           </p>
         </div>
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <UserRound className="h-5 w-5" aria-hidden />
-        </span>
       </header>
 
       <section className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-        <FeatureCard title="إجمالي الموظفين" value={numberFormatter.format(employees.length)} />
-        <StatCard
-          icon={<CheckCircle2 className="h-3 w-3" aria-hidden />}
+        <KpiCard
+          title="إجمالي الموظفين"
+          value={numberFormatter.format(employees.length)}
+          icon={<Users className="h-3 w-3" aria-hidden />}
+          to="/employees"
+          pressed={pressed === "/employees"}
+          onPress={() => openSection("/employees")}
+        />
+        <KpiCard
           title="الحاضرون اليوم"
           value={numberFormatter.format(presentToday)}
+          icon={<CalendarCheck className="h-3 w-3" aria-hidden />}
+          to="/attendance"
+          pressed={pressed === "/attendance"}
+          onPress={() => openSection("/attendance")}
         />
-        <StatCard
-          icon={<Plane className="h-3 w-3" aria-hidden />}
+        <KpiCard
           title="في إجازة اليوم"
           value={numberFormatter.format(onLeaveToday)}
+          icon={<Plane className="h-3 w-3" aria-hidden />}
+          to="/leaves"
+          pressed={pressed === "/leaves"}
+          onPress={() => openSection("/leaves")}
         />
-        <StatCard
-          icon={<Wallet className="h-3 w-3" aria-hidden />}
+        <KpiCard
           title={monthFormatter.format(new Date(`${month}T00:00:00`))}
           value={payrollStatus}
+          icon={<Wallet className="h-3 w-3" aria-hidden />}
+          to={isAdmin ? "/payroll" : undefined}
           compact
+          pressed={pressed === "/payroll"}
+          onPress={isAdmin ? () => openSection("/payroll") : undefined}
         />
       </section>
 
@@ -507,43 +526,62 @@ function DashboardPage() {
   );
 }
 
-function FeatureCard({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-gradient-to-b from-[#1f6bff] to-[#0c4bbc] p-2.5 text-primary-foreground shadow-[0_12px_26px_-12px_rgba(12,75,188,0.7),inset_0_1px_0_rgba(255,255,255,0.3)]">
-      <div className="flex items-center gap-1.5">
-        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white/15">
-          <Users className="h-3 w-3" aria-hidden />
-        </span>
-        <p className="truncate text-[11px] font-normal">{title}</p>
-      </div>
-      <p className="mt-1 truncate text-lg font-medium leading-tight">{value}</p>
-    </div>
-  );
-}
-
-function StatCard({
+function KpiCard({
   icon,
   title,
   value,
+  to,
+  pressed,
+  onPress,
   compact,
 }: {
   icon: ReactNode;
   title: string;
   value: string;
-  compact?: boolean;
+  to?: string | undefined;
+  pressed?: boolean | undefined;
+  onPress?: (() => void) | undefined;
+  compact?: boolean | undefined;
 }) {
-  return (
-    <div className="rounded-2xl border border-border/40 bg-card/75 p-2.5 shadow-glass backdrop-blur-sm">
+  const content = (
+    <>
       <div className="flex items-center gap-1.5">
-        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground [&_svg]:size-3">
+        <span
+          className={cn(
+            "flex size-6 shrink-0 items-center justify-center [&_svg]:size-3",
+            pressed ? "bg-white/15 text-white" : "bg-muted text-muted-foreground",
+          )}
+        >
           {icon}
         </span>
-        <p className="truncate text-[11px] font-normal text-muted-foreground">{title}</p>
+        <p className={cn("truncate text-[11px] font-normal", pressed ? "text-white" : "text-muted-foreground")}>
+          {title}
+        </p>
       </div>
-      <p className={cn("mt-1 truncate font-medium leading-tight text-foreground", compact ? "text-sm" : "text-lg")}>
+      <p
+        className={cn(
+          "mt-1 truncate font-medium leading-tight",
+          compact ? "text-sm" : "text-lg",
+          pressed ? "text-white" : "text-foreground",
+        )}
+      >
         {value}
       </p>
-    </div>
+    </>
+  );
+
+  const classes = cn(
+    "rounded-none border p-2.5 text-start transition-colors duration-150",
+    pressed ? "border-primary bg-primary" : "border-border bg-card",
+  );
+
+  if (!to || !onPress) {
+    return <div className={classes}>{content}</div>;
+  }
+  return (
+    <button type="button" className={classes} onClick={onPress} aria-label={title}>
+      {content}
+    </button>
   );
 }
 

@@ -53,7 +53,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const title = TITLES[pathname] ?? "نظام الموارد البشرية";
-  const { isAdmin, initials } = useCurrentUser();
+  const { isAdmin } = useCurrentUser();
   const { companyName, notifications } = useHeaderData();
   const companyNameIsArabic = /[\u0600-\u06ff]/.test(companyName);
   const listRef = useRef<HTMLUListElement>(null);
@@ -151,14 +151,6 @@ export function MobileShell({ children }: { children: ReactNode }) {
               </div>
             </PopoverContent>
           </Popover>
-
-          <Link
-            to="/account"
-            aria-label="الحساب الشخصي"
-            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/35 bg-white/15 text-[12px] font-bold leading-none text-white transition-colors hover:bg-white/25"
-          >
-            {initials}
-          </Link>
         </div>
         </div>
       </header>
