@@ -14,8 +14,6 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   Cell,
   Line,
   LineChart,
