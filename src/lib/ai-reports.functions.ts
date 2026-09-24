@@ -71,3 +71,74 @@ export const generateSmartReport = createServerFn({ method: "POST" })
 
     return { ready: true as const, content };
   });
+
+/**
+ * محادثة المساعد الذكي (Gemini) لمناقشة تقارير الشهر.
+ * نفس القواعد الامنية: المفتاح يقرا على الخادم فقط، والاستدعاء للمدير فقط.
+ */
+export const chatWithAssistant = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        context: z.string(),
+        messages: z
+          .array(z.object({ role: z.enum(["user", "assistant"]), text: z.string() }))
+          .max(40),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: role, error: roleError } = await context.supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (roleError || !role) {
+      throw new Error("Forbidden: المساعد الذكي متاح للمدير فقط");
+    }
+
+    const apiKey = process.env["GEMINI_API_KEY"];
+    if (!apiKey) {
+      return {
+        ready: false as const,
+        message:
+          "المحادثة جاهزة بالكامل وتنتظر فقط اضافة مفتاح Gemini في اسرار الخلفية، وبعدها تعمل الرسائل مباشرة.",
+      };
+    }
+
+    const res = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+        body: JSON.stringify({
+          systemInstruction: {
+            parts: [
+              {
+                text: `انت مساعد موارد بشرية عربي. اجب بلغة عربية بسيطة وبدون تشكيل وبجمل قصيرة. اعتمد على هذه البيانات:\n${data.context}`,
+              },
+            ],
+          },
+          contents: data.messages.map((item) => ({
+            role: item.role === "user" ? "user" : "model",
+            parts: [{ text: item.text }],
+          })),
+        }),
+      },
+    );
+
+    if (!res.ok) {
+      return { ready: true as const, error: `Gemini error ${res.status}`, content: null };
+    }
+
+    const json = (await res.json()) as {
+      candidates?: { content?: { parts?: { text?: string }[] } }[];
+    };
+    return {
+      ready: true as const,
+      error: null,
+      content: json.candidates?.[0]?.content?.parts?.[0]?.text ?? "",
+    };
+  });

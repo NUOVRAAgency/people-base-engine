@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
   Building2,
@@ -11,14 +11,14 @@ import {
   FileSearch,
   HandCoins,
   LoaderCircle,
-  Send,
   TrendingDown,
   UserRound,
   Wallet,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
+
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { generateSmartReport } from "@/lib/ai-reports.functions";
@@ -468,7 +468,6 @@ function InsightsTab({ month, summary }: { month: string; summary: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [points, setPoints] = useState<string[]>([]);
-  const [question, setQuestion] = useState("");
 
   async function ask(prompt: string) {
     setBusy(true);
@@ -496,13 +495,6 @@ function InsightsTab({ month, summary }: { month: string; summary: string }) {
     }
   }
 
-  function submitQuestion(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const value = question.trim();
-    if (!value || busy) return;
-    setQuestion("");
-    void ask(`${summary}\n\nسؤال المدير: ${value}\nاجب بالعربية بنقاط قصيرة وواضحة بدون تشكيل.`);
-  }
 
   return (
     <section className="space-y-4">
@@ -539,17 +531,21 @@ function InsightsTab({ month, summary }: { month: string; summary: string }) {
         )}
       </Panel>
 
-      <form onSubmit={submitQuestion} className="flex items-center gap-2 rounded-2xl border border-border/60 bg-card/75 p-2 shadow-glass backdrop-blur-sm">
-        <Input
-          value={question}
-          onChange={(event) => setQuestion(event.target.value)}
-          placeholder="اسال عن تقارير هذا الشهر"
-          className="h-11 flex-1 rounded-xl border-0 bg-transparent shadow-none focus-visible:ring-0"
-        />
-        <Button type="submit" size="icon" className="size-11 shrink-0 rounded-xl" disabled={busy || !question.trim()} aria-label="ارسال السؤال">
-          <Send className="h-4 w-4" aria-hidden />
-        </Button>
-      </form>
+      <Link
+        to="/assistant"
+        search={{ month }}
+        className="group flex items-center gap-3 rounded-2xl bg-gradient-to-b from-[#1f6bff] to-[#0c4bbc] p-4 text-primary-foreground shadow-[0_10px_24px_-8px_rgba(12,75,188,0.65),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform active:translate-y-0.5 md:hover:-translate-y-0.5"
+      >
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/15 text-base font-medium tracking-wide shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+          AI
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-medium">المساعد الذكي للموارد البشرية</span>
+          <span className="block text-[12px] leading-[1.7] text-primary-foreground/80">افتح المحادثة ونناقش بيانات الشهر نصا وصوتا</span>
+        </span>
+        <ChevronLeft className="h-5 w-5 shrink-0 text-primary-foreground/80" aria-hidden />
+      </Link>
+
     </section>
   );
 }
