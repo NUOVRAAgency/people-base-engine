@@ -468,7 +468,6 @@ function InsightsTab({ month, summary }: { month: string; summary: string }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [points, setPoints] = useState<string[]>([]);
-  const [question, setQuestion] = useState("");
 
   async function ask(prompt: string) {
     setBusy(true);
