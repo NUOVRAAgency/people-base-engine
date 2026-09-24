@@ -248,37 +248,48 @@ function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-3 pb-6">
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border/40 bg-card/75 p-3 shadow-glass backdrop-blur-sm">
+      <header className="rounded-none border border-border/40 bg-card/75 px-3 py-2">
         <div className="min-w-0">
-          <h2 className="truncate text-base font-medium leading-[1.6] text-foreground md:text-lg">
-            أهلا بك {fullName.trim()}
-          </h2>
+          <h2 className="truncate text-base font-medium leading-[1.6] text-foreground md:text-lg">أهلا بك</h2>
           <p className="mt-0.5 truncate text-[12px] leading-[1.7] text-muted-foreground md:text-sm">
             {dateFormatter.format(today)}
           </p>
         </div>
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <UserRound className="h-5 w-5" aria-hidden />
-        </span>
       </header>
 
       <section className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-        <FeatureCard title="إجمالي الموظفين" value={numberFormatter.format(employees.length)} />
-        <StatCard
-          icon={<CheckCircle2 className="h-3 w-3" aria-hidden />}
+        <KpiCard
+          title="إجمالي الموظفين"
+          value={numberFormatter.format(employees.length)}
+          icon={<Users className="h-3 w-3" aria-hidden />}
+          to="/employees"
+          pressed={pressed === "/employees"}
+          onPress={() => openSection("/employees")}
+        />
+        <KpiCard
           title="الحاضرون اليوم"
           value={numberFormatter.format(presentToday)}
+          icon={<CalendarCheck className="h-3 w-3" aria-hidden />}
+          to="/attendance"
+          pressed={pressed === "/attendance"}
+          onPress={() => openSection("/attendance")}
         />
-        <StatCard
-          icon={<Plane className="h-3 w-3" aria-hidden />}
+        <KpiCard
           title="في إجازة اليوم"
           value={numberFormatter.format(onLeaveToday)}
+          icon={<Plane className="h-3 w-3" aria-hidden />}
+          to="/leaves"
+          pressed={pressed === "/leaves"}
+          onPress={() => openSection("/leaves")}
         />
-        <StatCard
-          icon={<Wallet className="h-3 w-3" aria-hidden />}
+        <KpiCard
           title={monthFormatter.format(new Date(`${month}T00:00:00`))}
           value={payrollStatus}
+          icon={<Wallet className="h-3 w-3" aria-hidden />}
+          to={isAdmin ? "/payroll" : undefined}
           compact
+          pressed={pressed === "/payroll"}
+          onPress={isAdmin ? () => openSection("/payroll") : undefined}
         />
       </section>
 
