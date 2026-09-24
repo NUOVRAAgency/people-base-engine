@@ -176,17 +176,6 @@ function DashboardPage() {
       .slice(0, 5);
   }, [employees]);
 
-  const salaryByDepartment = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const row of payroll) {
-      const key = employeeById.get(row.employee_id)?.department?.trim() || "بدون قسم";
-      map.set(key, (map.get(key) ?? 0) + Number(row.net_salary ?? 0));
-    }
-    return [...map.entries()]
-      .map(([name, total]) => ({ name, total }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 6);
-  }, [payroll, employeeById]);
 
   const donutData = useMemo(
     () => (departments.length > 0 ? departments : SAMPLE_DEPARTMENTS),
