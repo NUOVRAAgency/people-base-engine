@@ -204,7 +204,7 @@ function PayrollPage() {
   }, [lines]);
 
   const sheetStatus = useMemo(() => {
-    if (!rows.length) return { key: "none", label: "لم يُنشأ بعد", tone: "bg-muted text-muted-foreground" };
+    if (!rows.length) return { key: "none", label: "لم ينشأ بعد", tone: "bg-muted text-muted-foreground" };
     if (rows.every((row) => row.status === "approved")) return { key: "approved", label: "معتمد ومصروف", tone: "bg-success/12 text-success" };
     if (rows.some((row) => row.status === "review")) return { key: "review", label: "قيد المراجعة", tone: "bg-warning/20 text-warning-foreground" };
     return { key: "draft", label: "مسودة", tone: "bg-primary/10 text-primary" };
@@ -224,7 +224,7 @@ function PayrollPage() {
     const missing = employees.filter((employee) => !rows.some((row) => row.employee_id === employee.id));
     if (!missing.length) {
       setBusy("");
-      setFeedback({ kind: "error", message: "مسير هذا الشهر مُولَّد بالكامل لجميع الموظفين" });
+      setFeedback({ kind: "error", message: "مسير هذا الشهر مكتمل لجميع الموظفين" });
       return;
     }
     const previous = new Date(`${month}T00:00:00`);
@@ -249,7 +249,7 @@ function PayrollPage() {
     const { error } = await supabase.from("payroll").insert(payload);
     setBusy("");
     if (error) {
-      setFeedback({ kind: "error", message: "تعذّر توليد المسير. صلاحية الرواتب للمدير فقط." });
+      setFeedback({ kind: "error", message: "تعذر توليد المسير. صلاحية الرواتب للمدير فقط." });
       return;
     }
     setFeedback({ kind: "success", message: `تم توليد مسير ${monthLabel(month)} لعدد ${numberFormatter.format(payload.length)} موظف` });
@@ -259,14 +259,14 @@ function PayrollPage() {
   async function approveSheet() {
     setFeedback(null);
     if (!rows.length) {
-      setFeedback({ kind: "error", message: "ولّد مسير الشهر أولاً" });
+      setFeedback({ kind: "error", message: "ولد مسير الشهر اولا" });
       return;
     }
     setBusy("approve");
     const { error } = await supabase.from("payroll").update({ status: "approved" }).eq("month", month);
     setBusy("");
     if (error) {
-      setFeedback({ kind: "error", message: "تعذّر اعتماد المسير. حاول مرة أخرى." });
+      setFeedback({ kind: "error", message: "تعذر اعتماد المسير. حاول مرة اخرى." });
       return;
     }
     setFeedback({ kind: "success", message: "تم اعتماد المسير وتسجيل صرف الرواتب" });
@@ -391,7 +391,7 @@ function PayrollPage() {
           {loading ? (
             <p className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card p-10 text-sm text-muted-foreground shadow-glass">
               <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
-              جارٍ تحميل بيانات الرواتب…
+              جاري تحميل بيانات الرواتب
             </p>
           ) : tab === "sheet" ? (
             <section className="space-y-3">
