@@ -9,7 +9,7 @@ import {
   HandCoins,
   LoaderCircle,
   Printer,
-  Sparkles,
+  Calculator,
   Trash2,
   UserRound,
   Wallet,
@@ -204,7 +204,7 @@ function PayrollPage() {
   }, [lines]);
 
   const sheetStatus = useMemo(() => {
-    if (!rows.length) return { key: "none", label: "لم يُنشأ بعد", tone: "bg-muted text-muted-foreground" };
+    if (!rows.length) return { key: "none", label: "لم ينشأ بعد", tone: "bg-muted text-muted-foreground" };
     if (rows.every((row) => row.status === "approved")) return { key: "approved", label: "معتمد ومصروف", tone: "bg-success/12 text-success" };
     if (rows.some((row) => row.status === "review")) return { key: "review", label: "قيد المراجعة", tone: "bg-warning/20 text-warning-foreground" };
     return { key: "draft", label: "مسودة", tone: "bg-primary/10 text-primary" };
@@ -224,7 +224,7 @@ function PayrollPage() {
     const missing = employees.filter((employee) => !rows.some((row) => row.employee_id === employee.id));
     if (!missing.length) {
       setBusy("");
-      setFeedback({ kind: "error", message: "مسير هذا الشهر مُولَّد بالكامل لجميع الموظفين" });
+      setFeedback({ kind: "error", message: "مسير هذا الشهر مكتمل لجميع الموظفين" });
       return;
     }
     const previous = new Date(`${month}T00:00:00`);
@@ -249,7 +249,7 @@ function PayrollPage() {
     const { error } = await supabase.from("payroll").insert(payload);
     setBusy("");
     if (error) {
-      setFeedback({ kind: "error", message: "تعذّر توليد المسير. صلاحية الرواتب للمدير فقط." });
+      setFeedback({ kind: "error", message: "تعذر توليد المسير. صلاحية الرواتب للمدير فقط." });
       return;
     }
     setFeedback({ kind: "success", message: `تم توليد مسير ${monthLabel(month)} لعدد ${numberFormatter.format(payload.length)} موظف` });
@@ -259,14 +259,14 @@ function PayrollPage() {
   async function approveSheet() {
     setFeedback(null);
     if (!rows.length) {
-      setFeedback({ kind: "error", message: "ولّد مسير الشهر أولاً" });
+      setFeedback({ kind: "error", message: "ولد مسير الشهر اولا" });
       return;
     }
     setBusy("approve");
     const { error } = await supabase.from("payroll").update({ status: "approved" }).eq("month", month);
     setBusy("");
     if (error) {
-      setFeedback({ kind: "error", message: "تعذّر اعتماد المسير. حاول مرة أخرى." });
+      setFeedback({ kind: "error", message: "تعذر اعتماد المسير. حاول مرة اخرى." });
       return;
     }
     setFeedback({ kind: "success", message: "تم اعتماد المسير وتسجيل صرف الرواتب" });
@@ -342,7 +342,7 @@ function PayrollPage() {
 
           <section className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 shadow-glass sm:flex-row sm:items-center">
             <Button type="button" className="h-11 flex-1 rounded-xl text-sm font-bold" onClick={() => void generateSheet()} disabled={busy === "generate"}>
-              {busy === "generate" ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <Sparkles className="h-4 w-4" aria-hidden />}
+              {busy === "generate" ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <Calculator className="h-4 w-4" aria-hidden />}
               توليد مسير رواتب الشهر
             </Button>
             <Button
@@ -391,7 +391,7 @@ function PayrollPage() {
           {loading ? (
             <p className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card p-10 text-sm text-muted-foreground shadow-glass">
               <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
-              جارٍ تحميل بيانات الرواتب…
+              جاري تحميل بيانات الرواتب
             </p>
           ) : tab === "sheet" ? (
             <section className="space-y-3">
@@ -404,8 +404,8 @@ function PayrollPage() {
 
               {!visibleLines.length ? (
                 <EmptyState
-                  title={rows.length ? "لا نتائج مطابقة للبحث" : `لم يُولَّد مسير ${monthLabel(month)} بعد`}
-                  detail={rows.length ? "جرّب اسماً أو رقماً وظيفياً آخر" : "اضغط «توليد مسير رواتب الشهر» لإنشاء المسير من بيانات الموظفين النشطين"}
+                  title={rows.length ? "لا نتائج مطابقة" : "لا يوجد مسير لهذا الشهر"}
+                  detail={rows.length ? "جرب اسما او رقما اخر" : "اضغط زر التوليد بالاعلى للبدء"}
                 />
               ) : (
                 <>
@@ -870,13 +870,15 @@ function KpiCard({
   badgeClass?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-glass">
-      <span className={cn("flex size-10 items-center justify-center rounded-full bg-muted", tone)}>{icon}</span>
-      <p className="mt-3 text-xs leading-[1.7] text-muted-foreground">{title}</p>
+    <div className="rounded-2xl border border-border/40 bg-card/75 px-3 py-2 shadow-glass backdrop-blur-sm">
+      <div className="flex items-center gap-2">
+        <span className={cn("flex size-6 shrink-0 items-center justify-center rounded-full bg-muted [&_svg]:size-3.5", tone)}>{icon}</span>
+        <p className="truncate text-[11px] font-normal leading-tight text-muted-foreground">{title}</p>
+      </div>
       {badgeClass ? (
-        <span className={cn("mt-1.5 inline-block rounded-full px-3 py-1 text-xs font-bold", badgeClass)}>{value}</span>
+        <span className={cn("mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-medium", badgeClass)}>{value}</span>
       ) : (
-        <p className={cn("mt-1 text-base font-bold leading-[1.6]", tone)}>{value}</p>
+        <p className={cn("mt-1 truncate text-sm font-medium leading-tight", tone)}>{value}</p>
       )}
     </div>
   );
