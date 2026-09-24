@@ -54,7 +54,19 @@ const monthFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { month: "long
 const weekdayFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { weekday: "short" });
 const numberFormatter = new Intl.NumberFormat("en-US");
 
-const CHART_COLORS = ["#1f6bff", "#4b8dff", "#86b2ff", "#b9d2ff", "#dbe7ff"];
+const CHART_COLORS = ["#1f6bff", "#7c5cff", "#00b8a9", "#ff7a45", "#f2427f", "#17b26a", "#12a3e0", "#f5b544"];
+
+const SAMPLE_DEPARTMENTS = [
+  { name: "تقنية المعلومات", count: 8 },
+  { name: "المبيعات", count: 6 },
+  { name: "التسويق", count: 4 },
+  { name: "الموارد البشرية", count: 3 },
+  { name: "المالية", count: 3 },
+  { name: "العمليات", count: 2 },
+];
+
+const YEAR_MONTHS = ["يناير", "فبراير", "مارس", "ابريل", "مايو", "يونيو", "يوليو", "اغسطس", "سبتمبر", "اكتوبر", "نوفمبر", "ديسمبر"];
+const SAMPLE_CURVE = [0.42, 0.48, 0.52, 0.58, 0.61, 0.68, 0.72, 0.79, 0.85, 0.9, 0.95, 1];
 
 const LEAVE_LABELS: Record<string, string> = {
   annual: "سنوية",
