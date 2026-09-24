@@ -203,7 +203,6 @@ function DashboardPage() {
     .reduce((sum, row) => sum + Number(row.net_salary ?? 0), 0);
   const payrollStatus = payroll[0]?.status ? (PAYROLL_STATUS[payroll[0].status] ?? "مسودة") : "لم يولد بعد";
   const disbursedRatio = totalNet > 0 ? Math.round((approvedNet / totalNet) * 100) : 0;
-  const attendanceRate = employees.length > 0 ? Math.round((presentToday / employees.length) * 100) : 0;
 
   const decideLeave = useCallback(
     async (id: string, status: "approved" | "rejected") => {
@@ -226,10 +225,10 @@ function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-3 pb-6">
-      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border/40 bg-card/75 p-4 shadow-glass backdrop-blur-sm">
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-border/40 bg-card/75 p-3 shadow-glass backdrop-blur-sm">
         <div className="min-w-0">
-          <h2 className="truncate text-lg font-medium leading-[1.6] text-foreground md:text-xl">
-            أهلا بك، {/[\u0600-\u06ff]/.test(fullName) ? fullName : "مدير النظام"} 👋
+          <h2 className="truncate text-base font-medium leading-[1.6] text-foreground md:text-lg">
+            أهلا بك {fullName.trim()}
           </h2>
           <p className="mt-0.5 truncate text-[12px] leading-[1.7] text-muted-foreground md:text-sm">
             {dateFormatter.format(today)}
@@ -240,124 +239,115 @@ function DashboardPage() {
         </span>
       </header>
 
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
-        <section className="grid grid-cols-2 gap-3">
-          <FeatureCard
-            title="إجمالي الموظفين"
-            value={numberFormatter.format(employees.length)}
-            caption="الموظفون النشطون"
-          />
-          <StatCard
-            icon={<CheckCircle2 className="h-4 w-4" aria-hidden />}
-            title="الحاضرون اليوم"
-            value={numberFormatter.format(presentToday)}
-            caption={`نسبة الحضور ${attendanceRate}%`}
-          />
-          <StatCard
-            icon={<Plane className="h-4 w-4" aria-hidden />}
-            title="في إجازة اليوم"
-            value={numberFormatter.format(onLeaveToday)}
-            caption="إجازات معتمدة سارية"
-          />
-          <StatCard
-            icon={<Wallet className="h-4 w-4" aria-hidden />}
-            title={monthFormatter.format(new Date(`${month}T00:00:00`))}
-            value={payrollStatus}
-            caption="حالة مسير الرواتب"
-            compact
-          />
-        </section>
+      <section className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+        <FeatureCard title="إجمالي الموظفين" value={numberFormatter.format(employees.length)} />
+        <StatCard
+          icon={<CheckCircle2 className="h-3 w-3" aria-hidden />}
+          title="الحاضرون اليوم"
+          value={numberFormatter.format(presentToday)}
+        />
+        <StatCard
+          icon={<Plane className="h-3 w-3" aria-hidden />}
+          title="في إجازة اليوم"
+          value={numberFormatter.format(onLeaveToday)}
+        />
+        <StatCard
+          icon={<Wallet className="h-3 w-3" aria-hidden />}
+          title={monthFormatter.format(new Date(`${month}T00:00:00`))}
+          value={payrollStatus}
+          compact
+        />
+      </section>
 
-        <Panel title="نظرة عامة على الأقسام" action="اليوم">
-          {departments.length === 0 ? (
-            <Empty text="لا يوجد موظفون بعد" />
-          ) : (
-            <div className="grid items-center gap-3 sm:grid-cols-[minmax(0,150px)_minmax(0,1fr)]">
-              <div className="relative mx-auto h-[150px] w-[150px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={departments}
-                      dataKey="count"
-                      nameKey="name"
-                      innerRadius={52}
-                      outerRadius={72}
-                      paddingAngle={2}
-                      stroke="none"
-                    >
-                      {departments.map((item, index) => (
-                        <Cell key={item.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[10px] text-muted-foreground">إجمالي الموظفين</span>
-                  <span className="text-xl font-medium text-foreground">{numberFormatter.format(employees.length)}</span>
-                </div>
+      <Panel title="الموظفون حسب الأقسام" action="اليوم">
+        {departments.length === 0 ? (
+          <Empty text="لا يوجد موظفون بعد" />
+        ) : (
+          <div className="grid items-center gap-3 sm:grid-cols-[minmax(0,150px)_minmax(0,1fr)]">
+            <div className="relative mx-auto h-[150px] w-[150px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={departments}
+                    dataKey="count"
+                    nameKey="name"
+                    innerRadius={52}
+                    outerRadius={72}
+                    paddingAngle={2}
+                    stroke="none"
+                  >
+                    {departments.map((item, index) => (
+                      <Cell key={item.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-[10px] text-muted-foreground">إجمالي الموظفين</span>
+                <span className="text-xl font-medium text-foreground">{numberFormatter.format(employees.length)}</span>
               </div>
-              <ul className="space-y-1.5">
-                {departments.map((item, index) => {
-                  const percent = employees.length > 0 ? Math.round((item.count / employees.length) * 100) : 0;
-                  return (
-                    <li
-                      key={item.name}
-                      className="flex items-center gap-2 border-b border-border/40 pb-1.5 last:border-0 last:pb-0"
-                    >
-                      <span
-                        className="h-7 w-1 shrink-0 rounded-full"
-                        style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[12px] text-foreground">{item.name}</span>
-                        <span className="block text-[11px] text-muted-foreground">{numberFormatter.format(item.count)}</span>
-                      </span>
-                      <span className="shrink-0 rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                        {percent}%
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
             </div>
-          )}
-        </Panel>
-      </div>
+            <ul className="space-y-1.5">
+              {departments.map((item, index) => {
+                const percent = employees.length > 0 ? Math.round((item.count / employees.length) * 100) : 0;
+                return (
+                  <li
+                    key={item.name}
+                    className="flex items-center gap-2 border-b border-border/40 pb-1.5 last:border-0 last:pb-0"
+                  >
+                    <span
+                      className="h-7 w-1 shrink-0 rounded-full"
+                      style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[12px] text-foreground">{item.name}</span>
+                      <span className="block text-[11px] text-muted-foreground">{numberFormatter.format(item.count)}</span>
+                    </span>
+                    <span className="shrink-0 rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                      {percent}%
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+      </Panel>
+
+      <Panel title="توزيع الرواتب حسب الأقسام" action={monthFormatter.format(new Date(`${month}T00:00:00`))}>
+        {salaryByDepartment.length === 0 ? (
+          <Empty text="لا يوجد مسير رواتب لهذا الشهر" />
+        ) : (
+          <div className="h-[220px] w-full" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={salaryByDepartment} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="barBlue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#1f6bff" stopOpacity={0.95} />
+                    <stop offset="100%" stopColor="#1f6bff" stopOpacity={0.25} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#7a8699" }} />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  width={54}
+                  tick={{ fontSize: 10, fill: "#9aa4b4" }}
+                  tickFormatter={(value: number) => numberFormatter.format(value)}
+                />
+                <Tooltip
+                  cursor={{ fill: "rgba(31,107,255,0.06)" }}
+                  formatter={(value: number) => [`${numberFormatter.format(value)} ر.ي`, "الإجمالي"]}
+                  contentStyle={{ borderRadius: 12, border: "1px solid rgba(0,0,0,0.06)", fontSize: 12 }}
+                />
+                <Bar dataKey="total" fill="url(#barBlue)" radius={[8, 8, 0, 0]} maxBarSize={56} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </Panel>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        <Panel title="توزيع الرواتب حسب الأقسام" action={monthFormatter.format(new Date(`${month}T00:00:00`))}>
-          {salaryByDepartment.length === 0 ? (
-            <Empty text="لا يوجد مسير رواتب لهذا الشهر" />
-          ) : (
-            <div className="h-[220px] w-full" dir="ltr">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={salaryByDepartment} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="barBlue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#1f6bff" stopOpacity={0.95} />
-                      <stop offset="100%" stopColor="#1f6bff" stopOpacity={0.25} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#7a8699" }} />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    width={54}
-                    tick={{ fontSize: 10, fill: "#9aa4b4" }}
-                    tickFormatter={(value: number) => numberFormatter.format(value)}
-                  />
-                  <Tooltip
-                    cursor={{ fill: "rgba(31,107,255,0.06)" }}
-                    formatter={(value: number) => [`${numberFormatter.format(value)} ر.ي`, "الإجمالي"]}
-                    contentStyle={{ borderRadius: 12, border: "1px solid rgba(0,0,0,0.06)", fontSize: 12 }}
-                  />
-                  <Bar dataKey="total" fill="url(#barBlue)" radius={[8, 8, 0, 0]} maxBarSize={56} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </Panel>
-
         <Panel title="الحضور مقابل الإجازات" action="آخر 7 أيام">
           <div className="mb-2 flex items-center gap-4">
             <Legend color="#1f6bff" label="الحضور" />
@@ -380,70 +370,6 @@ function DashboardPage() {
               </LineChart>
             </ResponsiveContainer>
           </div>
-        </Panel>
-      </div>
-
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <Panel title="طلبات الإجازة المعلقة" action={`${pendingLeaves.length} طلب`}>
-          {pendingLeaves.length === 0 ? (
-            <Empty text="لا توجد طلبات معلقة" />
-          ) : (
-            <ul className="space-y-2">
-              {pendingLeaves.slice(0, 5).map((row) => {
-                const employee = employeeById.get(row.employee_id);
-                return (
-                  <li
-                    key={row.id}
-                    className="flex items-center gap-3 rounded-xl border border-border/40 bg-background/40 p-2.5"
-                  >
-                    <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                      <UserRound className="h-4 w-4" aria-hidden />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-medium text-foreground">
-                        {employee?.full_name ?? "موظف"}
-                      </span>
-                      <span className="block truncate text-[11px] leading-[1.7] text-muted-foreground">
-                        {employee?.position || "بدون مسمى"} · {LEAVE_LABELS[row.leave_type] ?? "اجازة"} ·{" "}
-                        {numberFormatter.format(daysBetween(row.start_date, row.end_date))} أيام
-                      </span>
-                    </span>
-                    <span className="hidden shrink-0 rounded-md bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-600 sm:block">
-                      معلق
-                    </span>
-                    {isAdmin ? (
-                      <span className="flex shrink-0 items-center gap-1.5">
-                        <button
-                          type="button"
-                          disabled={saving === row.id}
-                          onClick={() => void decideLeave(row.id, "approved")}
-                          className="flex size-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
-                          aria-label="اعتماد"
-                        >
-                          <Check className="h-4 w-4" aria-hidden />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={saving === row.id}
-                          onClick={() => void decideLeave(row.id, "rejected")}
-                          className="flex size-8 items-center justify-center rounded-full bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20 disabled:opacity-50"
-                          aria-label="رفض"
-                        >
-                          <X className="h-4 w-4" aria-hidden />
-                        </button>
-                      </span>
-                    ) : null}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-          <Link
-            to="/leaves"
-            className="mt-2.5 block rounded-xl border border-border/40 bg-background/40 py-2 text-center text-[12px] text-primary transition-colors hover:bg-muted/60"
-          >
-            عرض كل الطلبات
-          </Link>
         </Panel>
 
         <Panel title="صرف الرواتب" action={monthFormatter.format(new Date(`${month}T00:00:00`))}>
@@ -477,6 +403,68 @@ function DashboardPage() {
         </Panel>
       </div>
 
+      <Panel title="طلبات الإجازة المعلقة" action={`${pendingLeaves.length} طلب`}>
+        {pendingLeaves.length === 0 ? (
+          <Empty text="لا توجد طلبات معلقة" />
+        ) : (
+          <ul className="space-y-2">
+            {pendingLeaves.slice(0, 5).map((row) => {
+              const employee = employeeById.get(row.employee_id);
+              return (
+                <li
+                  key={row.id}
+                  className="flex items-center gap-3 rounded-xl border border-border/40 bg-background/40 p-2.5"
+                >
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                    <UserRound className="h-4 w-4" aria-hidden />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[13px] font-medium text-foreground">
+                      {employee?.full_name ?? "موظف"}
+                    </span>
+                    <span className="block truncate text-[11px] leading-[1.7] text-muted-foreground">
+                      {employee?.position || "بدون مسمى"} · {LEAVE_LABELS[row.leave_type] ?? "اجازة"} ·{" "}
+                      {numberFormatter.format(daysBetween(row.start_date, row.end_date))} أيام
+                    </span>
+                  </span>
+                  <span className="hidden shrink-0 rounded-md bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-600 sm:block">
+                    معلق
+                  </span>
+                  {isAdmin ? (
+                    <span className="flex shrink-0 items-center gap-1.5">
+                      <button
+                        type="button"
+                        disabled={saving === row.id}
+                        onClick={() => void decideLeave(row.id, "approved")}
+                        className="flex size-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
+                        aria-label="اعتماد"
+                      >
+                        <Check className="h-4 w-4" aria-hidden />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={saving === row.id}
+                        onClick={() => void decideLeave(row.id, "rejected")}
+                        className="flex size-8 items-center justify-center rounded-full bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20 disabled:opacity-50"
+                        aria-label="رفض"
+                      >
+                        <X className="h-4 w-4" aria-hidden />
+                      </button>
+                    </span>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        <Link
+          to="/leaves"
+          className="mt-2.5 block rounded-xl border border-border/40 bg-background/40 py-2 text-center text-[12px] text-primary transition-colors hover:bg-muted/60"
+        >
+          عرض كل الطلبات
+        </Link>
+      </Panel>
+
       {!roleLoading && !isAdmin ? (
         <p className="rounded-2xl border border-border/40 bg-card/75 p-4 text-center text-xs leading-[1.8] text-muted-foreground shadow-glass backdrop-blur-sm">
           بعض الاجراءات متاحة لمدير النظام فقط.
@@ -486,17 +474,16 @@ function DashboardPage() {
   );
 }
 
-function FeatureCard({ title, value, caption }: { title: string; value: string; caption: string }) {
+function FeatureCard({ title, value }: { title: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-gradient-to-b from-[#1f6bff] to-[#0c4bbc] p-3.5 text-primary-foreground shadow-[0_12px_26px_-12px_rgba(12,75,188,0.7),inset_0_1px_0_rgba(255,255,255,0.3)]">
-      <div className="flex items-center gap-2">
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/15">
-          <Users className="h-3.5 w-3.5" aria-hidden />
+    <div className="rounded-2xl bg-gradient-to-b from-[#1f6bff] to-[#0c4bbc] p-2.5 text-primary-foreground shadow-[0_12px_26px_-12px_rgba(12,75,188,0.7),inset_0_1px_0_rgba(255,255,255,0.3)]">
+      <div className="flex items-center gap-1.5">
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white/15">
+          <Users className="h-3 w-3" aria-hidden />
         </span>
-        <p className="truncate text-[12px] font-normal">{title}</p>
+        <p className="truncate text-[11px] font-normal">{title}</p>
       </div>
-      <p className="mt-2 text-2xl font-medium leading-tight">{value}</p>
-      <p className="mt-0.5 text-[11px] text-primary-foreground/75">{caption}</p>
+      <p className="mt-1 truncate text-lg font-medium leading-tight">{value}</p>
     </div>
   );
 }
@@ -505,27 +492,24 @@ function StatCard({
   icon,
   title,
   value,
-  caption,
   compact,
 }: {
   icon: ReactNode;
   title: string;
   value: string;
-  caption: string;
   compact?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-border/40 bg-card/75 p-3.5 shadow-glass backdrop-blur-sm">
-      <div className="flex items-center gap-2">
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground [&_svg]:size-3.5">
+    <div className="rounded-2xl border border-border/40 bg-card/75 p-2.5 shadow-glass backdrop-blur-sm">
+      <div className="flex items-center gap-1.5">
+        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground [&_svg]:size-3">
           {icon}
         </span>
-        <p className="truncate text-[12px] font-normal text-muted-foreground">{title}</p>
+        <p className="truncate text-[11px] font-normal text-muted-foreground">{title}</p>
       </div>
-      <p className={cn("mt-2 truncate font-medium leading-tight text-foreground", compact ? "text-base" : "text-2xl")}>
+      <p className={cn("mt-1 truncate font-medium leading-tight text-foreground", compact ? "text-sm" : "text-lg")}>
         {value}
       </p>
-      <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{caption}</p>
     </div>
   );
 }
