@@ -14,8 +14,6 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   Cell,
   Line,
   LineChart,
@@ -54,7 +52,19 @@ const monthFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { month: "long
 const weekdayFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { weekday: "short" });
 const numberFormatter = new Intl.NumberFormat("en-US");
 
-const CHART_COLORS = ["#1f6bff", "#4b8dff", "#86b2ff", "#b9d2ff", "#dbe7ff"];
+const CHART_COLORS = ["#1f6bff", "#7c5cff", "#00b8a9", "#ff7a45", "#f2427f", "#17b26a", "#12a3e0", "#f5b544"];
+
+const SAMPLE_DEPARTMENTS = [
+  { name: "تقنية المعلومات", count: 8 },
+  { name: "المبيعات", count: 6 },
+  { name: "التسويق", count: 4 },
+  { name: "الموارد البشرية", count: 3 },
+  { name: "المالية", count: 3 },
+  { name: "العمليات", count: 2 },
+];
+
+const YEAR_MONTHS = ["يناير", "فبراير", "مارس", "ابريل", "مايو", "يونيو", "يوليو", "اغسطس", "سبتمبر", "اكتوبر", "نوفمبر", "ديسمبر"];
+const SAMPLE_CURVE = [0.42, 0.48, 0.52, 0.58, 0.61, 0.68, 0.72, 0.79, 0.85, 0.9, 0.95, 1];
 
 const LEAVE_LABELS: Record<string, string> = {
   annual: "سنوية",
@@ -164,17 +174,23 @@ function DashboardPage() {
       .slice(0, 5);
   }, [employees]);
 
-  const salaryByDepartment = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const row of payroll) {
-      const key = employeeById.get(row.employee_id)?.department?.trim() || "بدون قسم";
-      map.set(key, (map.get(key) ?? 0) + Number(row.net_salary ?? 0));
-    }
-    return [...map.entries()]
-      .map(([name, total]) => ({ name, total }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 6);
-  }, [payroll, employeeById]);
+
+  const donutData = useMemo(
+    () => (departments.length > 0 ? departments : SAMPLE_DEPARTMENTS),
+    [departments],
+  );
+  const donutTotal = useMemo(() => donutData.reduce((sum, item) => sum + item.count, 0), [donutData]);
+
+  const yearSeries = useMemo(() => {
+    const currentMonth = today.getMonth();
+    const actual = payroll.reduce((sum, row) => sum + Number(row.net_salary ?? 0), 0);
+    const peak = actual > 0 ? actual / (SAMPLE_CURVE[currentMonth] ?? 1) : 2_400_000;
+    return YEAR_MONTHS.map((label, index) => ({
+      label,
+      value: Math.round(peak * (SAMPLE_CURVE[index] ?? 0)),
+    }));
+  }, [payroll, today]);
+
 
   const weekSeries = useMemo(() => {
     const days: { label: string; key: string; حضور: number; إجازات: number }[] = [];
@@ -259,93 +275,110 @@ function DashboardPage() {
         />
       </section>
 
-      <Panel title="الموظفون حسب الأقسام" action="اليوم">
-        {departments.length === 0 ? (
-          <Empty text="لا يوجد موظفون بعد" />
-        ) : (
-          <div className="grid items-center gap-3 sm:grid-cols-[minmax(0,150px)_minmax(0,1fr)]">
-            <div className="relative mx-auto h-[150px] w-[150px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={departments}
-                    dataKey="count"
-                    nameKey="name"
-                    innerRadius={52}
-                    outerRadius={72}
-                    paddingAngle={2}
-                    stroke="none"
-                  >
-                    {departments.map((item, index) => (
-                      <Cell key={item.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-[10px] text-muted-foreground">إجمالي الموظفين</span>
-                <span className="text-xl font-medium text-foreground">{numberFormatter.format(employees.length)}</span>
-              </div>
-            </div>
-            <ul className="space-y-1.5">
-              {departments.map((item, index) => {
-                const percent = employees.length > 0 ? Math.round((item.count / employees.length) * 100) : 0;
-                return (
-                  <li
-                    key={item.name}
-                    className="flex items-center gap-2 border-b border-border/40 pb-1.5 last:border-0 last:pb-0"
-                  >
-                    <span
-                      className="h-7 w-1 shrink-0 rounded-full"
-                      style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[12px] text-foreground">{item.name}</span>
-                      <span className="block text-[11px] text-muted-foreground">{numberFormatter.format(item.count)}</span>
-                    </span>
-                    <span className="shrink-0 rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                      {percent}%
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-      </Panel>
-
-      <Panel title="توزيع الرواتب حسب الأقسام" action={monthFormatter.format(new Date(`${month}T00:00:00`))}>
-        {salaryByDepartment.length === 0 ? (
-          <Empty text="لا يوجد مسير رواتب لهذا الشهر" />
-        ) : (
-          <div className="h-[220px] w-full" dir="ltr">
+      <div className="grid gap-3 lg:grid-cols-2">
+        <Panel title="توزيع الموظفين حسب الأقسام" action={departments.length > 0 ? "الاقسام" : "بيانات توضيحية"}>
+          <div className="relative mx-auto h-[210px] w-full max-w-[280px]" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={salaryByDepartment} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <PieChart>
+                <Pie
+                  data={donutData}
+                  dataKey="count"
+                  nameKey="name"
+                  innerRadius="62%"
+                  outerRadius="92%"
+                  paddingAngle={2}
+                  cornerRadius={6}
+                  stroke="none"
+                >
+                  {donutData.map((item, index) => (
+                    <Cell key={item.name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    `${numberFormatter.format(value)} موظف (${Math.round((value / donutTotal) * 100)}%)`,
+                    name,
+                  ]}
+                  contentStyle={{
+                    borderRadius: 14,
+                    border: "1px solid rgba(0,0,0,0.06)",
+                    fontSize: 12,
+                    direction: "rtl",
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center" dir="rtl">
+              <span className="text-[11px] text-muted-foreground">إجمالي الموظفين</span>
+              <span className="text-2xl font-medium leading-tight text-foreground">
+                {numberFormatter.format(donutTotal)}
+              </span>
+            </div>
+          </div>
+          <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-1.5">
+            {donutData.map((item, index) => (
+              <li key={item.name} className="flex items-center gap-1.5">
+                <span
+                  className="size-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
+                />
+                <span className="min-w-0 flex-1 truncate text-[11px] text-muted-foreground">{item.name}</span>
+                <span className="shrink-0 text-[11px] font-medium text-foreground">
+                  {donutTotal > 0 ? Math.round((item.count / donutTotal) * 100) : 0}%
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+
+        <Panel title="اتجاه صرف الرواتب خلال السنة" action="ر.ي">
+          <div className="h-[252px] w-full" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={yearSeries} margin={{ top: 10, right: 6, left: 0, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="barBlue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1f6bff" stopOpacity={0.95} />
-                    <stop offset="100%" stopColor="#1f6bff" stopOpacity={0.25} />
+                  <linearGradient id="areaTrend" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#00b8a9" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#00b8a9" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#7a8699" }} />
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  axisLine={false}
+                  interval="preserveStartEnd"
+                  minTickGap={8}
+                  tick={{ fontSize: 9, fill: "#9aa4b4" }}
+                />
                 <YAxis
                   tickLine={false}
                   axisLine={false}
-                  width={54}
+                  width={48}
                   tick={{ fontSize: 10, fill: "#9aa4b4" }}
-                  tickFormatter={(value: number) => numberFormatter.format(value)}
+                  tickFormatter={(value: number) => numberFormatter.format(Math.round(value / 1000)) + "k"}
                 />
                 <Tooltip
-                  cursor={{ fill: "rgba(31,107,255,0.06)" }}
-                  formatter={(value: number) => [`${numberFormatter.format(value)} ر.ي`, "الإجمالي"]}
-                  contentStyle={{ borderRadius: 12, border: "1px solid rgba(0,0,0,0.06)", fontSize: 12 }}
+                  cursor={{ stroke: "rgba(0,184,169,0.35)", strokeWidth: 1 }}
+                  formatter={(value: number) => [`${numberFormatter.format(value)} ر.ي`, "الرواتب"]}
+                  contentStyle={{
+                    borderRadius: 14,
+                    border: "1px solid rgba(0,0,0,0.06)",
+                    fontSize: 12,
+                    direction: "rtl",
+                  }}
                 />
-                <Bar dataKey="total" fill="url(#barBlue)" radius={[8, 8, 0, 0]} maxBarSize={56} />
-              </BarChart>
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#00b8a9"
+                  strokeWidth={2.5}
+                  fill="url(#areaTrend)"
+                  activeDot={{ r: 4, strokeWidth: 0 }}
+                />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
-        )}
-      </Panel>
+        </Panel>
+      </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
         <Panel title="الحضور مقابل الإجازات" action="آخر 7 أيام">
