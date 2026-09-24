@@ -11,14 +11,14 @@ import {
   FileSearch,
   HandCoins,
   LoaderCircle,
-  Send,
+  TrendingDown,
   TrendingDown,
   UserRound,
   Wallet,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { generateSmartReport } from "@/lib/ai-reports.functions";
