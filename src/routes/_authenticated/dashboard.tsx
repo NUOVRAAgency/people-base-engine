@@ -188,6 +188,23 @@ function DashboardPage() {
       .slice(0, 6);
   }, [payroll, employeeById]);
 
+  const donutData = useMemo(
+    () => (departments.length > 0 ? departments : SAMPLE_DEPARTMENTS),
+    [departments],
+  );
+  const donutTotal = useMemo(() => donutData.reduce((sum, item) => sum + item.count, 0), [donutData]);
+
+  const yearSeries = useMemo(() => {
+    const currentMonth = today.getMonth();
+    const actual = payroll.reduce((sum, row) => sum + Number(row.net_salary ?? 0), 0);
+    const peak = actual > 0 ? actual / (SAMPLE_CURVE[currentMonth] ?? 1) : 2_400_000;
+    return YEAR_MONTHS.map((label, index) => ({
+      label,
+      value: Math.round(peak * (SAMPLE_CURVE[index] ?? 0)),
+    }));
+  }, [payroll, today]);
+
+
   const weekSeries = useMemo(() => {
     const days: { label: string; key: string; حضور: number; إجازات: number }[] = [];
     for (let i = 6; i >= 0; i -= 1) {
