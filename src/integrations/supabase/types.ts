@@ -17,49 +17,67 @@ export type Database = {
       app_settings: {
         Row: {
           company_name: string | null
+          grace_minutes: number
           id: string
           logo_path: string | null
           updated_at: string
           updated_by: string | null
+          work_end: string
+          work_start: string
         }
         Insert: {
           company_name?: string | null
+          grace_minutes?: number
           id?: string
           logo_path?: string | null
           updated_at?: string
           updated_by?: string | null
+          work_end?: string
+          work_start?: string
         }
         Update: {
           company_name?: string | null
+          grace_minutes?: number
           id?: string
           logo_path?: string | null
           updated_at?: string
           updated_by?: string | null
+          work_end?: string
+          work_start?: string
         }
         Relationships: []
       }
       attendance: {
         Row: {
+          check_in: string | null
+          check_out: string | null
           created_at: string
           date: string
           employee_id: string
           id: string
+          late_minutes: number
           note: string | null
           status: string
         }
         Insert: {
+          check_in?: string | null
+          check_out?: string | null
           created_at?: string
           date: string
           employee_id: string
           id?: string
+          late_minutes?: number
           note?: string | null
           status: string
         }
         Update: {
+          check_in?: string | null
+          check_out?: string | null
           created_at?: string
           date?: string
           employee_id?: string
           id?: string
+          late_minutes?: number
           note?: string | null
           status?: string
         }
