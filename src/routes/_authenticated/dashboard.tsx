@@ -3,7 +3,6 @@ import {
   Check,
   CalendarCheck,
   CheckCircle2,
-  Clock3,
   LoaderCircle,
   Plane,
   Users,
@@ -561,8 +560,4 @@ function Empty({ text }: { text: string }) {
       <p className="mt-2 text-[13px] text-muted-foreground">{text}</p>
     </div>
   );
-}
-
-function _unusedClock() {
-  return <Clock3 />;
 }
