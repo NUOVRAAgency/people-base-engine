@@ -496,13 +496,6 @@ function InsightsTab({ month, summary }: { month: string; summary: string }) {
     }
   }
 
-  function submitQuestion(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const value = question.trim();
-    if (!value || busy) return;
-    setQuestion("");
-    void ask(`${summary}\n\nسؤال المدير: ${value}\nاجب بالعربية بنقاط قصيرة وواضحة بدون تشكيل.`);
-  }
 
   return (
     <section className="space-y-4">
