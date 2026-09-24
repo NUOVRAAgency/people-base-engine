@@ -306,7 +306,7 @@ function PayrollPage() {
       <header className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold leading-[1.6] text-foreground md:text-2xl">الرواتب</h2>
+            <h2 className="hidden text-xl font-bold leading-[1.6] text-foreground md:block md:text-2xl">الرواتب</h2>
             <p className="text-sm leading-[1.7] text-muted-foreground">مسير الرواتب الشهري والمؤثرات المالية وقسائم الرواتب</p>
           </div>
           <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1 shadow-glass">
