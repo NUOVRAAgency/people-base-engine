@@ -6,6 +6,7 @@ import {
   FileText,
   Home,
   Plane,
+  Search,
   Settings,
   Users,
   Wallet,
@@ -52,7 +53,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const title = TITLES[pathname] ?? "نظام الموارد البشرية";
-  const { isAdmin } = useCurrentUser();
+  const { isAdmin, initials } = useCurrentUser();
   const { companyName, notifications } = useHeaderData();
   const companyNameIsArabic = /[\u0600-\u06ff]/.test(companyName);
   const listRef = useRef<HTMLUListElement>(null);
@@ -70,21 +71,38 @@ export function MobileShell({ children }: { children: ReactNode }) {
     <div dir="rtl" className="min-h-dvh bg-background font-kufi">
       <header className="fixed inset-x-0 top-0 z-30 shadow-nav">
         <div className="h-[7px] w-full bg-white" />
-        <div className="relative flex h-[62px] items-center justify-between px-4 text-primary-foreground [background:var(--header-gradient)]">
-        <div className="flex min-w-0 items-center">
-          <h1 className="truncate py-1 text-[18px] font-bold leading-[1.6]">{title}</h1>
+        <div className="relative flex h-[52px] items-center gap-3 px-3 text-primary-foreground [background:var(--header-gradient)] md:h-[56px] md:px-6">
+        <div className="flex min-w-0 items-center gap-2.5">
+          {companyName ? (
+            <span
+              dir="auto"
+              className={cn(
+                "hidden max-w-[180px] truncate rounded-full border border-white/25 bg-white/15 px-3 py-1 text-[12px] font-bold leading-[1.5] md:inline-block",
+                companyNameIsArabic ? "font-kufi" : "font-sans",
+              )}
+            >
+              {companyName}
+            </span>
+          ) : null}
+          <h1 className="truncate text-lg font-bold leading-[1.5] text-white md:text-xl">{title}</h1>
         </div>
 
-        {companyName ? (
-          <p
-            dir="auto"
-            className={`pointer-events-none absolute left-1/2 max-w-[42%] -translate-x-1/2 truncate py-1 text-center text-[15px] font-bold leading-[1.6] text-primary-foreground ${companyNameIsArabic ? "font-kufi" : "font-sans"}`}
-          >
-            {companyName}
-          </p>
-        ) : null}
+        <div className="hidden min-w-0 flex-1 justify-center md:flex">
+          <div className="relative w-full max-w-sm">
+            <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/70" aria-hidden />
+            <input
+              type="search"
+              aria-label="بحث سريع"
+              placeholder="بحث سريع…"
+              className="h-9 w-full rounded-full border border-white/25 bg-white/15 pe-9 ps-4 text-sm text-white outline-none transition-colors placeholder:text-white/65 focus:bg-white/25"
+            />
+          </div>
+        </div>
 
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="ms-auto flex shrink-0 items-center gap-1 md:ms-0">
+
+
+
 
 
           <Popover>
@@ -133,11 +151,19 @@ export function MobileShell({ children }: { children: ReactNode }) {
               </div>
             </PopoverContent>
           </Popover>
+
+          <Link
+            to="/account"
+            aria-label="الحساب الشخصي"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/35 bg-white/15 text-[12px] font-bold leading-none text-white transition-colors hover:bg-white/25"
+          >
+            {initials}
+          </Link>
         </div>
         </div>
       </header>
 
-      <main className="min-h-dvh bg-background px-4 pb-[96px] pt-[85px]">{children}</main>
+      <main className="min-h-dvh bg-background px-4 pb-[96px] pt-[72px] md:px-6 md:pt-[76px]">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur-md">
         <ul ref={listRef} className="scrollbar-hide mx-auto flex max-w-[480px] items-stretch gap-1 overflow-x-auto px-3 pb-[env(safe-area-inset-bottom)]">
