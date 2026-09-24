@@ -6,6 +6,7 @@ import {
   FileText,
   Home,
   Plane,
+  Search,
   Settings,
   Users,
   Wallet,
@@ -52,7 +53,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const title = TITLES[pathname] ?? "نظام الموارد البشرية";
-  const { isAdmin } = useCurrentUser();
+  const { isAdmin, initials } = useCurrentUser();
   const { companyName, notifications } = useHeaderData();
   const companyNameIsArabic = /[\u0600-\u06ff]/.test(companyName);
   const listRef = useRef<HTMLUListElement>(null);
