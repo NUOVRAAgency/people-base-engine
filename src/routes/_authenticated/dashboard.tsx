@@ -203,7 +203,7 @@ function DashboardPage() {
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <div className="min-w-0">
             <h2 className="truncate text-lg font-medium leading-[1.6] text-foreground md:text-xl">
-              أهلا بك، {fullName || "مدير النظام"} 👋
+              أهلا بك، {/[\u0600-\u06ff]/.test(fullName) ? fullName : "مدير النظام"} 👋
             </h2>
             <p className="mt-0.5 truncate text-[12px] leading-[1.7] text-muted-foreground md:text-sm">
               {dateFormatter.format(today)}
