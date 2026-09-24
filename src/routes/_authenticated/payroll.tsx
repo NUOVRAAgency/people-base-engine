@@ -379,7 +379,7 @@ function PayrollPage() {
                 type="button"
                 onClick={() => setTab(item.key)}
                 className={cn(
-                  "flex-1 whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold transition-colors",
+                  "flex-1 whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-bold transition-colors md:px-4 md:text-sm",
                   tab === item.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted",
                 )}
               >
