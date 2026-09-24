@@ -1,8 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
-  Check,
   CalendarCheck,
-  CheckCircle2,
   LoaderCircle,
   Plane,
   Users,
@@ -109,7 +107,16 @@ type LeaveRow = {
 type PayrollRow = { employee_id: string; net_salary: number; status: string };
 
 function DashboardPage() {
-  const { fullName, isAdmin, loading: roleLoading } = useCurrentUser();
+  const { isAdmin, loading: roleLoading } = useCurrentUser();
+  const navigate = useNavigate();
+  const [pressed, setPressed] = useState<string | null>(null);
+  const openSection = useCallback((to: "/employees" | "/attendance" | "/leaves" | "/payroll") => {
+    setPressed(to);
+    window.setTimeout(() => {
+      setPressed(null);
+      void navigate({ to });
+    }, 280);
+  }, [navigate]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [employees, setEmployees] = useState<EmployeeRow[]>([]);
@@ -507,43 +514,62 @@ function DashboardPage() {
   );
 }
 
-function FeatureCard({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-gradient-to-b from-[#1f6bff] to-[#0c4bbc] p-2.5 text-primary-foreground shadow-[0_12px_26px_-12px_rgba(12,75,188,0.7),inset_0_1px_0_rgba(255,255,255,0.3)]">
-      <div className="flex items-center gap-1.5">
-        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white/15">
-          <Users className="h-3 w-3" aria-hidden />
-        </span>
-        <p className="truncate text-[11px] font-normal">{title}</p>
-      </div>
-      <p className="mt-1 truncate text-lg font-medium leading-tight">{value}</p>
-    </div>
-  );
-}
-
-function StatCard({
+function KpiCard({
   icon,
   title,
   value,
+  to,
+  pressed,
+  onPress,
   compact,
 }: {
   icon: ReactNode;
   title: string;
   value: string;
+  to?: string;
+  pressed?: boolean;
+  onPress?: () => void;
   compact?: boolean;
 }) {
-  return (
-    <div className="rounded-2xl border border-border/40 bg-card/75 p-2.5 shadow-glass backdrop-blur-sm">
+  const content = (
+    <>
       <div className="flex items-center gap-1.5">
-        <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground [&_svg]:size-3">
+        <span
+          className={cn(
+            "flex size-6 shrink-0 items-center justify-center [&_svg]:size-3",
+            pressed ? "bg-white/15 text-white" : "bg-muted text-muted-foreground",
+          )}
+        >
           {icon}
         </span>
-        <p className="truncate text-[11px] font-normal text-muted-foreground">{title}</p>
+        <p className={cn("truncate text-[11px] font-normal", pressed ? "text-white" : "text-muted-foreground")}>
+          {title}
+        </p>
       </div>
-      <p className={cn("mt-1 truncate font-medium leading-tight text-foreground", compact ? "text-sm" : "text-lg")}>
+      <p
+        className={cn(
+          "mt-1 truncate font-medium leading-tight",
+          compact ? "text-sm" : "text-lg",
+          pressed ? "text-white" : "text-foreground",
+        )}
+      >
         {value}
       </p>
-    </div>
+    </>
+  );
+
+  const classes = cn(
+    "rounded-none border p-2.5 text-start transition-colors duration-150",
+    pressed ? "border-primary bg-primary" : "border-border bg-card",
+  );
+
+  if (!to || !onPress) {
+    return <div className={classes}>{content}</div>;
+  }
+  return (
+    <button type="button" className={classes} onClick={onPress} aria-label={title}>
+      {content}
+    </button>
   );
 }
 
