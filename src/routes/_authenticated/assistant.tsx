@@ -29,7 +29,6 @@ type ChatMessage = { id: string; role: "user" | "assistant"; text: string; at: s
 
 const timeFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { hour: "2-digit", minute: "2-digit" });
 const monthFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { month: "long", year: "numeric" });
-const numberFormatter = new Intl.NumberFormat("ar-YE-u-nu-latn", { maximumFractionDigits: 0 });
 
 function monthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-01`;
@@ -336,7 +335,7 @@ function AssistantPage() {
           </Button>
         </div>
         <p className="mx-auto mt-2 w-full max-w-3xl text-center text-[11px] text-muted-foreground">
-          {listening ? "جاري الاستماع" : `مدعوم ببيانات ${numberFormatter.format(1)} شهر من النظام`}
+          {listening ? "جاري الاستماع" : "الردود تعتمد على بيانات النظام لهذا الشهر"}
         </p>
       </form>
     </div>
