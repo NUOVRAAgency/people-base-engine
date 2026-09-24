@@ -150,11 +150,19 @@ export function MobileShell({ children }: { children: ReactNode }) {
               </div>
             </PopoverContent>
           </Popover>
+
+          <Link
+            to="/account"
+            aria-label="الحساب الشخصي"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-white/35 bg-white/15 text-[12px] font-bold leading-none text-white transition-colors hover:bg-white/25"
+          >
+            {initials}
+          </Link>
         </div>
         </div>
       </header>
 
-      <main className="min-h-dvh bg-background px-4 pb-[96px] pt-[85px]">{children}</main>
+      <main className="min-h-dvh bg-background px-4 pb-[96px] pt-[72px] md:px-6 md:pt-[76px]">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur-md">
         <ul ref={listRef} className="scrollbar-hide mx-auto flex max-w-[480px] items-stretch gap-1 overflow-x-auto px-3 pb-[env(safe-area-inset-bottom)]">
