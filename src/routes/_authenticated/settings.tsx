@@ -100,8 +100,8 @@ function SettingsPage() {
         <section className="space-y-2.5">
           <p className="px-1 text-xs font-medium text-muted-foreground">الادارة والصلاحيات</p>
           <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/75 shadow-glass backdrop-blur-sm">
-            {adminItems.map((item, index) => (
-              <SettingsRow key={item.key} {...item} withBorderTop={index > 0} />
+            {adminItems.map(({ key, ...item }, index) => (
+              <SettingsRow key={key} {...item} withBorderTop={index > 0} />
             ))}
           </div>
         </section>
