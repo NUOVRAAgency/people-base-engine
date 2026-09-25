@@ -39,7 +39,7 @@ type Branch = { id: string; name: string; location: string | null; status: strin
 function SettingsPage() {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const { email, fullName, role, initials, isAdmin, loading } = useCurrentUser();
+  const { fullName, role, isAdmin, loading } = useCurrentUser();
   const [branchesOpen, setBranchesOpen] = useState(false);
   const [language, setLanguage] = useState<"ar" | "en">("ar");
   const [helpOpen, setHelpOpen] = useState(false);
