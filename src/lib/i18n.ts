@@ -38,7 +38,7 @@ export function getDirection(): "rtl" | "ltr" {
 
 /** Locale for Intl formatters: Latin digits in both languages. */
 export function getLocale(): string {
-  return getLanguage() === "en" ? "en-US" : getLocale();
+  return getLanguage() === "en" ? "en-US" : "ar-u-nu-latn";
 }
 
 /** Translate a fixed UI string (Arabic source text). User data must never pass through this. */
