@@ -64,7 +64,7 @@ function SettingsPage() {
     {
       key: "branches",
       label: "إدارة الفروع",
-      description: "اضافة الفروع وتعديل حالتها",
+      description: "إضافة الفروع وتعديل حالتها",
       icon: Building2,
       action: () => setBranchesOpen(true),
     },
