@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/account")({
 
 function AccountPage() {
   const navigate = useNavigate();
-  const { fullName, role } = useCurrentUser();
+  const { role } = useCurrentUser();
   return (
     <div className="space-y-4">
       <section className="rounded-2xl border border-border/50 bg-card/75 p-5 shadow-glass backdrop-blur-sm">
