@@ -216,24 +216,20 @@ function AssistantPage() {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background" dir="rtl">
-      <header className="shrink-0 bg-[linear-gradient(180deg,#0c4bbc_0%,#0055ff_100%)] px-4 pb-6 pt-5 text-primary-foreground">
-        <div className="mx-auto flex w-full max-w-4xl items-center gap-3">
+      <header className="shrink-0 bg-[linear-gradient(180deg,#0c4bbc_0%,#0f52d8_100%)] px-4 pb-2.5 pt-2.5 text-primary-foreground">
+        <div className="mx-auto flex w-full max-w-4xl items-center gap-2.5">
           <button
             type="button"
             onClick={() => void navigate({ to: "/reports" })}
             aria-label="اغلاق المحادثة"
-            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-[#0c4bbc] shadow-sm transition-transform active:scale-95"
+            className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-[#0c4bbc] transition-transform active:scale-95"
           >
-            <X className="h-5 w-5" aria-hidden />
+            <X className="h-4 w-4" aria-hidden />
           </button>
-          <div className="min-w-0">
-            <h1 className="truncate text-lg font-medium md:text-xl">المساعد الذكي</h1>
-            <p className="truncate text-[12px] text-primary-foreground/80">
-              نقاش حول بيانات {monthFormatter.format(new Date(`${month}T00:00:00`))}
-            </p>
-          </div>
+          <h1 className="min-w-0 truncate text-[15px] font-medium">المساعد الذكي</h1>
         </div>
       </header>
+
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
