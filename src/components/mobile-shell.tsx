@@ -19,6 +19,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 
 
+import { tr, trf } from "@/lib/i18n";
 type NavItem = {
   to: "/dashboard" | "/employees" | "/attendance" | "/leaves" | "/payroll" | "/reports" | "/settings";
   label: string;
@@ -27,32 +28,32 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
-  { to: "/dashboard", label: "الرئيسية", icon: Home },
-  { to: "/employees", label: "الموظفون", icon: Users },
-  { to: "/attendance", label: "الحضور", icon: CalendarCheck },
-  { to: "/leaves", label: "الإجازات", icon: Plane },
-  { to: "/payroll", label: "الرواتب", icon: Wallet, adminOnly: true },
-  { to: "/reports", label: "التقارير", icon: BarChart3 },
-  { to: "/settings", label: "الإعدادات", icon: Settings },
+  { to: "/dashboard", label: tr("الرئيسية"), icon: Home },
+  { to: "/employees", label: tr("الموظفون"), icon: Users },
+  { to: "/attendance", label: tr("الحضور"), icon: CalendarCheck },
+  { to: "/leaves", label: tr("الإجازات"), icon: Plane },
+  { to: "/payroll", label: tr("الرواتب"), icon: Wallet, adminOnly: true },
+  { to: "/reports", label: tr("التقارير"), icon: BarChart3 },
+  { to: "/settings", label: tr("الإعدادات"), icon: Settings },
 ];
 
 const TITLES: Record<string, string> = {
-  "/dashboard": "الرئيسية",
-  "/employees": "الموظفون",
-  "/attendance": "الحضور",
-  "/leaves": "الإجازات",
-  "/payroll": "الرواتب",
-  "/reports": "التقارير",
-  "/settings": "الإعدادات",
-  "/settings/system": "إعدادات النظام",
-  "/account": "الحساب",
-  "/users": "المستخدمون",
+  "/dashboard": tr("الرئيسية"),
+  "/employees": tr("الموظفون"),
+  "/attendance": tr("الحضور"),
+  "/leaves": tr("الإجازات"),
+  "/payroll": tr("الرواتب"),
+  "/reports": tr("التقارير"),
+  "/settings": tr("الإعدادات"),
+  "/settings/system": tr("إعدادات النظام"),
+  "/account": tr("الحساب"),
+  "/users": tr("المستخدمون"),
 };
 
 export function MobileShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const title = TITLES[pathname] ?? "نظام الموارد البشرية";
+  const title = TITLES[pathname] ?? tr("نظام الموارد البشرية");
   const { isAdmin } = useCurrentUser();
   const { companyName, notifications } = useHeaderData();
   const companyNameIsArabic = /[\u0600-\u06ff]/.test(companyName);
@@ -92,8 +93,8 @@ export function MobileShell({ children }: { children: ReactNode }) {
             <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/70" aria-hidden />
             <input
               type="search"
-              aria-label="بحث سريع"
-              placeholder="بحث سريع…"
+              aria-label={tr("بحث سريع")}
+              placeholder={tr("بحث سريع…")}
               className="h-9 w-full rounded-full border border-white/25 bg-white/15 pe-9 ps-4 text-sm text-white outline-none transition-colors placeholder:text-white/65 focus:bg-white/25"
             />
           </div>
@@ -111,7 +112,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label={`التنبيهات${notifications.length ? `، ${notifications.length} جديدة` : ""}`}
+                aria-label={trf("التنبيهات{0}", notifications.length ? `، ${notifications.length} جديدة` : "")}
                 className="relative text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
               >
                 <Bell className="h-5 w-5" aria-hidden />
@@ -122,8 +123,8 @@ export function MobileShell({ children }: { children: ReactNode }) {
             </PopoverTrigger>
             <PopoverContent align="end" sideOffset={10} className="w-[min(340px,calc(100vw-24px))] rounded-lg border-border/80 p-0 shadow-card">
               <div className="border-b border-border px-4 py-3">
-                <p className="text-sm font-bold">التنبيهات الإدارية</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">آخر تحديثات الحضور والتقارير</p>
+                <p className="text-sm font-bold">{tr("التنبيهات الإدارية")}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{tr("آخر تحديثات الحضور والتقارير")}</p>
               </div>
               <div className="max-h-80 overflow-y-auto p-2">
                 {notifications.length ? notifications.map((notification) => {
@@ -146,7 +147,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
                     </Button>
                   );
                 }) : (
-                  <p className="px-3 py-8 text-center text-sm text-muted-foreground">لا توجد تنبيهات حالياً</p>
+                  <p className="px-3 py-8 text-center text-sm text-muted-foreground">{tr("لا توجد تنبيهات حالياً")}</p>
                 )}
               </div>
             </PopoverContent>

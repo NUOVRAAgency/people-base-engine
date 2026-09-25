@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
+import { tr, trf } from "@/lib/i18n";
 type Props = {
   value: string; // yyyy-MM-dd
   onChange: (value: string) => void;
@@ -15,7 +16,7 @@ type Props = {
   ariaLabel: string;
 };
 
-export function GlassDatePicker({ value, onChange, minDate, placeholder = "اختر التاريخ", ariaLabel }: Props) {
+export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("اختر التاريخ"), ariaLabel }: Props) {
   const [open, setOpen] = useState(false);
   const selected = value ? parseISO(value) : undefined;
   const min = minDate ? parseISO(minDate) : undefined;
@@ -53,7 +54,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = "اخ�
         <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-primary/25" aria-hidden />
         <div className="mb-2 border-b border-border/60 px-2 pb-2 pt-1 text-right">
           <p className="font-kufi text-sm font-normal leading-7">{ariaLabel}</p>
-          <p className="text-xs leading-6 text-muted-foreground">اختر اليوم المناسب من التقويم</p>
+          <p className="text-xs leading-6 text-muted-foreground">{tr("اختر اليوم المناسب من التقويم")}</p>
         </div>
         <Calendar
           mode="single"

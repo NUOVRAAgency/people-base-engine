@@ -46,13 +46,14 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
+import { tr, trf } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/employees")({
   head: () => ({
     meta: [
-      { title: "إدارة الموظفين | نظام الموارد البشرية" },
-      { name: "description", content: "البحث وإدارة أعضاء الفريق وبياناتهم الوظيفية" },
-      { property: "og:title", content: "إدارة الموظفين | نظام الموارد البشرية" },
-      { property: "og:description", content: "البحث وإدارة أعضاء الفريق وبياناتهم الوظيفية" },
+      { title: tr("إدارة الموظفين | نظام الموارد البشرية") },
+      { name: "description", content: tr("البحث وإدارة أعضاء الفريق وبياناتهم الوظيفية") },
+      { property: "og:title", content: tr("إدارة الموظفين | نظام الموارد البشرية") },
+      { property: "og:description", content: tr("البحث وإدارة أعضاء الفريق وبياناتهم الوظيفية") },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -129,39 +130,39 @@ const EMPTY_FORM: EmployeeForm = {
 };
 
 const employmentSchema = z.object({
-  workEmail: z.string().trim().email("أدخل بريداً عملياً صحيحاً").max(255),
-  department: z.string().trim().min(1, "القسم مطلوب").max(100),
-  position: z.string().trim().min(1, "المسمى الوظيفي مطلوب").max(100),
-  branchId: z.string().uuid("اختر الفرع"),
-  hireDate: z.string().date("اختر تاريخ التعيين"),
+  workEmail: z.string().trim().email(tr("أدخل بريداً عملياً صحيحاً")).max(255),
+  department: z.string().trim().min(1, tr("القسم مطلوب")).max(100),
+  position: z.string().trim().min(1, tr("المسمى الوظيفي مطلوب")).max(100),
+  branchId: z.string().uuid(tr("اختر الفرع")),
+  hireDate: z.string().date(tr("اختر تاريخ التعيين")),
 });
 
 const personalSchema = z.object({
-  fullName: z.string().trim().min(3, "أدخل الاسم الكامل").max(150),
-  nationalId: z.string().trim().min(5, "أدخل رقم هوية أو جواز صحيحاً").max(30).regex(/^[\p{L}\p{N}-]+$/u, "استخدم الحروف والأرقام والشرطة فقط"),
-  phone: z.string().trim().regex(/^\+?[0-9\s-]{7,18}$/, "أدخل رقم جوال صحيحاً"),
-  birthDate: z.string().date("اختر تاريخ الميلاد").refine((value) => new Date(`${value}T12:00:00`) < new Date(), "تاريخ الميلاد يجب أن يكون في الماضي"),
-  gender: z.enum(["male", "female"], { message: "اختر الجنس" }),
-  nationality: z.string().trim().min(2, "الجنسية مطلوبة").max(80),
+  fullName: z.string().trim().min(3, tr("أدخل الاسم الكامل")).max(150),
+  nationalId: z.string().trim().min(5, tr("أدخل رقم هوية أو جواز صحيحاً")).max(30).regex(/^[\p{L}\p{N}-]+$/u, tr("استخدم الحروف والأرقام والشرطة فقط")),
+  phone: z.string().trim().regex(/^\+?[0-9\s-]{7,18}$/, tr("أدخل رقم جوال صحيحاً")),
+  birthDate: z.string().date(tr("اختر تاريخ الميلاد")).refine((value) => new Date(`${value}T12:00:00`) < new Date(), tr("تاريخ الميلاد يجب أن يكون في الماضي")),
+  gender: z.enum(["male", "female"], { message: tr("اختر الجنس") }),
+  nationality: z.string().trim().min(2, tr("الجنسية مطلوبة")).max(80),
 });
 
 const financialSchema = z.object({
-  baseSalary: z.string().trim().min(1, "أدخل الراتب الأساسي").transform(Number).refine((value) => Number.isFinite(value) && value >= 0, "لا يمكن أن يكون الراتب سالباً"),
-  housingAllowance: z.string().trim().min(1, "أدخل بدل السكن أو صفراً").transform(Number).refine((value) => Number.isFinite(value) && value >= 0, "لا يمكن أن يكون بدل السكن سالباً"),
-  transportAllowance: z.string().trim().min(1, "أدخل بدل النقل أو صفراً").transform(Number).refine((value) => Number.isFinite(value) && value >= 0, "لا يمكن أن يكون بدل النقل سالباً"),
-  bankName: z.string().trim().min(2, "اسم البنك مطلوب").max(100),
+  baseSalary: z.string().trim().min(1, tr("أدخل الراتب الأساسي")).transform(Number).refine((value) => Number.isFinite(value) && value >= 0, tr("لا يمكن أن يكون الراتب سالباً")),
+  housingAllowance: z.string().trim().min(1, tr("أدخل بدل السكن أو صفراً")).transform(Number).refine((value) => Number.isFinite(value) && value >= 0, tr("لا يمكن أن يكون بدل السكن سالباً")),
+  transportAllowance: z.string().trim().min(1, tr("أدخل بدل النقل أو صفراً")).transform(Number).refine((value) => Number.isFinite(value) && value >= 0, tr("لا يمكن أن يكون بدل النقل سالباً")),
+  bankName: z.string().trim().min(2, tr("اسم البنك مطلوب")).max(100),
 });
 
 const EMPLOYMENT_LABELS: Record<string, string> = {
-  full_time: "دوام كامل",
-  part_time: "دوام جزئي",
-  remote: "عن بُعد",
+  full_time: tr("دوام كامل"),
+  part_time: tr("دوام جزئي"),
+  remote: tr("عن بُعد"),
 };
 
 const STEPS = [
-  { label: "البيانات الوظيفية", icon: BriefcaseBusiness },
-  { label: "البيانات الشخصية", icon: UserRound },
-  { label: "البيانات المالية", icon: WalletCards },
+  { label: tr("البيانات الوظيفية"), icon: BriefcaseBusiness },
+  { label: tr("البيانات الشخصية"), icon: UserRound },
+  { label: tr("البيانات المالية"), icon: WalletCards },
 ];
 
 function EmployeesPage() {
@@ -202,7 +203,7 @@ function EmployeesPage() {
     ]);
 
     if (employeeResult.error || branchResult.error) {
-      setFeedback({ kind: "error", message: "تعذّر تحميل بيانات الموظفين. حاول مرة أخرى." });
+      setFeedback({ kind: "error", message: tr("تعذّر تحميل بيانات الموظفين. حاول مرة أخرى.") });
     } else {
       setEmployees((employeeResult.data ?? []) as Employee[]);
       setBranches(branchResult.data ?? []);
@@ -304,7 +305,7 @@ function EmployeesPage() {
         if (field && !errors[field]) errors[field] = issue.message;
       });
       setFieldErrors(errors);
-      setFeedback({ kind: "error", message: "راجع الحقول الموضحة قبل المتابعة" });
+      setFeedback({ kind: "error", message: tr("راجع الحقول الموضحة قبل المتابعة") });
       return false;
     }
     setFieldErrors({});
@@ -339,7 +340,7 @@ function EmployeesPage() {
 
     if (firstInvalidStep !== null) {
       setFieldErrors(errors);
-      setFeedback({ kind: "error", message: "راجع الحقول الموضحة قبل حفظ الموظف" });
+      setFeedback({ kind: "error", message: tr("راجع الحقول الموضحة قبل حفظ الموظف") });
       setStep(firstInvalidStep);
       return false;
     }
@@ -376,14 +377,14 @@ function EmployeesPage() {
       const result = await supabase.from("employees").update(employeePayload).eq("id", editingId).select("id").single();
       if (result.error) {
         setSaving(false);
-        setFeedback({ kind: "error", message: result.error.code === "23505" ? "الرقم الوظيفي أو البريد أو الهوية مستخدم مسبقاً" : "تعذّر تحديث بيانات الموظف" });
+        setFeedback({ kind: "error", message: result.error.code === "23505" ? tr("الرقم الوظيفي أو البريد أو الهوية مستخدم مسبقاً") : tr("تعذّر تحديث بيانات الموظف") });
         return;
       }
     } else {
       const result = await supabase.from("employees").insert(employeePayload).select("id").single();
       if (result.error) {
         setSaving(false);
-        setFeedback({ kind: "error", message: result.error.code === "23505" ? "الرقم الوظيفي أو البريد أو الهوية مستخدم مسبقاً" : "تعذّر إضافة الموظف. تحقق من الفرع والصلاحيات." });
+        setFeedback({ kind: "error", message: result.error.code === "23505" ? tr("الرقم الوظيفي أو البريد أو الهوية مستخدم مسبقاً") : tr("تعذّر إضافة الموظف. تحقق من الفرع والصلاحيات.") });
         return;
       }
       employeeId = result.data.id;
@@ -401,7 +402,7 @@ function EmployeesPage() {
       }, { onConflict: "employee_id,month" });
       if (financialResult.error) {
         setSaving(false);
-        setFeedback({ kind: "error", message: "حُفظ الموظف، لكن تعذّر حفظ بياناته المالية" });
+        setFeedback({ kind: "error", message: tr("حُفظ الموظف، لكن تعذّر حفظ بياناته المالية") });
         await loadData();
         return;
       }
@@ -409,7 +410,7 @@ function EmployeesPage() {
 
     setSaving(false);
     setWizardOpen(false);
-    setFeedback({ kind: "success", message: editingId ? "تم تحديث بيانات الموظف بنجاح" : "تمت إضافة الموظف بنجاح" });
+    setFeedback({ kind: "success", message: editingId ? tr("تم تحديث بيانات الموظف بنجاح") : tr("تمت إضافة الموظف بنجاح") });
     await loadData();
   }
 
@@ -418,10 +419,10 @@ function EmployeesPage() {
     const result = await supabase.from("employees").delete().eq("id", selected.id);
     setDeleteOpen(false);
     if (result.error) {
-      setFeedback({ kind: "error", message: "تعذّر حذف الموظف لوجود سجلات مرتبطة به" });
+      setFeedback({ kind: "error", message: tr("تعذّر حذف الموظف لوجود سجلات مرتبطة به") });
       return;
     }
-    setFeedback({ kind: "success", message: "تم حذف الموظف" });
+    setFeedback({ kind: "success", message: tr("تم حذف الموظف") });
     setSelected(null);
     await loadData();
   }
@@ -457,14 +458,14 @@ function EmployeesPage() {
     <section className="mx-auto w-full max-w-6xl space-y-4 font-sans text-foreground" aria-labelledby="employees-heading">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs text-muted-foreground">دليل الفريق</p>
-          <h2 id="employees-heading" className="truncate text-xl font-semibold leading-relaxed">إدارة الموظفين</h2>
+          <p className="text-xs text-muted-foreground">{tr("دليل الفريق")}</p>
+          <h2 id="employees-heading" className="truncate text-xl font-semibold leading-relaxed">{tr("إدارة الموظفين")}</h2>
         </div>
         {!roleLoading && canWrite ? (
           <Button type="button" onClick={openCreate} className="h-11 shrink-0 rounded-lg bg-primary px-3 text-primary-foreground shadow-nav hover:bg-primary/90 sm:px-4">
             <Plus aria-hidden />
-            <span className="hidden sm:inline">إضافة موظف جديد</span>
-            <span className="sm:hidden">إضافة موظف</span>
+            <span className="hidden sm:inline">{tr("إضافة موظف جديد")}</span>
+            <span className="sm:hidden">{tr("إضافة موظف")}</span>
           </Button>
         ) : null}
       </div>
@@ -473,7 +474,7 @@ function EmployeesPage() {
         <div className={cn("flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm", feedback.kind === "success" ? "border-success/25 bg-success/10 text-success" : "border-destructive/25 bg-destructive/10 text-destructive")}>
           {feedback.kind === "success" ? <Check className="size-4" /> : <CircleAlert className="size-4" />}
           <span className="flex-1">{feedback.message}</span>
-          <Button type="button" size="icon-sm" variant="ghost" aria-label="إخفاء الرسالة" onClick={() => setFeedback(null)}><X /></Button>
+          <Button type="button" size="icon-sm" variant="ghost" aria-label={tr("إخفاء الرسالة")} onClick={() => setFeedback(null)}><X /></Button>
         </div>
       ) : null}
 
@@ -483,40 +484,40 @@ function EmployeesPage() {
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="البحث بالاسم أو الرقم الوظيفي"
-            aria-label="البحث بالاسم أو الرقم الوظيفي"
+            placeholder={tr("البحث بالاسم أو الرقم الوظيفي")}
+            aria-label={tr("البحث بالاسم أو الرقم الوظيفي")}
             className="h-11 rounded-lg border-primary/10 bg-background pe-10 shadow-none"
           />
         </div>
         <div className="mt-3 grid grid-cols-1 gap-2 min-[420px]:grid-cols-3">
-          <FilterSelect label="القسم" value={department} onChange={setDepartment} options={departments.map((item) => ({ value: item, label: item }))} />
-          <FilterSelect label="الحالة" value={status} onChange={setStatus} options={[{ value: "active", label: "نشط" }, { value: "inactive", label: "مستقيل" }]} />
-          <FilterSelect label="نوع الدوام" value={employmentType} onChange={setEmploymentType} options={Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => ({ value, label }))} />
+          <FilterSelect label={tr("القسم")} value={department} onChange={setDepartment} options={departments.map((item) => ({ value: item, label: item }))} />
+          <FilterSelect label={tr("الحالة")} value={status} onChange={setStatus} options={[{ value: "active", label: tr("نشط") }, { value: "inactive", label: tr("مستقيل") }]} />
+          <FilterSelect label={tr("نوع الدوام")} value={employmentType} onChange={setEmploymentType} options={Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => ({ value, label }))} />
         </div>
       </div>
 
       <div className="overflow-hidden rounded-lg border border-border bg-card shadow-card">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <p className="text-sm font-medium">الموظفون</p>
-          <span className="rounded-full bg-primary/8 px-2.5 py-1 text-xs font-medium text-primary">{filteredEmployees.length} موظف</span>
+          <p className="text-sm font-medium">{tr("الموظفون")}</p>
+          <span className="rounded-full bg-primary/8 px-2.5 py-1 text-xs font-medium text-primary">{filteredEmployees.length} {tr("موظف")}</span>
         </div>
         {loading ? (
-          <div className="grid min-h-56 place-items-center"><LoaderCircle className="size-6 animate-spin text-primary" aria-label="جارٍ تحميل الموظفين" /></div>
+          <div className="grid min-h-56 place-items-center"><LoaderCircle className="size-6 animate-spin text-primary" aria-label={tr("جارٍ تحميل الموظفين")} /></div>
         ) : filteredEmployees.length === 0 ? (
           <div className="grid min-h-56 place-items-center px-6 text-center">
-            <div><UserRound className="mx-auto mb-3 size-9 text-muted-foreground/60" /><p className="text-sm font-medium">{employees.length ? "لا توجد نتائج مطابقة" : "لا يوجد موظفون بعد"}</p><p className="mt-1 text-xs text-muted-foreground">{employees.length ? "جرّب تغيير البحث أو الفلاتر" : "أضف أول موظف لبدء بناء دليل الفريق"}</p>{employees.length ? <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => { setSearch(""); setDepartment("all"); setStatus("all"); setEmploymentType("all"); }}>مسح البحث والفلاتر</Button> : null}</div>
+            <div><UserRound className="mx-auto mb-3 size-9 text-muted-foreground/60" /><p className="text-sm font-medium">{employees.length ? tr("لا توجد نتائج مطابقة") : tr("لا يوجد موظفون بعد")}</p><p className="mt-1 text-xs text-muted-foreground">{employees.length ? tr("جرّب تغيير البحث أو الفلاتر") : tr("أضف أول موظف لبدء بناء دليل الفريق")}</p>{employees.length ? <Button type="button" variant="outline" size="sm" className="mt-3" onClick={() => { setSearch(""); setDepartment("all"); setStatus("all"); setEmploymentType("all"); }}>{tr("مسح البحث والفلاتر")}</Button> : null}</div>
           </div>
         ) : (
           <Table>
             <TableHeader className="bg-muted/45">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="min-w-52 text-right">الصورة والاسم الكامل</TableHead>
-                <TableHead className="min-w-28 text-right">الرقم الوظيفي</TableHead>
-                <TableHead className="min-w-32 text-right">القسم</TableHead>
-                <TableHead className="min-w-40 text-right">المسمى الوظيفي</TableHead>
-                <TableHead className="min-w-32 text-right">تاريخ التعيين</TableHead>
-                <TableHead className="min-w-24 text-right">الحالة</TableHead>
-                <TableHead className="w-20 text-center">إجراءات</TableHead>
+                <TableHead className="min-w-52 text-right">{tr("الصورة والاسم الكامل")}</TableHead>
+                <TableHead className="min-w-28 text-right">{tr("الرقم الوظيفي")}</TableHead>
+                <TableHead className="min-w-32 text-right">{tr("القسم")}</TableHead>
+                <TableHead className="min-w-40 text-right">{tr("المسمى الوظيفي")}</TableHead>
+                <TableHead className="min-w-32 text-right">{tr("تاريخ التعيين")}</TableHead>
+                <TableHead className="min-w-24 text-right">{tr("الحالة")}</TableHead>
+                <TableHead className="w-20 text-center">{tr("إجراءات")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -578,12 +579,12 @@ function EmployeesPage() {
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent dir="rtl" className="w-[calc(100vw-2rem)] max-w-sm rounded-xl font-sans">
           <AlertDialogHeader className="text-right sm:text-right">
-            <AlertDialogTitle>حذف الموظف</AlertDialogTitle>
-            <AlertDialogDescription>سيُحذف سجل {selected?.full_name} نهائياً. لا يمكن التراجع عن هذه الخطوة.</AlertDialogDescription>
+            <AlertDialogTitle>{tr("حذف الموظف")}</AlertDialogTitle>
+            <AlertDialogDescription>{tr("سيُحذف سجل")} {selected?.full_name} {tr("نهائياً. لا يمكن التراجع عن هذه الخطوة.")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:space-x-0">
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={() => void deleteEmployee()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">حذف</AlertDialogAction>
+            <AlertDialogCancel>{tr("إلغاء")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void deleteEmployee()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{tr("حذف")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -595,7 +596,7 @@ function FilterSelect({ label, value, onChange, options }: { label: string; valu
   return (
     <Select dir="rtl" value={value} onValueChange={onChange}>
       <SelectTrigger className="h-10 rounded-lg border-primary/10 bg-background"><SelectValue placeholder={label} /></SelectTrigger>
-      <SelectContent dir="rtl" position="popper" className="z-[120] max-h-64"><SelectItem value="all">كل {label === "القسم" ? "الأقسام" : label === "الحالة" ? "الحالات" : "أنواع الدوام"}</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
+      <SelectContent dir="rtl" position="popper" className="z-[120] max-h-64"><SelectItem value="all">{tr("كل")} {label === "القسم" ? tr("الأقسام") : label === "الحالة" ? tr("الحالات") : tr("أنواع الدوام")}</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
     </Select>
   );
 }
@@ -607,17 +608,17 @@ function EmployeeAvatar({ name }: { name: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const active = status === "active";
-  return <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium", active ? "border-success/20 bg-success/10 text-success" : "border-destructive/15 bg-muted text-muted-foreground")}><span className={cn("size-1.5 rounded-full", active ? "bg-success" : "bg-muted-foreground")} />{active ? "نشط" : "مستقيل"}</span>;
+  return <span className={cn("inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium", active ? "border-success/20 bg-success/10 text-success" : "border-destructive/15 bg-muted text-muted-foreground")}><span className={cn("size-1.5 rounded-full", active ? "bg-success" : "bg-muted-foreground")} />{active ? tr("نشط") : tr("مستقيل")}</span>;
 }
 
 function EmployeeActions({ employee, canEdit, canDelete, onView, onEdit, onDelete }: { employee: Employee; canEdit: boolean; canDelete: boolean; onView: () => void; onEdit: () => void; onDelete: () => void }) {
   return (
     <DropdownMenu dir="rtl">
-      <DropdownMenuTrigger asChild><Button type="button" variant="ghost" size="icon" aria-label={`إجراءات ${employee.full_name}`}><MoreHorizontal /></Button></DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild><Button type="button" variant="ghost" size="icon" aria-label={trf("إجراءات {0}", employee.full_name)}><MoreHorizontal /></Button></DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuItem onSelect={onView}><Eye />عرض الملف</DropdownMenuItem>
-        {canEdit ? <DropdownMenuItem onSelect={onEdit}><Pencil />تعديل</DropdownMenuItem> : null}
-        {canDelete ? <DropdownMenuItem onSelect={onDelete} className="text-destructive focus:text-destructive"><Trash2 />حذف</DropdownMenuItem> : null}
+        <DropdownMenuItem onSelect={onView}><Eye />{tr("عرض الملف")}</DropdownMenuItem>
+        {canEdit ? <DropdownMenuItem onSelect={onEdit}><Pencil />{tr("تعديل")}</DropdownMenuItem> : null}
+        {canDelete ? <DropdownMenuItem onSelect={onDelete} className="text-destructive focus:text-destructive"><Trash2 />{tr("حذف")}</DropdownMenuItem> : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -649,8 +650,8 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent dir="rtl" className="z-[100] flex max-h-[88dvh] w-[calc(100vw-1.25rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl border-primary/15 bg-card p-0 font-sans shadow-card">
         <DialogHeader className="border-b border-border bg-muted/25 px-5 py-4 pe-12 text-right sm:text-right">
-          <DialogTitle className="font-kufi text-base font-normal leading-7">{editing ? "تعديل بيانات الموظف" : "إضافة موظف جديد"}</DialogTitle>
-          <DialogDescription className="text-xs leading-6">أدخل بيانات الموظف على ثلاث خطوات متتالية</DialogDescription>
+          <DialogTitle className="font-kufi text-base font-normal leading-7">{editing ? tr("تعديل بيانات الموظف") : tr("إضافة موظف جديد")}</DialogTitle>
+          <DialogDescription className="text-xs leading-6">{tr("أدخل بيانات الموظف على ثلاث خطوات متتالية")}</DialogDescription>
         </DialogHeader>
 
         <div className="shrink-0 px-4 pt-3 sm:px-5 sm:pt-4">
@@ -681,8 +682,8 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
           </div>
 
           <div className="flex shrink-0 items-center justify-between gap-2 border-t border-border bg-muted/20 px-4 py-3 sm:px-5 sm:py-4">
-            <Button type="button" variant="outline" onClick={() => step === 1 ? onOpenChange(false) : setStep(step - 1)}>{step === 1 ? "إلغاء" : <><ChevronRight />السابق</>}</Button>
-            {step < 3 ? <Button type="button" onClick={onNext}>التالي<ChevronLeft /></Button> : <Button type="submit" disabled={saving}>{saving ? <LoaderCircle className="animate-spin" /> : <Check />}{editing ? "حفظ التعديلات" : "حفظ الموظف"}</Button>}
+            <Button type="button" variant="outline" onClick={() => step === 1 ? onOpenChange(false) : setStep(step - 1)}>{step === 1 ? tr("إلغاء") : <><ChevronRight />{tr("السابق")}</>}</Button>
+            {step < 3 ? <Button type="button" onClick={onNext}>{tr("التالي")}<ChevronLeft /></Button> : <Button type="submit" disabled={saving}>{saving ? <LoaderCircle className="animate-spin" /> : <Check />}{editing ? tr("حفظ التعديلات") : tr("حفظ الموظف")}</Button>}
           </div>
         </form>
       </DialogContent>
@@ -695,9 +696,9 @@ const ADD_VALUE = "__add_new__";
 type QuickAddKind = "branch" | "department" | "manager";
 
 const QUICK_ADD_LABELS: Record<QuickAddKind, { title: string; field: string; trigger: string }> = {
-  branch: { title: "إضافة فرع جديد", field: "اسم الفرع الجديد", trigger: "+ إضافة فرع جديد" },
-  department: { title: "إضافة قسم جديد", field: "اسم القسم الجديد", trigger: "+ إضافة قسم جديد" },
-  manager: { title: "إضافة مدير مباشر", field: "اسم المدير المباشر", trigger: "+ إضافة مدير مباشر" },
+  branch: { title: tr("إضافة فرع جديد"), field: tr("اسم الفرع الجديد"), trigger: tr("+ إضافة فرع جديد") },
+  department: { title: tr("إضافة قسم جديد"), field: tr("اسم القسم الجديد"), trigger: tr("+ إضافة قسم جديد") },
+  manager: { title: tr("إضافة مدير مباشر"), field: tr("اسم المدير المباشر"), trigger: tr("+ إضافة مدير مباشر") },
 };
 
 function EmploymentFields({ form, setField, branches, managers, departments, isAdmin, errors, onCreateBranch, onCreateDepartment, onCreateManager }: {
@@ -726,7 +727,7 @@ function EmploymentFields({ form, setField, branches, managers, departments, isA
   async function submitQuickAdd() {
     const name = quickName.trim();
     if (name.length < 2) {
-      setQuickError("أدخل اسماً صحيحاً");
+      setQuickError(tr("أدخل اسماً صحيحاً"));
       return;
     }
     setQuickSaving(true);
@@ -737,7 +738,7 @@ function EmploymentFields({ form, setField, branches, managers, departments, isA
       const id = await onCreateBranch(name);
       if (!id) {
         setQuickSaving(false);
-        setQuickError("تعذّر إضافة الفرع. تأكد من صلاحياتك.");
+        setQuickError(tr("تعذّر إضافة الفرع. تأكد من صلاحياتك."));
         return;
       }
       setField("branchId", id);
@@ -745,7 +746,7 @@ function EmploymentFields({ form, setField, branches, managers, departments, isA
       const id = await onCreateManager(name);
       if (!id) {
         setQuickSaving(false);
-        setQuickError("اختر الفرع أولاً ثم أضف المدير.");
+        setQuickError(tr("اختر الفرع أولاً ثم أضف المدير."));
         return;
       }
       setField("managerId", id);
@@ -758,50 +759,50 @@ function EmploymentFields({ form, setField, branches, managers, departments, isA
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="الرقم الوظيفي" hint="يولّده النظام تلقائياً عند الحفظ">
+      <Field label={tr("الرقم الوظيفي")} hint={tr("يولّده النظام تلقائياً عند الحفظ")}>
         <div className="flex h-11 items-center justify-between rounded-md border border-input bg-muted/40 px-3 text-sm text-muted-foreground">
-          <span>{form.employeeNumber || "تلقائي"}</span>
-          <span className="text-[10px]">غير قابل للتعديل</span>
+          <span>{form.employeeNumber || tr("تلقائي")}</span>
+          <span className="text-[10px]">{tr("غير قابل للتعديل")}</span>
         </div>
       </Field>
-      <Field label="البريد الإلكتروني العملي" required error={errors.workEmail}><Input dir="ltr" type="email" value={form.workEmail} onChange={(event) => setField("workEmail", event.target.value)} placeholder="name@company.com" aria-invalid={Boolean(errors.workEmail)} className="h-11 text-left" /></Field>
-      <Field label="القسم" required error={errors.department}>
+      <Field label={tr("البريد الإلكتروني العملي")} required error={errors.workEmail}><Input dir="ltr" type="email" value={form.workEmail} onChange={(event) => setField("workEmail", event.target.value)} placeholder="name@company.com" aria-invalid={Boolean(errors.workEmail)} className="h-11 text-left" /></Field>
+      <Field label={tr("القسم")} required error={errors.department}>
         <Select dir="rtl" value={form.department} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("department") : setField("department", value)}>
-          <SelectTrigger aria-invalid={Boolean(errors.department)} className="h-11"><SelectValue placeholder="اختر القسم" /></SelectTrigger>
+          <SelectTrigger aria-invalid={Boolean(errors.department)} className="h-11"><SelectValue placeholder={tr("اختر القسم")} /></SelectTrigger>
           <SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">
             {departments.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}
             <SelectItem value={ADD_VALUE} className={addRowClass}>{QUICK_ADD_LABELS.department.trigger}</SelectItem>
           </SelectContent>
         </Select>
       </Field>
-      <Field label="المسمى الوظيفي" required error={errors.position}><Input value={form.position} onChange={(event) => setField("position", event.target.value)} placeholder="مثال: أخصائي موارد بشرية" aria-invalid={Boolean(errors.position)} className="h-11" /></Field>
-      <Field label="المدير المباشر">
+      <Field label={tr("المسمى الوظيفي")} required error={errors.position}><Input value={form.position} onChange={(event) => setField("position", event.target.value)} placeholder={tr("مثال: أخصائي موارد بشرية")} aria-invalid={Boolean(errors.position)} className="h-11" /></Field>
+      <Field label={tr("المدير المباشر")}>
         <Select dir="rtl" value={form.managerId} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("manager") : setField("managerId", value)}>
-          <SelectTrigger className="h-11"><SelectValue placeholder="اختر المدير" /></SelectTrigger>
+          <SelectTrigger className="h-11"><SelectValue placeholder={tr("اختر المدير")} /></SelectTrigger>
           <SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">
-            <SelectItem value="none">بدون مدير مباشر</SelectItem>
+            <SelectItem value="none">{tr("بدون مدير مباشر")}</SelectItem>
             {managers.map((manager) => <SelectItem key={manager.id} value={manager.id}>{manager.full_name}</SelectItem>)}
             <SelectItem value={ADD_VALUE} className={addRowClass}>{QUICK_ADD_LABELS.manager.trigger}</SelectItem>
           </SelectContent>
         </Select>
       </Field>
-      <Field label="الفرع" required error={errors.branchId}>
+      <Field label={tr("الفرع")} required error={errors.branchId}>
         <Select dir="rtl" value={form.branchId} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("branch") : setField("branchId", value)} disabled={!isAdmin}>
-          <SelectTrigger aria-invalid={Boolean(errors.branchId)} className="h-11"><SelectValue placeholder="اختر الفرع" /></SelectTrigger>
+          <SelectTrigger aria-invalid={Boolean(errors.branchId)} className="h-11"><SelectValue placeholder={tr("اختر الفرع")} /></SelectTrigger>
           <SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">
             {branches.map((branch) => <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>)}
             <SelectItem value={ADD_VALUE} className={addRowClass}>{QUICK_ADD_LABELS.branch.trigger}</SelectItem>
           </SelectContent>
         </Select>
       </Field>
-      <Field label="تاريخ التعيين" required error={errors.hireDate}><GlassDatePicker ariaLabel="تاريخ التعيين" value={form.hireDate} onChange={(value) => setField("hireDate", value)} /></Field>
-      <Field label="نوع الدوام" required><Select dir="rtl" value={form.employmentType} onValueChange={(value) => setField("employmentType", value)}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">{Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></Field>
+      <Field label={tr("تاريخ التعيين")} required error={errors.hireDate}><GlassDatePicker ariaLabel={tr("تاريخ التعيين")} value={form.hireDate} onChange={(value) => setField("hireDate", value)} /></Field>
+      <Field label={tr("نوع الدوام")} required><Select dir="rtl" value={form.employmentType} onValueChange={(value) => setField("employmentType", value)}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">{Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></Field>
 
       <Dialog open={quickAdd !== null} onOpenChange={(open) => { if (!open) setQuickAdd(null); }}>
         <DialogContent dir="rtl" className="z-[300] w-[calc(100vw-2.5rem)] max-w-sm rounded-xl font-sans">
           <DialogHeader className="text-right sm:text-right">
             <DialogTitle className="font-kufi text-base font-normal leading-7">{quickAdd ? QUICK_ADD_LABELS[quickAdd].title : ""}</DialogTitle>
-            <DialogDescription className="text-xs">سيُضاف مباشرة إلى خيارات النظام ويُحدد في النموذج</DialogDescription>
+            <DialogDescription className="text-xs">{tr("سيُضاف مباشرة إلى خيارات النظام ويُحدد في النموذج")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
             <Label className="text-xs font-medium">{quickAdd ? QUICK_ADD_LABELS[quickAdd].field : ""}</Label>
@@ -809,8 +810,8 @@ function EmploymentFields({ form, setField, branches, managers, departments, isA
             {quickError ? <p className="text-[11px] text-destructive">{quickError}</p> : null}
           </div>
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => setQuickAdd(null)}>إلغاء</Button>
-            <Button type="button" onClick={() => void submitQuickAdd()} disabled={quickSaving}>{quickSaving ? <LoaderCircle className="animate-spin" /> : <Plus />}إضافة وحفظ</Button>
+            <Button type="button" variant="outline" onClick={() => setQuickAdd(null)}>{tr("إلغاء")}</Button>
+            <Button type="button" onClick={() => void submitQuickAdd()} disabled={quickSaving}>{quickSaving ? <LoaderCircle className="animate-spin" /> : <Plus />}{tr("إضافة وحفظ")}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -821,10 +822,10 @@ function EmploymentFields({ form, setField, branches, managers, departments, isA
 function PersonalFields({ form, setField, errors }: { form: EmployeeForm; setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void; errors: FieldErrors }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="الاسم الكامل" required error={errors.fullName}><Input value={form.fullName} onChange={(event) => setField("fullName", event.target.value)} placeholder="الاسم الكامل" aria-invalid={Boolean(errors.fullName)} className="h-11" /></Field>
-      <Field label="الاسم بالإنجليزية" hint="اختياري"><Input dir="ltr" value={form.fullNameEn} onChange={(event) => setField("fullNameEn", event.target.value)} placeholder="Full name" className="h-11 text-left" /></Field>
-      <Field label="رقم الهوية / الجواز" required error={errors.nationalId}><Input dir="ltr" value={form.nationalId} onChange={(event) => setField("nationalId", event.target.value)} placeholder="رقم الهوية أو الجواز" aria-invalid={Boolean(errors.nationalId)} className="h-11 text-left" /></Field>
-      <Field label="رقم الجوال" required error={errors.phone}>
+      <Field label={tr("الاسم الكامل")} required error={errors.fullName}><Input value={form.fullName} onChange={(event) => setField("fullName", event.target.value)} placeholder={tr("الاسم الكامل")} aria-invalid={Boolean(errors.fullName)} className="h-11" /></Field>
+      <Field label={tr("الاسم بالإنجليزية")} hint={tr("اختياري")}><Input dir="ltr" value={form.fullNameEn} onChange={(event) => setField("fullNameEn", event.target.value)} placeholder="Full name" className="h-11 text-left" /></Field>
+      <Field label={tr("رقم الهوية / الجواز")} required error={errors.nationalId}><Input dir="ltr" value={form.nationalId} onChange={(event) => setField("nationalId", event.target.value)} placeholder={tr("رقم الهوية أو الجواز")} aria-invalid={Boolean(errors.nationalId)} className="h-11 text-left" /></Field>
+      <Field label={tr("رقم الجوال")} required error={errors.phone}>
         <Input
           dir="ltr"
           type="tel"
@@ -832,44 +833,44 @@ function PersonalFields({ form, setField, errors }: { form: EmployeeForm; setFie
           value={form.phone}
           onChange={(event) => setField("phone", event.target.value.replace(/[^\d+\s-]/g, ""))}
           placeholder="+967 7XXXXXXXX"
-          aria-label="رقم الجوال"
+          aria-label={tr("رقم الجوال")}
           aria-invalid={Boolean(errors.phone)}
           className="h-11 text-left"
         />
       </Field>
-      <Field label="تاريخ الميلاد" required error={errors.birthDate}><GlassDatePicker ariaLabel="تاريخ الميلاد" value={form.birthDate} onChange={(value) => setField("birthDate", value)} /></Field>
-      <Field label="الجنس" required error={errors.gender}><Select dir="rtl" value={form.gender} onValueChange={(value) => setField("gender", value)}><SelectTrigger aria-invalid={Boolean(errors.gender)} className="h-11"><SelectValue placeholder="اختر الجنس" /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64"><SelectItem value="male">ذكر</SelectItem><SelectItem value="female">أنثى</SelectItem></SelectContent></Select></Field>
-      <Field label="الجنسية" required error={errors.nationality} className="sm:col-span-2"><Input value={form.nationality} onChange={(event) => setField("nationality", event.target.value)} placeholder="الجنسية" aria-invalid={Boolean(errors.nationality)} className="h-11" /></Field>
+      <Field label={tr("تاريخ الميلاد")} required error={errors.birthDate}><GlassDatePicker ariaLabel={tr("تاريخ الميلاد")} value={form.birthDate} onChange={(value) => setField("birthDate", value)} /></Field>
+      <Field label={tr("الجنس")} required error={errors.gender}><Select dir="rtl" value={form.gender} onValueChange={(value) => setField("gender", value)}><SelectTrigger aria-invalid={Boolean(errors.gender)} className="h-11"><SelectValue placeholder={tr("اختر الجنس")} /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64"><SelectItem value="male">{tr("ذكر")}</SelectItem><SelectItem value="female">{tr("أنثى")}</SelectItem></SelectContent></Select></Field>
+      <Field label={tr("الجنسية")} required error={errors.nationality} className="sm:col-span-2"><Input value={form.nationality} onChange={(event) => setField("nationality", event.target.value)} placeholder={tr("الجنسية")} aria-invalid={Boolean(errors.nationality)} className="h-11" /></Field>
     </div>
   );
 }
 
 function FinancialFields({ form, setField, isAdmin, errors }: { form: EmployeeForm; setField: <K extends keyof EmployeeForm>(field: K, value: EmployeeForm[K]) => void; isAdmin: boolean; errors: FieldErrors }) {
-  if (!isAdmin) return <div className="grid min-h-52 place-items-center rounded-xl border border-dashed border-primary/20 bg-primary/5 px-6 text-center"><div><WalletCards className="mx-auto mb-3 size-9 text-primary" /><p className="font-medium">البيانات المالية محمية</p><p className="mt-1 text-sm leading-6 text-muted-foreground">يمكن للمدير فقط إدخال الراتب والبدلات. يمكنك حفظ الموظف الآن وسيضيف المدير بياناته المالية لاحقاً.</p></div></div>;
+  if (!isAdmin) return <div className="grid min-h-52 place-items-center rounded-xl border border-dashed border-primary/20 bg-primary/5 px-6 text-center"><div><WalletCards className="mx-auto mb-3 size-9 text-primary" /><p className="font-medium">{tr("البيانات المالية محمية")}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{tr("يمكن للمدير فقط إدخال الراتب والبدلات. يمكنك حفظ الموظف الآن وسيضيف المدير بياناته المالية لاحقاً.")}</p></div></div>;
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="الراتب الأساسي" required error={errors.baseSalary}><MoneyInput value={form.baseSalary} onChange={(value) => setField("baseSalary", value)} invalid={Boolean(errors.baseSalary)} /></Field>
-      <Field label="بدل السكن" required error={errors.housingAllowance}><MoneyInput value={form.housingAllowance} onChange={(value) => setField("housingAllowance", value)} invalid={Boolean(errors.housingAllowance)} /></Field>
-      <Field label="بدل النقل" required error={errors.transportAllowance}><MoneyInput value={form.transportAllowance} onChange={(value) => setField("transportAllowance", value)} invalid={Boolean(errors.transportAllowance)} /></Field>
-      <Field label="اسم البنك" required error={errors.bankName}><Input value={form.bankName} onChange={(event) => setField("bankName", event.target.value)} placeholder="اسم البنك" aria-invalid={Boolean(errors.bankName)} className="h-11" /></Field>
+      <Field label={tr("الراتب الأساسي")} required error={errors.baseSalary}><MoneyInput value={form.baseSalary} onChange={(value) => setField("baseSalary", value)} invalid={Boolean(errors.baseSalary)} /></Field>
+      <Field label={tr("بدل السكن")} required error={errors.housingAllowance}><MoneyInput value={form.housingAllowance} onChange={(value) => setField("housingAllowance", value)} invalid={Boolean(errors.housingAllowance)} /></Field>
+      <Field label={tr("بدل النقل")} required error={errors.transportAllowance}><MoneyInput value={form.transportAllowance} onChange={(value) => setField("transportAllowance", value)} invalid={Boolean(errors.transportAllowance)} /></Field>
+      <Field label={tr("اسم البنك")} required error={errors.bankName}><Input value={form.bankName} onChange={(event) => setField("bankName", event.target.value)} placeholder={tr("اسم البنك")} aria-invalid={Boolean(errors.bankName)} className="h-11" /></Field>
     </div>
   );
 }
 
 function Field({ label, hint, required, error, className, children }: { label: string; hint?: string | undefined; required?: boolean | undefined; error?: string | undefined; className?: string | undefined; children: ReactNode }) {
-  return <div className={cn("space-y-1.5", className)}><div className="flex items-center justify-between gap-2"><Label className="text-xs font-medium">{label}</Label>{required ? <span className="text-[10px] text-muted-foreground">مطلوب</span> : null}</div>{children}{error ? <p className="text-[11px] leading-5 text-destructive">{error}</p> : hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}</div>;
+  return <div className={cn("space-y-1.5", className)}><div className="flex items-center justify-between gap-2"><Label className="text-xs font-medium">{label}</Label>{required ? <span className="text-[10px] text-muted-foreground">{tr("مطلوب")}</span> : null}</div>{children}{error ? <p className="text-[11px] leading-5 text-destructive">{error}</p> : hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}</div>;
 }
 
 function MoneyInput({ value, onChange, invalid }: { value: string; onChange: (value: string) => void; invalid?: boolean }) {
-  return <div className="relative"><Input dir="ltr" type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(event.target.value)} placeholder="" aria-invalid={invalid} className="h-11 pe-14 text-left" /><span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">ر.ي</span></div>;
+  return <div className="relative"><Input dir="ltr" type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(event.target.value)} placeholder="" aria-invalid={invalid} className="h-11 pe-14 text-left" /><span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{tr("ر.ي")}</span></div>;
 }
 
 function EmployeeDetails({ employee, open, onOpenChange }: { employee: Employee | null; open: boolean; onOpenChange: (open: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent dir="rtl" className="w-[calc(100vw-1.5rem)] max-w-md rounded-xl font-sans">
-        <DialogHeader className="text-right sm:text-right"><DialogTitle className="font-kufi text-base font-normal leading-7">ملف الموظف</DialogTitle><DialogDescription>بيانات الموظف الوظيفية والشخصية</DialogDescription></DialogHeader>
-        {employee ? <div className="space-y-4"><div className="flex items-center gap-3 rounded-lg border bg-muted/25 p-3"><EmployeeAvatar name={employee.full_name} /><div><p className="font-medium">{employee.full_name}</p><p dir="ltr" className="text-left text-xs text-muted-foreground">{employee.employee_number}</p></div></div><dl className="grid grid-cols-2 gap-3 text-sm"><Detail label="القسم" value={employee.department} /><Detail label="المسمى" value={employee.position} /><Detail label="نوع الدوام" value={EMPLOYMENT_LABELS[employee.employment_type]} /><Detail label="تاريخ التعيين" value={formatArabicDate(employee.hire_date)} /><Detail label="البريد العملي" value={employee.work_email} /><Detail label="الهاتف" value={employee.phone} /></dl></div> : null}
+        <DialogHeader className="text-right sm:text-right"><DialogTitle className="font-kufi text-base font-normal leading-7">{tr("ملف الموظف")}</DialogTitle><DialogDescription>{tr("بيانات الموظف الوظيفية والشخصية")}</DialogDescription></DialogHeader>
+        {employee ? <div className="space-y-4"><div className="flex items-center gap-3 rounded-lg border bg-muted/25 p-3"><EmployeeAvatar name={employee.full_name} /><div><p className="font-medium">{employee.full_name}</p><p dir="ltr" className="text-left text-xs text-muted-foreground">{employee.employee_number}</p></div></div><dl className="grid grid-cols-2 gap-3 text-sm"><Detail label={tr("القسم")} value={employee.department} /><Detail label={tr("المسمى")} value={employee.position} /><Detail label={tr("نوع الدوام")} value={EMPLOYMENT_LABELS[employee.employment_type]} /><Detail label={tr("تاريخ التعيين")} value={formatArabicDate(employee.hire_date)} /><Detail label={tr("البريد العملي")} value={employee.work_email} /><Detail label={tr("الهاتف")} value={employee.phone} /></dl></div> : null}
       </DialogContent>
     </Dialog>
   );

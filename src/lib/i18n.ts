@@ -59,3 +59,8 @@ export function setLanguage(lang: AppLanguage) {
 
 /** Inline script that sets <html lang/dir> before first paint. */
 export const LANGUAGE_BOOT_SCRIPT = `try{var l=localStorage.getItem("${LANGUAGE_STORAGE_KEY}")==="en"?"en":"ar";document.documentElement.lang=l;document.documentElement.dir=l==="en"?"ltr":"rtl";}catch(e){}`;
+
+/** Translate a template with positional placeholders {0}, {1}... */
+export function trf(template: string, ...values: unknown[]): string {
+  return tr(template).replace(/\{(\d+)\}/g, (_, i) => String(values[Number(i)] ?? ""));
+}

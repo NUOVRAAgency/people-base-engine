@@ -24,13 +24,14 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
+import { tr, trf } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/attendance")({
   head: () => ({
     meta: [
-      { title: "الحضور | نظام الموارد البشرية" },
-      { name: "description", content: "سجل الحضور اليومي والملخص الشهري وإعدادات الدوام" },
-      { property: "og:title", content: "الحضور | نظام الموارد البشرية" },
-      { property: "og:description", content: "سجل الحضور اليومي والملخص الشهري وإعدادات الدوام" },
+      { title: tr("الحضور | نظام الموارد البشرية") },
+      { name: "description", content: tr("سجل الحضور اليومي والملخص الشهري وإعدادات الدوام") },
+      { property: "og:title", content: tr("الحضور | نظام الموارد البشرية") },
+      { property: "og:description", content: tr("سجل الحضور اليومي والملخص الشهري وإعدادات الدوام") },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -106,15 +107,15 @@ function minutesOf(value: string) {
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/).slice(0, 2);
-  return parts.map((part) => part.charAt(0)).join("") || "م";
+  return parts.map((part) => part.charAt(0)).join("") || tr("م");
 }
 
 const STATUS_META: Record<string, { label: string; badge: string; dot: string }> = {
-  present: { label: "حاضر", badge: "bg-success/12 text-success", dot: "bg-success" },
-  late: { label: "متاخر", badge: "bg-warning/20 text-warning-foreground", dot: "bg-warning" },
-  absent: { label: "غائب", badge: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
-  leave: { label: "في اجازة", badge: "bg-primary/10 text-primary", dot: "bg-primary" },
-  none: { label: "لم يسجل", badge: "bg-muted text-muted-foreground", dot: "bg-muted-foreground/40" },
+  present: { label: tr("حاضر"), badge: "bg-success/12 text-success", dot: "bg-success" },
+  late: { label: tr("متاخر"), badge: "bg-warning/20 text-warning-foreground", dot: "bg-warning" },
+  absent: { label: tr("غائب"), badge: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
+  leave: { label: tr("في اجازة"), badge: "bg-primary/10 text-primary", dot: "bg-primary" },
+  none: { label: tr("لم يسجل"), badge: "bg-muted text-muted-foreground", dot: "bg-muted-foreground/40" },
 };
 
 function AttendancePage() {
@@ -192,7 +193,7 @@ function AttendancePage() {
   function openForm(employee?: Employee) {
     const target = employee ?? employees[0];
     if (!target) {
-      setFeedback({ kind: "error", message: "اضف موظفا اولا من قسم الموظفين" });
+      setFeedback({ kind: "error", message: tr("اضف موظفا اولا من قسم الموظفين") });
       return;
     }
     setEditing({ employee: target, row: rowByEmployee.get(target.id) ?? null });
@@ -209,11 +210,11 @@ function AttendancePage() {
     };
     const { error } = await supabase.from("app_settings").update(payload).eq("id", "organization");
     if (error) {
-      setFeedback({ kind: "error", message: "تعذر حفظ اعدادات الدوام. الصلاحية للمدير فقط." });
+      setFeedback({ kind: "error", message: tr("تعذر حفظ اعدادات الدوام. الصلاحية للمدير فقط.") });
       return;
     }
     setSettings(payload);
-    setFeedback({ kind: "success", message: "تم حفظ اعدادات الدوام" });
+    setFeedback({ kind: "success", message: tr("تم حفظ اعدادات الدوام") });
   }
 
   return (
@@ -221,34 +222,34 @@ function AttendancePage() {
       <div className="sticky top-[72px] z-30 -mx-4 space-y-3 border-b border-border/40 bg-background/85 px-4 pb-3 pt-3 backdrop-blur-md md:top-[76px] md:-mx-6 md:px-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="min-w-0">
-            <h2 className="hidden text-xl font-medium leading-[1.6] text-foreground md:block md:text-2xl">الحضور</h2>
+            <h2 className="hidden text-xl font-medium leading-[1.6] text-foreground md:block md:text-2xl">{tr("الحضور")}</h2>
             <p className="truncate text-[13px] leading-[1.7] text-muted-foreground">{dayFormatter.format(new Date(`${today}T00:00:00`))}</p>
           </div>
           <div className="flex items-center gap-1 rounded-full border border-border/40 bg-card/75 p-1 shadow-glass backdrop-blur-sm">
-            <Button type="button" variant="ghost" size="icon" className="size-8 rounded-full" aria-label="اليوم السابق" onClick={() => shiftDay(-1)}>
+            <Button type="button" variant="ghost" size="icon" className="size-8 rounded-full" aria-label={tr("اليوم السابق")} onClick={() => shiftDay(-1)}>
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Button>
             <Button type="button" variant="ghost" size="sm" className="h-8 rounded-full px-3 text-xs font-medium" onClick={() => setToday(dateKey(new Date()))}>
-              اليوم
+              {tr("اليوم")}
             </Button>
-            <Button type="button" variant="ghost" size="icon" className="size-8 rounded-full" aria-label="اليوم التالي" onClick={() => shiftDay(1)}>
+            <Button type="button" variant="ghost" size="icon" className="size-8 rounded-full" aria-label={tr("اليوم التالي")} onClick={() => shiftDay(1)}>
               <ChevronLeft className="h-4 w-4" aria-hidden />
             </Button>
           </div>
         </div>
 
         <section className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-          <KpiCard icon={<CheckCircle2 className="h-5 w-5" aria-hidden />} title="الحاضرون اليوم" value={numberFormatter.format(counts.present)} tone="text-success" />
-          <KpiCard icon={<Timer className="h-5 w-5" aria-hidden />} title="المتاخرون" value={numberFormatter.format(counts.late)} tone="text-warning-foreground" />
-          <KpiCard icon={<XCircle className="h-5 w-5" aria-hidden />} title="الغائبون" value={numberFormatter.format(counts.absent)} tone="text-destructive" />
-          <KpiCard icon={<Plane className="h-5 w-5" aria-hidden />} title="في اجازة" value={numberFormatter.format(counts.leave)} tone="text-primary" />
+          <KpiCard icon={<CheckCircle2 className="h-5 w-5" aria-hidden />} title={tr("الحاضرون اليوم")} value={numberFormatter.format(counts.present)} tone="text-success" />
+          <KpiCard icon={<Timer className="h-5 w-5" aria-hidden />} title={tr("المتاخرون")} value={numberFormatter.format(counts.late)} tone="text-warning-foreground" />
+          <KpiCard icon={<XCircle className="h-5 w-5" aria-hidden />} title={tr("الغائبون")} value={numberFormatter.format(counts.absent)} tone="text-destructive" />
+          <KpiCard icon={<Plane className="h-5 w-5" aria-hidden />} title={tr("في اجازة")} value={numberFormatter.format(counts.leave)} tone="text-primary" />
         </section>
 
         <nav className="flex gap-1 overflow-x-auto rounded-full border border-border/40 bg-card/75 p-1 shadow-glass backdrop-blur-sm scrollbar-hide">
           {([
-            { key: "today", label: "سجل اليوم" },
-            { key: "monthly", label: "الملخص الشهري" },
-            { key: "settings", label: "اعدادات الدوام" },
+            { key: "today", label: tr("سجل اليوم") },
+            { key: "monthly", label: tr("الملخص الشهري") },
+            { key: "settings", label: tr("اعدادات الدوام") },
           ] as { key: TabKey; label: string }[]).map((item) => (
             <button
               key={item.key}
@@ -280,17 +281,17 @@ function AttendancePage() {
         {loading ? (
           <p className="flex items-center justify-center gap-2 rounded-2xl border border-border/40 bg-card/75 p-10 text-sm text-muted-foreground shadow-glass backdrop-blur-sm">
             <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
-            جاري تحميل سجل الحضور
+            {tr("جاري تحميل سجل الحضور")}
           </p>
         ) : tab === "today" ? (
           <section className="space-y-3">
             <Button type="button" className="h-11 w-full rounded-xl text-sm font-medium md:w-auto md:px-6" onClick={() => openForm()}>
               <Plus className="h-4 w-4" aria-hidden />
-              تسجيل حضور يدوي
+              {tr("تسجيل حضور يدوي")}
             </Button>
 
             {!cards.length ? (
-              <EmptyState title="لا يوجد موظفون نشطون" detail="اضف موظفا من قسم الموظفين ليظهر سجل حضوره هنا" />
+              <EmptyState title={tr("لا يوجد موظفون نشطون")} detail={tr("اضف موظفا من قسم الموظفين ليظهر سجل حضوره هنا")} />
             ) : (
               <div className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
                 {cards.map((card) => {
@@ -309,7 +310,7 @@ function AttendancePage() {
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm font-medium text-foreground">{card.employee.full_name}</span>
                           <span className="block truncate text-xs text-muted-foreground">
-                            {card.employee.department ?? "بدون قسم"} — {card.employee.employee_number}
+                            {card.employee.department ?? tr("بدون قسم")} — {card.employee.employee_number}
                           </span>
                         </span>
                         <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium", meta.badge)}>{meta.label}</span>
@@ -326,7 +327,7 @@ function AttendancePage() {
                         {card.row && card.row.late_minutes > 0 ? (
                           <span className="ms-auto flex items-center gap-1.5 text-warning-foreground">
                             <Clock className="h-3.5 w-3.5" aria-hidden />
-                            تاخير {numberFormatter.format(card.row.late_minutes)} د
+                            {tr("تاخير")} {numberFormatter.format(card.row.late_minutes)} {tr("د")}
                           </span>
                         ) : null}
                       </div>
@@ -420,24 +421,24 @@ function ManualDialog({
     );
     setSaving(false);
     if (error) {
-      onError("تعذر حفظ سجل الحضور. تحقق من صلاحيتك على هذا الفرع.");
+      onError(tr("تعذر حفظ سجل الحضور. تحقق من صلاحيتك على هذا الفرع."));
       return;
     }
-    await onSaved("تم حفظ سجل الحضور");
+    await onSaved(tr("تم حفظ سجل الحضور"));
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent dir="rtl" className="max-w-md rounded-3xl border-border/40 bg-card/95 backdrop-blur-md">
         <DialogHeader className="text-start">
-          <DialogTitle className="text-base font-medium">تسجيل حضور يدوي</DialogTitle>
-          <DialogDescription className="text-xs">سجل وقت الدخول والخروج ليوم {date}</DialogDescription>
+          <DialogTitle className="text-base font-medium">{tr("تسجيل حضور يدوي")}</DialogTitle>
+          <DialogDescription className="text-xs">{tr("سجل وقت الدخول والخروج ليوم")} {date}</DialogDescription>
         </DialogHeader>
         <form onSubmit={(event) => void submit(event)} className="space-y-3">
           <FieldSelect
-            label="الموظف"
+            label={tr("الموظف")}
             value={editing?.employee.id ?? ""}
-            placeholder="اختر الموظف"
+            placeholder={tr("اختر الموظف")}
             onChange={(value) => {
               const employee = employees.find((item) => item.id === value);
               if (employee) onEditingChange({ employee, row: rowByEmployee.get(employee.id) ?? null });
@@ -450,20 +451,20 @@ function ManualDialog({
             ))}
           </FieldSelect>
 
-          <FieldSelect label="الحالة" value={status} placeholder="اختر الحالة" onChange={setStatus}>
-            <SelectItem value="present">حاضر</SelectItem>
-            <SelectItem value="late">متاخر</SelectItem>
-            <SelectItem value="absent">غائب</SelectItem>
+          <FieldSelect label={tr("الحالة")} value={status} placeholder={tr("اختر الحالة")} onChange={setStatus}>
+            <SelectItem value="present">{tr("حاضر")}</SelectItem>
+            <SelectItem value="late">{tr("متاخر")}</SelectItem>
+            <SelectItem value="absent">{tr("غائب")}</SelectItem>
           </FieldSelect>
 
           <div className="grid grid-cols-2 gap-3">
-            <TimeField label="وقت الدخول" value={checkIn} onChange={setCheckIn} disabled={status === "absent"} />
-            <TimeField label="وقت الخروج" value={checkOut} onChange={setCheckOut} disabled={status === "absent"} />
+            <TimeField label={tr("وقت الدخول")} value={checkIn} onChange={setCheckIn} disabled={status === "absent"} />
+            <TimeField label={tr("وقت الخروج")} value={checkOut} onChange={setCheckOut} disabled={status === "absent"} />
           </div>
 
           <Button type="submit" className="h-11 w-full rounded-xl text-sm font-medium" disabled={saving || !editing}>
             {saving ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <Save className="h-4 w-4" aria-hidden />}
-            حفظ السجل
+            {tr("حفظ السجل")}
           </Button>
         </form>
       </DialogContent>
@@ -533,7 +534,7 @@ function MonthlyTab({ employees }: { employees: Employee[] }) {
   return (
     <section className="space-y-3">
       <div className="grid gap-3 rounded-2xl border border-border/40 bg-card/75 p-4 shadow-glass backdrop-blur-sm sm:grid-cols-[1fr_auto] sm:items-end">
-        <FieldSelect label="الموظف" value={employeeId} placeholder="اختر الموظف" onChange={setEmployeeId}>
+        <FieldSelect label={tr("الموظف")} value={employeeId} placeholder={tr("اختر الموظف")} onChange={setEmployeeId}>
           {employees.map((employee) => (
             <SelectItem key={employee.id} value={employee.id}>
               {employee.full_name}
@@ -541,11 +542,11 @@ function MonthlyTab({ employees }: { employees: Employee[] }) {
           ))}
         </FieldSelect>
         <div className="flex items-center gap-1 rounded-full border border-border/40 bg-background/60 p-1">
-          <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label="الشهر السابق" onClick={() => shiftMonth(-1)}>
+          <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر السابق")} onClick={() => shiftMonth(-1)}>
             <ChevronRight className="h-4 w-4" aria-hidden />
           </Button>
           <span className="min-w-[120px] text-center text-sm font-medium text-foreground">{monthLabel(month)}</span>
-          <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label="الشهر التالي" onClick={() => shiftMonth(1)}>
+          <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر التالي")} onClick={() => shiftMonth(1)}>
             <ChevronLeft className="h-4 w-4" aria-hidden />
           </Button>
         </div>
@@ -554,22 +555,22 @@ function MonthlyTab({ employees }: { employees: Employee[] }) {
       {loading ? (
         <p className="flex items-center justify-center gap-2 rounded-2xl border border-border/40 bg-card/75 p-10 text-sm text-muted-foreground shadow-glass backdrop-blur-sm">
           <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
-          جاري تحميل الملخص
+          {tr("جاري تحميل الملخص")}
         </p>
       ) : (
         <>
           <div className="grid grid-cols-3 gap-2.5">
-            <SummaryCard label="ايام الحضور" value={numberFormatter.format(summary.present)} tone="text-success" />
+            <SummaryCard label={tr("ايام الحضور")} value={numberFormatter.format(summary.present)} tone="text-success" />
             <SummaryCard
-              label="ساعات التاخير"
+              label={tr("ساعات التاخير")}
               value={`${numberFormatter.format(lateHours)}:${String(lateRest).padStart(2, "0")}`}
               tone="text-warning-foreground"
             />
-            <SummaryCard label="غياب غير مبرر" value={numberFormatter.format(summary.absent)} tone="text-destructive" />
+            <SummaryCard label={tr("غياب غير مبرر")} value={numberFormatter.format(summary.absent)} tone="text-destructive" />
           </div>
 
           {!rows.length ? (
-            <EmptyState title="لا توجد سجلات لهذا الشهر" detail="سجل الحضور اليومي ليظهر الملخص هنا" />
+            <EmptyState title={tr("لا توجد سجلات لهذا الشهر")} detail={tr("سجل الحضور اليومي ليظهر الملخص هنا")} />
           ) : (
             <div className="overflow-hidden rounded-2xl border border-border/40 bg-card/75 shadow-glass backdrop-blur-sm">
               {rows.map((row) => {
@@ -609,7 +610,7 @@ function SettingsTab({
   if (!roleLoading && !isAdmin) {
     return (
       <p className="rounded-2xl border border-border/40 bg-card/75 p-6 text-center text-sm leading-[1.8] text-muted-foreground shadow-glass backdrop-blur-sm">
-        اعدادات الدوام متاحة لمدير النظام فقط.
+        {tr("اعدادات الدوام متاحة لمدير النظام فقط.")}
       </p>
     );
   }
@@ -622,20 +623,20 @@ function SettingsTab({
     >
       <p className="flex items-center gap-2 text-sm font-medium text-foreground">
         <CalendarDays className="h-4 w-4 text-primary" aria-hidden />
-        اعدادات الدوام الرسمي
+        {tr("اعدادات الدوام الرسمي")}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block space-y-1.5 text-sm">
-          <span className="block font-medium text-foreground">وقت بداية الدوام</span>
+          <span className="block font-medium text-foreground">{tr("وقت بداية الدوام")}</span>
           <Input name="work_start" type="time" defaultValue={settings.work_start} dir="ltr" className="h-11 rounded-xl text-left" />
         </label>
         <label className="block space-y-1.5 text-sm">
-          <span className="block font-medium text-foreground">وقت نهاية الدوام</span>
+          <span className="block font-medium text-foreground">{tr("وقت نهاية الدوام")}</span>
           <Input name="work_end" type="time" defaultValue={settings.work_end} dir="ltr" className="h-11 rounded-xl text-left" />
         </label>
       </div>
       <label className="block space-y-1.5 text-sm">
-        <span className="block font-medium text-foreground">فترة السماح بالدقائق</span>
+        <span className="block font-medium text-foreground">{tr("فترة السماح بالدقائق")}</span>
         <Input
           name="grace_minutes"
           type="number"
@@ -649,7 +650,7 @@ function SettingsTab({
       </label>
       <Button type="submit" className="h-11 w-full rounded-xl text-sm font-medium sm:w-auto sm:px-6">
         <Save className="h-4 w-4" aria-hidden />
-        حفظ التعديلات
+        {tr("حفظ التعديلات")}
       </Button>
     </form>
   );

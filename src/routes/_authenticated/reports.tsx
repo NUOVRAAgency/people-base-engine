@@ -24,13 +24,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { generateSmartReport } from "@/lib/ai-reports.functions";
 import { cn } from "@/lib/utils";
 
+import { tr, trf } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/reports")({
   head: () => ({
     meta: [
-      { title: "التقارير | نظام الموارد البشرية" },
-      { name: "description", content: "تقارير مالية وحضور وإجازات مع تحليل ذكي شهري" },
-      { property: "og:title", content: "التقارير | نظام الموارد البشرية" },
-      { property: "og:description", content: "تقارير مالية وحضور وإجازات مع تحليل ذكي شهري" },
+      { title: tr("التقارير | نظام الموارد البشرية") },
+      { name: "description", content: tr("تقارير مالية وحضور وإجازات مع تحليل ذكي شهري") },
+      { property: "og:title", content: tr("التقارير | نظام الموارد البشرية") },
+      { property: "og:description", content: tr("تقارير مالية وحضور وإجازات مع تحليل ذكي شهري") },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -81,15 +82,15 @@ const decimalFormatter = new Intl.NumberFormat("ar-YE-u-nu-latn", { maximumFract
 const monthFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { month: "long", year: "numeric" });
 
 const LEAVE_LABELS: Record<string, string> = {
-  annual: "سنوية",
-  sick: "مرضية",
-  unpaid: "بدون راتب",
-  emergency: "طارئة",
-  other: "اخرى",
+  annual: tr("سنوية"),
+  sick: tr("مرضية"),
+  unpaid: tr("بدون راتب"),
+  emergency: tr("طارئة"),
+  other: tr("اخرى"),
 };
 
 function money(value: number) {
-  return `${numberFormatter.format(Math.round(value))} ر.ي`;
+  return trf("{0} ر.ي", numberFormatter.format(Math.round(value)));
 }
 
 function monthKey(date: Date) {
@@ -151,7 +152,7 @@ function ReportsPage() {
     const outstanding = loans.reduce((total, row) => total + Math.max(0, Number(row.total_amount) - Number(row.paid_amount)), 0);
     const byDepartment = new Map<string, { total: number; count: number }>();
     payroll.forEach((row) => {
-      const name = employeeById.get(row.employee_id)?.department ?? "بدون قسم";
+      const name = employeeById.get(row.employee_id)?.department ?? tr("بدون قسم");
       const current = byDepartment.get(name) ?? { total: 0, count: 0 };
       byDepartment.set(name, { total: current.total + Number(row.net_salary), count: current.count + 1 });
     });
@@ -198,12 +199,12 @@ function ReportsPage() {
 
     const byDepartment = new Map<string, { used: number; headcount: number }>();
     employees.forEach((employee) => {
-      const name = employee.department ?? "بدون قسم";
+      const name = employee.department ?? tr("بدون قسم");
       const current = byDepartment.get(name) ?? { used: 0, headcount: 0 };
       byDepartment.set(name, { used: current.used, headcount: current.headcount + 1 });
     });
     approved.forEach((row) => {
-      const name = employeeById.get(row.employee_id)?.department ?? "بدون قسم";
+      const name = employeeById.get(row.employee_id)?.department ?? tr("بدون قسم");
       const current = byDepartment.get(name) ?? { used: 0, headcount: 0 };
       const days =
         Math.floor((new Date(`${row.end_date}T00:00:00`).getTime() - new Date(`${row.start_date}T00:00:00`).getTime()) / 86400000) + 1;
@@ -229,21 +230,21 @@ function ReportsPage() {
 
   function exportReport() {
     const rows: string[][] = [
-      ["التقرير", monthLabel(month)],
+      [tr("التقرير"), monthLabel(month)],
       [],
-      ["إجمالي الرواتب المصروفة", String(Math.round(finance.net))],
-      ["إجمالي الخصومات", String(Math.round(finance.deductions))],
-      ["السلف القائمة", String(Math.round(finance.outstanding))],
+      [tr("إجمالي الرواتب المصروفة"), String(Math.round(finance.net))],
+      [tr("إجمالي الخصومات"), String(Math.round(finance.deductions))],
+      [tr("السلف القائمة"), String(Math.round(finance.outstanding))],
       [],
-      ["القسم", "إجمالي المصروف"],
+      [tr("القسم"), tr("إجمالي المصروف")],
       ...finance.departments.map((item) => [item.name, String(Math.round(item.total))]),
       [],
-      ["أيام الحضور", String(attendanceStats.present)],
-      ["أيام التأخير", String(attendanceStats.late)],
-      ["دقائق التأخير", String(attendanceStats.lateMinutes)],
-      ["أيام الغياب", String(attendanceStats.absent)],
+      [tr("أيام الحضور"), String(attendanceStats.present)],
+      [tr("أيام التأخير"), String(attendanceStats.late)],
+      [tr("دقائق التأخير"), String(attendanceStats.lateMinutes)],
+      [tr("أيام الغياب"), String(attendanceStats.absent)],
       [],
-      ["نوع الإجازة", "الأيام"],
+      [tr("نوع الإجازة"), tr("الأيام")],
       ...leaveStats.types.map((item) => [item.label, String(item.days)]),
     ];
     const csv = "\uFEFF" + rows.map((row) => row.join(",")).join("\n");
@@ -258,14 +259,14 @@ function ReportsPage() {
   const summaryForAi = useMemo(
     () =>
       [
-        `الشهر: ${monthLabel(month)}`,
-        `عدد الموظفين النشطين: ${employees.length}`,
-        `اجمالي الرواتب: ${Math.round(finance.net)} ريال`,
-        `اجمالي الخصومات: ${Math.round(finance.deductions)} ريال`,
-        `السلف القائمة: ${Math.round(finance.outstanding)} ريال`,
-        `ايام الحضور: ${attendanceStats.present}, التاخير: ${attendanceStats.late}, الغياب: ${attendanceStats.absent}, دقائق التاخير: ${attendanceStats.lateMinutes}`,
-        `ايام الاجازات المعتمدة: ${leaveStats.totalDays}, طلبات معلقة: ${leaveStats.pending}`,
-        `توزيع المصروفات: ${finance.departments.map((item) => `${item.name}: ${Math.round(item.total)}`).join(" | ") || "لا يوجد"}`,
+        trf("الشهر: {0}", monthLabel(month)),
+        trf("عدد الموظفين النشطين: {0}", employees.length),
+        trf("اجمالي الرواتب: {0} ريال", Math.round(finance.net)),
+        trf("اجمالي الخصومات: {0} ريال", Math.round(finance.deductions)),
+        trf("السلف القائمة: {0} ريال", Math.round(finance.outstanding)),
+        trf("ايام الحضور: {0}, التاخير: {1}, الغياب: {2}, دقائق التاخير: {3}", attendanceStats.present, attendanceStats.late, attendanceStats.absent, attendanceStats.lateMinutes),
+        trf("ايام الاجازات المعتمدة: {0}, طلبات معلقة: {1}", leaveStats.totalDays, leaveStats.pending),
+        trf("توزيع المصروفات: {0}", finance.departments.map((item) => `${item.name}: ${Math.round(item.total)}`).join(" | ") || "لا يوجد"),
       ].join("\n"),
     [month, employees.length, finance, attendanceStats, leaveStats],
   );
@@ -274,39 +275,39 @@ function ReportsPage() {
     <div className="mx-auto w-full max-w-6xl space-y-5 pb-6">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="hidden text-xl font-medium leading-[1.6] text-foreground md:block md:text-2xl">التقارير</h2>
-          <p className="text-sm leading-[1.7] text-muted-foreground">ملخص مالي وحضور واجازات مع تحليل ذكي</p>
+          <h2 className="hidden text-xl font-medium leading-[1.6] text-foreground md:block md:text-2xl">{tr("التقارير")}</h2>
+          <p className="text-sm leading-[1.7] text-muted-foreground">{tr("ملخص مالي وحضور واجازات مع تحليل ذكي")}</p>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 rounded-full border border-border/60 bg-card/75 p-1 shadow-glass backdrop-blur-sm">
-            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label="الشهر السابق" onClick={() => shiftMonth(-1)}>
+            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر السابق")} onClick={() => shiftMonth(-1)}>
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Button>
             <span className="min-w-[120px] text-center text-sm font-medium text-foreground">{monthLabel(month)}</span>
-            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label="الشهر التالي" onClick={() => shiftMonth(1)}>
+            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر التالي")} onClick={() => shiftMonth(1)}>
               <ChevronLeft className="h-4 w-4" aria-hidden />
             </Button>
           </div>
           <Button type="button" className="h-10 rounded-xl px-4 text-sm font-medium" onClick={exportReport}>
             <Download className="h-4 w-4" aria-hidden />
-            تصدير التقرير
+            {tr("تصدير التقرير")}
           </Button>
         </div>
       </header>
 
       {!roleLoading && !isAdmin ? (
         <p className="rounded-2xl border border-border bg-card p-6 text-center text-sm leading-[1.8] text-muted-foreground shadow-glass">
-          التقارير متاحة لمدير النظام فقط.
+          {tr("التقارير متاحة لمدير النظام فقط.")}
         </p>
       ) : (
         <>
           <nav className="flex gap-1 overflow-x-auto rounded-full border border-border/60 bg-card/75 p-1 shadow-glass backdrop-blur-sm scrollbar-hide">
             {(
               [
-                { key: "finance", label: "المالي والرواتب" },
-                { key: "attendance", label: "الحضور والالتزام" },
-                { key: "leaves", label: "الإجازات" },
-                { key: "insights", label: "التحليل الذكي" },
+                { key: "finance", label: tr("المالي والرواتب") },
+                { key: "attendance", label: tr("الحضور والالتزام") },
+                { key: "leaves", label: tr("الإجازات") },
+                { key: "insights", label: tr("التحليل الذكي") },
               ] as { key: TabKey; label: string }[]
             ).map((item) => (
               <button
@@ -326,19 +327,19 @@ function ReportsPage() {
           {loading ? (
             <p className="flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/75 p-10 text-sm text-muted-foreground shadow-glass backdrop-blur-sm">
               <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
-              جاري تجهيز التقارير
+              {tr("جاري تجهيز التقارير")}
             </p>
           ) : tab === "finance" ? (
             <section className="space-y-4">
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-                <KpiCard icon={<Wallet className="h-5 w-5" aria-hidden />} title="الرواتب المصروفة" value={money(finance.net)} tone="text-primary" />
-                <KpiCard icon={<TrendingDown className="h-5 w-5" aria-hidden />} title="الخصومات والاستقطاعات" value={money(finance.deductions)} tone="text-destructive" />
-                <KpiCard icon={<HandCoins className="h-5 w-5" aria-hidden />} title="السلف القائمة" value={money(finance.outstanding)} tone="text-warning-foreground" />
+                <KpiCard icon={<Wallet className="h-5 w-5" aria-hidden />} title={tr("الرواتب المصروفة")} value={money(finance.net)} tone="text-primary" />
+                <KpiCard icon={<TrendingDown className="h-5 w-5" aria-hidden />} title={tr("الخصومات والاستقطاعات")} value={money(finance.deductions)} tone="text-destructive" />
+                <KpiCard icon={<HandCoins className="h-5 w-5" aria-hidden />} title={tr("السلف القائمة")} value={money(finance.outstanding)} tone="text-warning-foreground" />
               </div>
 
-              <Panel title="توزيع المصروفات حسب الأقسام" icon={<Building2 className="h-4 w-4" aria-hidden />}>
+              <Panel title={tr("توزيع المصروفات حسب الأقسام")} icon={<Building2 className="h-4 w-4" aria-hidden />}>
                 {!finance.departments.length ? (
-                  <EmptyState title="لا توجد بيانات مالية لهذا الشهر" detail="ولد مسير الرواتب من قسم الرواتب" />
+                  <EmptyState title={tr("لا توجد بيانات مالية لهذا الشهر")} detail={tr("ولد مسير الرواتب من قسم الرواتب")} />
                 ) : (
                   <ul className="space-y-2.5">
                     {finance.departments.map((item) => (
@@ -351,7 +352,7 @@ function ReportsPage() {
                           <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, item.share)}%` }} />
                         </div>
                         <p className="mt-1.5 text-[11px] text-muted-foreground">
-                          {numberFormatter.format(item.count)} موظف — {decimalFormatter.format(item.share)}%
+                          {numberFormatter.format(item.count)} {tr("موظف —")} {decimalFormatter.format(item.share)}%
                         </p>
                       </li>
                     ))}
@@ -364,27 +365,27 @@ function ReportsPage() {
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
                 <KpiCard
                   icon={<ClipboardList className="h-5 w-5" aria-hidden />}
-                  title="نسبة الالتزام بالدوام"
+                  title={tr("نسبة الالتزام بالدوام")}
                   value={`${decimalFormatter.format(attendanceStats.compliance)}%`}
                   tone="text-success"
                 />
                 <KpiCard
                   icon={<Clock3 className="h-5 w-5" aria-hidden />}
-                  title="مجموع ساعات التأخير"
-                  value={`${decimalFormatter.format(attendanceStats.lateMinutes / 60)} ساعة`}
+                  title={tr("مجموع ساعات التأخير")}
+                  value={trf("{0} ساعة", decimalFormatter.format(attendanceStats.lateMinutes / 60))}
                   tone="text-warning-foreground"
                 />
                 <KpiCard
                   icon={<CalendarDays className="h-5 w-5" aria-hidden />}
-                  title="إجمالي أيام الغياب"
+                  title={tr("إجمالي أيام الغياب")}
                   value={numberFormatter.format(attendanceStats.absent)}
                   tone="text-destructive"
                 />
               </div>
 
-              <Panel title="أعلى الموظفين تأخيرا وغيابا" icon={<UserRound className="h-4 w-4" aria-hidden />}>
+              <Panel title={tr("أعلى الموظفين تأخيرا وغيابا")} icon={<UserRound className="h-4 w-4" aria-hidden />}>
                 {!attendanceStats.top.length ? (
-                  <EmptyState title="لا توجد مخالفات دوام هذا الشهر" detail="سجل الحضور نظيف بالكامل" />
+                  <EmptyState title={tr("لا توجد مخالفات دوام هذا الشهر")} detail={tr("سجل الحضور نظيف بالكامل")} />
                 ) : (
                   <ul className="space-y-2.5">
                     {attendanceStats.top.map((item) => {
@@ -395,15 +396,15 @@ function ReportsPage() {
                             <UserRound className="h-4 w-4" aria-hidden />
                           </span>
                           <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-medium text-foreground">{employee?.full_name ?? "موظف"}</span>
-                            <span className="block text-[11px] text-muted-foreground">{employee?.department ?? "بدون قسم"}</span>
+                            <span className="block truncate text-sm font-medium text-foreground">{employee?.full_name ?? tr("موظف")}</span>
+                            <span className="block text-[11px] text-muted-foreground">{employee?.department ?? tr("بدون قسم")}</span>
                           </span>
                           <span className="flex shrink-0 items-center gap-1.5 text-[11px]">
                             <span className="rounded-full bg-warning/20 px-2 py-0.5 text-warning-foreground">
-                              تأخير {numberFormatter.format(item.late)}
+                              {tr("تأخير")} {numberFormatter.format(item.late)}
                             </span>
                             <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-destructive">
-                              غياب {numberFormatter.format(item.absent)}
+                              {tr("غياب")} {numberFormatter.format(item.absent)}
                             </span>
                           </span>
                         </li>
@@ -418,7 +419,7 @@ function ReportsPage() {
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <KpiCard
                   icon={<CalendarDays className="h-5 w-5" aria-hidden />}
-                  title="إجمالي أيام الإجازات"
+                  title={tr("إجمالي أيام الإجازات")}
                   value={numberFormatter.format(leaveStats.totalDays)}
                   tone="text-primary"
                 />
@@ -426,27 +427,27 @@ function ReportsPage() {
                   <KpiCard
                     key={item.key}
                     icon={<CalendarDays className="h-5 w-5" aria-hidden />}
-                    title={`اجازات ${item.label}`}
-                    value={`${numberFormatter.format(item.days)} يوم`}
+                    title={trf("اجازات {0}", item.label)}
+                    value={trf("{0} يوم", numberFormatter.format(item.days))}
                     tone="text-foreground"
                   />
                 ))}
               </div>
 
-              <Panel title="رصيد الإجازات حسب الأقسام" icon={<Building2 className="h-4 w-4" aria-hidden />}>
+              <Panel title={tr("رصيد الإجازات حسب الأقسام")} icon={<Building2 className="h-4 w-4" aria-hidden />}>
                 {!leaveStats.departments.length ? (
-                  <EmptyState title="لا توجد أقسام بعد" detail="أضف الموظفين لعرض أرصدة الإجازات" />
+                  <EmptyState title={tr("لا توجد أقسام بعد")} detail={tr("أضف الموظفين لعرض أرصدة الإجازات")} />
                 ) : (
                   <ul className="space-y-2.5">
                     {leaveStats.departments.map((item) => (
                       <li key={item.name} className="flex items-center justify-between gap-3 rounded-xl border border-border/40 bg-background/40 p-3 text-sm">
                         <span className="min-w-0">
                           <span className="block truncate font-medium text-foreground">{item.name}</span>
-                          <span className="block text-[11px] text-muted-foreground">{numberFormatter.format(item.headcount)} موظف</span>
+                          <span className="block text-[11px] text-muted-foreground">{numberFormatter.format(item.headcount)} {tr("موظف")}</span>
                         </span>
                         <span className="flex shrink-0 items-center gap-1.5 text-[11px]">
-                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary">مستهلك {numberFormatter.format(item.used)}</span>
-                          <span className="rounded-full bg-success/12 px-2 py-0.5 text-success">متبقي {numberFormatter.format(item.balance)}</span>
+                          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary">{tr("مستهلك")} {numberFormatter.format(item.used)}</span>
+                          <span className="rounded-full bg-success/12 px-2 py-0.5 text-success">{tr("متبقي")} {numberFormatter.format(item.balance)}</span>
                         </span>
                       </li>
                     ))}
@@ -479,7 +480,7 @@ function InsightsTab({ month, summary }: { month: string; summary: string }) {
         return;
       }
       if ("error" in result && result.error) {
-        setError("تعذر توليد التحليل حاليا. حاول مرة اخرى.");
+        setError(tr("تعذر توليد التحليل حاليا. حاول مرة اخرى."));
         return;
       }
       const text = ("content" in result ? result.content : "") ?? "";
@@ -489,7 +490,7 @@ function InsightsTab({ month, summary }: { month: string; summary: string }) {
         .filter((line) => line.length > 2);
       setPoints(parsed.length ? parsed : [text.trim()].filter(Boolean));
     } catch {
-      setError("تعذر الاتصال بخدمة التحليل.");
+      setError(tr("تعذر الاتصال بخدمة التحليل."));
     } finally {
       setBusy(false);
     }
@@ -504,21 +505,21 @@ function InsightsTab({ month, summary }: { month: string; summary: string }) {
         disabled={busy}
         onClick={() =>
           void ask(
-            `${summary}\n\nحلل هذه البيانات كمستشار موارد بشرية واكتب من خمس الى سبع نقاط قصيرة بالعربية بدون تشكيل تشمل اسباب الخصومات ومخاطر نقص الكادر بسبب الاجازات وتوصيات عملية لتقليل التاخير.`,
+            trf("{0}\n\nحلل هذه البيانات كمستشار موارد بشرية واكتب من خمس الى سبع نقاط قصيرة بالعربية بدون تشكيل تشمل اسباب الخصومات ومخاطر نقص الكادر بسبب الاجازات وتوصيات عملية لتقليل التاخير.", summary),
           )
         }
       >
         {busy ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <FileSearch className="h-4 w-4" aria-hidden />}
-        توليد تقرير ذكي
+        {tr("توليد تقرير ذكي")}
       </Button>
 
       {error ? (
         <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-center text-sm leading-[1.7] text-destructive">{error}</p>
       ) : null}
 
-      <Panel title="ملاحظات وتوصيات" icon={<FileSearch className="h-4 w-4" aria-hidden />}>
+      <Panel title={tr("ملاحظات وتوصيات")} icon={<FileSearch className="h-4 w-4" aria-hidden />}>
         {!points.length ? (
-          <EmptyState title="لا يوجد تحليل بعد" detail="اضغط زر التوليد بالاعلى للبدء" />
+          <EmptyState title={tr("لا يوجد تحليل بعد")} detail={tr("اضغط زر التوليد بالاعلى للبدء")} />
         ) : (
           <ul className="space-y-2.5">
             {points.map((point, index) => (
@@ -539,7 +540,7 @@ function InsightsTab({ month, summary }: { month: string; summary: string }) {
         <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/15 text-[12px] font-medium">
           AI
         </span>
-        <span className="min-w-0 flex-1 truncate text-[13px] font-medium">المساعد الذكي</span>
+        <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{tr("المساعد الذكي")}</span>
         <ChevronLeft className="h-4 w-4 shrink-0 text-primary-foreground/80" aria-hidden />
       </Link>
 

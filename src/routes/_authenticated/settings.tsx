@@ -20,13 +20,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABELS, useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
 
+import { tr, trf } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
-      { title: "الإعدادات | نظام الموارد البشرية" },
-      { name: "description", content: "الملف الشخصي وإدارة المستخدمين والفروع وإعدادات النظام" },
-      { property: "og:title", content: "الإعدادات | نظام الموارد البشرية" },
-      { property: "og:description", content: "الملف الشخصي وإدارة المستخدمين والفروع وإعدادات النظام" },
+      { title: tr("الإعدادات | نظام الموارد البشرية") },
+      { name: "description", content: tr("الملف الشخصي وإدارة المستخدمين والفروع وإعدادات النظام") },
+      { property: "og:title", content: tr("الإعدادات | نظام الموارد البشرية") },
+      { property: "og:description", content: tr("الملف الشخصي وإدارة المستخدمين والفروع وإعدادات النظام") },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -49,22 +50,22 @@ function SettingsPage() {
   const adminItems = [
     {
       key: "users",
-      label: "إدارة المستخدمين والصلاحيات",
-      description: "المستخدمون والأدوار",
+      label: tr("إدارة المستخدمين والصلاحيات"),
+      description: tr("المستخدمون والأدوار"),
       icon: ShieldCheck,
       action: () => navigate({ to: "/users" }),
     },
     {
       key: "system",
-      label: "إعدادات النظام",
-      description: "اسم المنشأة ومواعيد الدوام",
+      label: tr("إعدادات النظام"),
+      description: tr("اسم المنشأة ومواعيد الدوام"),
       icon: SlidersHorizontal,
       action: () => navigate({ to: "/settings/system" }),
     },
     {
       key: "branches",
-      label: "إدارة الفروع",
-      description: "إضافة الفروع وتعديل حالتها",
+      label: tr("إدارة الفروع"),
+      description: tr("إضافة الفروع وتعديل حالتها"),
       icon: Building2,
       action: () => setBranchesOpen(true),
     },
@@ -75,7 +76,7 @@ function SettingsPage() {
       <section className="rounded-2xl border border-border/50 bg-card/75 p-5 shadow-glass backdrop-blur-sm">
         <div>
           <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            {loading ? "جاري التحميل" : role ? ROLE_LABELS[role] : "بدون دور"}
+            {loading ? tr("جاري التحميل") : role ? ROLE_LABELS[role] : tr("بدون دور")}
           </span>
         </div>
         <Button
@@ -85,13 +86,13 @@ function SettingsPage() {
           onClick={() => navigate({ to: "/account" })}
         >
           <UserCog className="h-4 w-4" aria-hidden />
-          عرض الملف الشخصي
+          {tr("عرض الملف الشخصي")}
         </Button>
       </section>
 
       {isAdmin ? (
         <section className="space-y-2.5">
-          <p className="px-1 text-xs font-medium text-muted-foreground">الإدارة والصلاحيات</p>
+          <p className="px-1 text-xs font-medium text-muted-foreground">{tr("الإدارة والصلاحيات")}</p>
           <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/75 shadow-glass backdrop-blur-sm">
             {adminItems.map(({ key, ...item }, index) => (
               <SettingsRow key={key} {...item} withBorderTop={index > 0} />
@@ -101,15 +102,15 @@ function SettingsPage() {
       ) : null}
 
       <section className="space-y-2.5">
-        <p className="px-1 text-xs font-medium text-muted-foreground">تفضيلات عامة</p>
+        <p className="px-1 text-xs font-medium text-muted-foreground">{tr("تفضيلات عامة")}</p>
         <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/75 shadow-glass backdrop-blur-sm">
           <div className="flex items-center gap-3 px-4 py-3.5">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Globe className="h-5 w-5" aria-hidden />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-medium text-foreground">اللغة</span>
-              <span className="block text-xs text-muted-foreground">لغة عرض الواجهة</span>
+              <span className="block text-sm font-medium text-foreground">{tr("اللغة")}</span>
+              <span className="block text-xs text-muted-foreground">{tr("لغة عرض الواجهة")}</span>
             </span>
             <span className="flex shrink-0 items-center gap-1 rounded-full border border-border/50 bg-background/60 p-1">
               {(["ar", "en"] as const).map((code) => (
@@ -122,15 +123,15 @@ function SettingsPage() {
                     language === code ? "bg-primary text-primary-foreground" : "text-muted-foreground",
                   )}
                 >
-                  {code === "ar" ? "عربي" : "English"}
+                  {code === "ar" ? tr("عربي") : "English"}
                 </button>
               ))}
             </span>
           </div>
 
           <SettingsRow
-            label="مركز المساعدة"
-            description="الاسئلة الشائعة والدعم"
+            label={tr("مركز المساعدة")}
+            description={tr("الاسئلة الشائعة والدعم")}
             icon={CircleHelp}
             action={() => setHelpOpen(true)}
             withBorderTop
@@ -148,7 +149,7 @@ function SettingsPage() {
         }}
       >
         <LogOut className="h-4 w-4" aria-hidden />
-        تسجيل الخروج
+        {tr("تسجيل الخروج")}
       </Button>
 
       <BranchesDialog open={branchesOpen} onOpenChange={setBranchesOpen} />
@@ -156,9 +157,9 @@ function SettingsPage() {
       <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
         <DialogContent dir="rtl" className="max-w-md rounded-2xl border-border/50 bg-card/95 backdrop-blur-md">
           <DialogHeader className="text-start">
-            <DialogTitle className="text-base font-semibold">مركز المساعدة</DialogTitle>
+            <DialogTitle className="text-base font-semibold">{tr("مركز المساعدة")}</DialogTitle>
             <DialogDescription className="text-xs leading-[1.9]">
-              دليل الاستخدام والدعم الفني قيد التجهيز، وسيتم تفعيله قريبا داخل التطبيق.
+              {tr("دليل الاستخدام والدعم الفني قيد التجهيز، وسيتم تفعيله قريبا داخل التطبيق.")}
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
@@ -221,7 +222,7 @@ function BranchesDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
 
   async function addBranch() {
     if (name.trim().length < 2) {
-      setError("اكتب اسم الفرع");
+      setError(tr("اكتب اسم الفرع"));
       return;
     }
     setSaving(true);
@@ -233,7 +234,7 @@ function BranchesDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
       .single();
     setSaving(false);
     if (insertError || !data) {
-      setError("تعذر اضافة الفرع");
+      setError(tr("تعذر اضافة الفرع"));
       return;
     }
     setBranches((current) => [...current, data as Branch].sort((a, b) => a.name.localeCompare(b.name, "ar")));
@@ -245,7 +246,7 @@ function BranchesDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
     const next = branch.status === "active" ? "inactive" : "active";
     const { error: updateError } = await supabase.from("branches").update({ status: next }).eq("id", branch.id);
     if (updateError) {
-      setError("تعذر تحديث حالة الفرع");
+      setError(tr("تعذر تحديث حالة الفرع"));
       return;
     }
     setBranches((current) => current.map((item) => (item.id === branch.id ? { ...item, status: next } : item)));
@@ -254,7 +255,7 @@ function BranchesDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
   async function removeBranch(branch: Branch) {
     const { error: deleteError } = await supabase.from("branches").delete().eq("id", branch.id);
     if (deleteError) {
-      setError("تعذر حذف الفرع لوجود موظفين مرتبطين به");
+      setError(tr("تعذر حذف الفرع لوجود موظفين مرتبطين به"));
       return;
     }
     setBranches((current) => current.filter((item) => item.id !== branch.id));
@@ -264,16 +265,16 @@ function BranchesDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent dir="rtl" className="max-h-[88dvh] max-w-md overflow-y-auto rounded-2xl border-border/50 bg-card/95 backdrop-blur-md">
         <DialogHeader className="text-start">
-          <DialogTitle className="text-base font-semibold">إدارة الفروع</DialogTitle>
-          <DialogDescription className="text-xs">اضف الفروع وتحكم بتفعيلها او ايقافها</DialogDescription>
+          <DialogTitle className="text-base font-semibold">{tr("إدارة الفروع")}</DialogTitle>
+          <DialogDescription className="text-xs">{tr("اضف الفروع وتحكم بتفعيلها او ايقافها")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2.5 rounded-xl border border-border/40 bg-background/40 p-3">
-          <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="اسم الفرع" className="h-11 rounded-xl" />
-          <Input value={location} onChange={(event) => setLocation(event.target.value)} placeholder="الموقع (اختياري)" className="h-11 rounded-xl" />
+          <Input value={name} onChange={(event) => setName(event.target.value)} placeholder={tr("اسم الفرع")} className="h-11 rounded-xl" />
+          <Input value={location} onChange={(event) => setLocation(event.target.value)} placeholder={tr("الموقع (اختياري)")} className="h-11 rounded-xl" />
           <Button type="button" className="h-11 w-full rounded-xl text-sm font-medium" disabled={saving} onClick={() => void addBranch()}>
             {saving ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <Plus className="h-4 w-4" aria-hidden />}
-            إضافة وحفظ
+            {tr("إضافة وحفظ")}
           </Button>
         </div>
 
@@ -282,17 +283,17 @@ function BranchesDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
         {loading ? (
           <p className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
             <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
-            جاري تحميل الفروع
+            {tr("جاري تحميل الفروع")}
           </p>
         ) : !branches.length ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">لا توجد فروع بعد</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">{tr("لا توجد فروع بعد")}</p>
         ) : (
           <ul className="space-y-2">
             {branches.map((branch) => (
               <li key={branch.id} className="flex items-center gap-2 rounded-xl border border-border/40 bg-background/40 p-3">
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-medium text-foreground">{branch.name}</span>
-                  <span className="block truncate text-[11px] text-muted-foreground">{branch.location || "بدون موقع"}</span>
+                  <span className="block truncate text-[11px] text-muted-foreground">{branch.location || tr("بدون موقع")}</span>
                 </span>
                 <button
                   type="button"
@@ -302,13 +303,13 @@ function BranchesDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
                     branch.status === "active" ? "bg-success/12 text-success" : "bg-muted text-muted-foreground",
                   )}
                 >
-                  {branch.status === "active" ? "نشط" : "موقوف"}
+                  {branch.status === "active" ? tr("نشط") : tr("موقوف")}
                 </button>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  aria-label={`حذف ${branch.name}`}
+                  aria-label={trf("حذف {0}", branch.name)}
                   className="size-9 shrink-0 rounded-full text-destructive hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => void removeBranch(branch)}
                 >

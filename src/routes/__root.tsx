@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
 
+import { tr, trf } from "@/lib/i18n";
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -99,10 +100,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "HR System" },
-      { name: "description", content: "نظام إدارة الموارد البشرية" },
+      { name: "description", content: tr("نظام إدارة الموارد البشرية") },
       { name: "theme-color", content: "#ffffff" },
       { property: "og:title", content: "HR System" },
-      { property: "og:description", content: "نظام إدارة الموارد البشرية" },
+      { property: "og:description", content: tr("نظام إدارة الموارد البشرية") },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
