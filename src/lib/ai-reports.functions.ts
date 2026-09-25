@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+// النموذج المعتمد في استدعاءات Gemini (يُحدّث من مكان واحد فقط).
+const GEMINI_MODEL = "gemini-3.7-flash";
+
 /**
  * وسيط الذكاء الاصطناعي (Gemini).
  *
