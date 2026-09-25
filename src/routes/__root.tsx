@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
 
+import { DirectionProvider } from "@radix-ui/react-direction";
+import { tr, getDirection, LANGUAGE_BOOT_SCRIPT } from "@/lib/i18n";
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -99,10 +101,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "HR System" },
-      { name: "description", content: "نظام إدارة الموارد البشرية" },
+      { name: "description", content: tr("نظام إدارة الموارد البشرية") },
       { name: "theme-color", content: "#ffffff" },
       { property: "og:title", content: "HR System" },
-      { property: "og:description", content: "نظام إدارة الموارد البشرية" },
+      { property: "og:description", content: tr("نظام إدارة الموارد البشرية") },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -136,7 +138,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar">
       <head>
         <HeadContent />
       </head>
@@ -164,6 +166,11 @@ function RootComponent() {
     navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
 
+  useEffect(() => {
+    document.documentElement.dir = getDirection();
+    document.documentElement.lang = getDirection() === "ltr" ? "en" : "ar";
+  }, []);
+
   // تحديث حالة الجلسة عند تسجيل الدخول أو الخروج
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
@@ -177,7 +184,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <DirectionProvider dir={getDirection()}>
+        <Outlet />
+      </DirectionProvider>
     </QueryClientProvider>
   );
 }

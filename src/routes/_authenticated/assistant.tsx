@@ -8,16 +8,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { chatWithAssistant } from "@/lib/ai-reports.functions";
 import { cn } from "@/lib/utils";
 
+import { tr, trf, getLocale } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/assistant")({
   validateSearch: (search: Record<string, unknown>) => ({
     month: typeof search["month"] === "string" ? (search["month"] as string) : undefined,
   }),
   head: () => ({
     meta: [
-      { title: "المساعد الذكي | نظام الموارد البشرية" },
-      { name: "description", content: "محادثة نصية وصوتية مع مساعد الموارد البشرية الذكي" },
-      { property: "og:title", content: "المساعد الذكي | نظام الموارد البشرية" },
-      { property: "og:description", content: "محادثة نصية وصوتية مع مساعد الموارد البشرية الذكي" },
+      { title: tr("المساعد الذكي | نظام الموارد البشرية") },
+      { name: "description", content: tr("محادثة نصية وصوتية مع مساعد الموارد البشرية الذكي") },
+      { property: "og:title", content: tr("المساعد الذكي | نظام الموارد البشرية") },
+      { property: "og:description", content: tr("محادثة نصية وصوتية مع مساعد الموارد البشرية الذكي") },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -27,8 +28,8 @@ export const Route = createFileRoute("/_authenticated/assistant")({
 
 type ChatMessage = { id: string; role: "user" | "assistant"; text: string; at: string };
 
-const timeFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { hour: "2-digit", minute: "2-digit" });
-const monthFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { month: "long", year: "numeric" });
+const timeFormatter = new Intl.DateTimeFormat(getLocale(), { hour: "2-digit", minute: "2-digit" });
+const monthFormatter = new Intl.DateTimeFormat(getLocale(), { month: "long", year: "numeric" });
 
 function monthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-01`;
@@ -45,9 +46,9 @@ function monthBounds(key: string) {
 }
 
 const SUGGESTIONS = [
-  "ما هو القسم الاكثر كفاءة ماليا؟",
-  "لخص لي الخصومات هذا الشهر",
-  "من هم الاكثر تاخيرا وكيف اعالج ذلك؟",
+  tr("ما هو القسم الاكثر كفاءة ماليا؟"),
+  tr("لخص لي الخصومات هذا الشهر"),
+  tr("من هم الاكثر تاخيرا وكيف اعالج ذلك؟"),
 ];
 
 function AssistantPage() {
@@ -61,7 +62,7 @@ function AssistantPage() {
     {
       id: "welcome",
       role: "assistant",
-      text: "اهلا بك. اسالني عن رواتب هذا الشهر او الحضور او الاجازات وسالخص لك الصورة كاملة.",
+      text: tr("اهلا بك. اسالني عن رواتب هذا الشهر او الحضور او الاجازات وسالخص لك الصورة كاملة."),
       at: new Date().toISOString(),
     },
   ]);
@@ -96,13 +97,13 @@ function AssistantPage() {
       const lateMinutes = attendance.reduce((sum, row) => sum + Number(row.late_minutes ?? 0), 0);
       setContextText(
         [
-          `الشهر: ${monthFormatter.format(new Date(`${month}T00:00:00`))}`,
-          `عدد الموظفين النشطين: ${employees.length}`,
-          `اجمالي الرواتب: ${Math.round(net)} ريال يمني`,
-          `اجمالي الخصومات: ${Math.round(deductions)} ريال يمني`,
-          `ايام التاخير: ${late}, دقائق التاخير: ${lateMinutes}, ايام الغياب: ${absent}`,
-          `طلبات الاجازات في الشهر: ${leaves.length}, المعتمدة: ${leaves.filter((row) => row.status === "approved").length}`,
-          `الاقسام: ${[...new Set(employees.map((row) => row.department ?? "بدون قسم"))].join(", ") || "لا يوجد"}`,
+          trf("الشهر: {0}", monthFormatter.format(new Date(`${month}T00:00:00`))),
+          trf("عدد الموظفين النشطين: {0}", employees.length),
+          trf("اجمالي الرواتب: {0} ريال يمني", Math.round(net)),
+          trf("اجمالي الخصومات: {0} ريال يمني", Math.round(deductions)),
+          trf("ايام التاخير: {0}, دقائق التاخير: {1}, ايام الغياب: {2}", late, lateMinutes, absent),
+          trf("طلبات الاجازات في الشهر: {0}, المعتمدة: {1}", leaves.length, leaves.filter((row) => row.status === "approved").length),
+          trf("الاقسام: {0}", [...new Set(employees.map((row) => row.department ?? "بدون قسم"))].join(", ") || "لا يوجد"),
         ].join("\n"),
       );
     }
@@ -142,7 +143,7 @@ function AssistantPage() {
           return;
         }
         if (result.error || !result.content) {
-          setNotice("تعذر الحصول على رد الان. حاول مرة اخرى بعد قليل.");
+          setNotice(tr("تعذر الحصول على رد الان. حاول مرة اخرى بعد قليل."));
           return;
         }
         setMessages((current) => [
@@ -150,7 +151,7 @@ function AssistantPage() {
           { id: `${Date.now()}-a`, role: "assistant", text: result.content ?? "", at: new Date().toISOString() },
         ]);
       } catch {
-        setNotice("تعذر الاتصال بالمساعد الذكي.");
+        setNotice(tr("تعذر الاتصال بالمساعد الذكي."));
       } finally {
         setBusy(false);
         inputRef.current?.focus();
@@ -185,7 +186,7 @@ function AssistantPage() {
         })
       | undefined;
     if (!Ctor) {
-      setNotice("التسجيل الصوتي غير مدعوم في هذا المتصفح.");
+      setNotice(tr("التسجيل الصوتي غير مدعوم في هذا المتصفح."));
       return;
     }
     const recognition = new Ctor();
@@ -202,7 +203,7 @@ function AssistantPage() {
     recognition.onend = () => setListening(false);
     recognition.onerror = () => {
       setListening(false);
-      setNotice("تعذر التقاط الصوت. تاكد من اذن الميكروفون.");
+      setNotice(tr("تعذر التقاط الصوت. تاكد من اذن الميكروفون."));
     };
     recognitionRef.current = recognition;
     recognition.start();
@@ -215,18 +216,18 @@ function AssistantPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background" dir="rtl">
+    <div className="fixed inset-0 z-50 flex flex-col bg-background">
       <header className="shrink-0 bg-[linear-gradient(180deg,#0c4bbc_0%,#0f52d8_100%)] px-4 pb-2.5 pt-2.5 text-primary-foreground">
         <div className="mx-auto flex w-full max-w-4xl items-center gap-2.5">
           <button
             type="button"
             onClick={() => void navigate({ to: "/reports" })}
-            aria-label="اغلاق المحادثة"
+            aria-label={tr("اغلاق المحادثة")}
             className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white text-[#0c4bbc] transition-transform active:scale-95"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
-          <h1 className="min-w-0 truncate text-[15px] font-medium">المساعد الذكي</h1>
+          <h1 className="min-w-0 truncate text-[15px] font-medium">{tr("المساعد الذكي")}</h1>
         </div>
       </header>
 
@@ -236,7 +237,7 @@ function AssistantPage() {
 
           {!roleLoading && !isAdmin ? (
             <p className="rounded-2xl border border-border bg-card p-6 text-center text-sm leading-[1.8] text-muted-foreground shadow-glass">
-              المساعد الذكي متاح لمدير النظام فقط.
+              {tr("المساعد الذكي متاح لمدير النظام فقط.")}
             </p>
           ) : (
             <>
@@ -266,7 +267,7 @@ function AssistantPage() {
                 <div className="flex justify-end">
                   <span className="flex items-center gap-2 rounded-2xl bg-muted/70 px-4 py-3 text-sm text-muted-foreground">
                     <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
-                    يكتب الان
+                    {tr("يكتب الان")}
                   </span>
                 </div>
               ) : null}
@@ -303,7 +304,7 @@ function AssistantPage() {
             ref={inputRef}
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
-            placeholder="اكتب رسالتك"
+            placeholder={tr("اكتب رسالتك")}
             disabled={!isAdmin && !roleLoading}
             className="h-12 min-w-0 flex-1 rounded-2xl bg-muted/50 px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30"
           />
@@ -313,7 +314,7 @@ function AssistantPage() {
               variant="ghost"
               size="icon"
               onClick={toggleVoice}
-              aria-label={listening ? "ايقاف التسجيل" : "تسجيل صوتي"}
+              aria-label={listening ? tr("ايقاف التسجيل") : tr("تسجيل صوتي")}
               className={cn(
                 "size-12 shrink-0 rounded-2xl",
                 listening ? "bg-destructive/10 text-destructive" : "text-muted-foreground",
@@ -326,14 +327,14 @@ function AssistantPage() {
             type="submit"
             size="icon"
             disabled={busy || !draft.trim()}
-            aria-label="ارسال"
+            aria-label={tr("ارسال")}
             className="size-12 shrink-0 rounded-2xl shadow-[0_8px_18px_-8px_rgba(12,75,188,0.8)]"
           >
             <Send className="h-5 w-5" aria-hidden />
           </Button>
         </div>
         <p className="mx-auto mt-2 w-full max-w-3xl text-center text-[11px] text-muted-foreground">
-          {listening ? "جاري الاستماع" : "الردود تعتمد على بيانات النظام لهذا الشهر"}
+          {listening ? tr("جاري الاستماع") : tr("الردود تعتمد على بيانات النظام لهذا الشهر")}
         </p>
       </form>
     </div>

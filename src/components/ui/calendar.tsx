@@ -1,5 +1,6 @@
 "use client";
 
+import { getLocale } from "@/lib/i18n";
 import * as React from "react";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
@@ -32,7 +33,7 @@ function Calendar({
       )}
       captionLayout={captionLayout}
       formatters={{
-        formatMonthDropdown: (date) => date.toLocaleString("ar-YE-u-nu-latn", { month: "short" }),
+        formatMonthDropdown: (date) => date.toLocaleString(getLocale(), { month: "short" }),
         ...formatters,
       }}
       classNames={{

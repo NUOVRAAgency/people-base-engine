@@ -503,7 +503,7 @@ function PayrollPage() {
       )}
 
       <Dialog open={Boolean(payslip)} onOpenChange={(open) => !open && setPayslipId("")}>
-        <DialogContent dir="rtl" className="max-h-[92dvh] max-w-lg overflow-y-auto rounded-2xl">
+        <DialogContent className="max-h-[92dvh] max-w-lg overflow-y-auto rounded-2xl">
           <DialogHeader className="no-print">
             <DialogTitle className="text-base font-bold">قسيمة الراتب</DialogTitle>
             <DialogDescription className="text-xs">قسيمة {monthLabel(month)} — يمكنك طباعتها أو حفظها بصيغة PDF</DialogDescription>
@@ -563,7 +563,7 @@ function PayrollPage() {
       </Dialog>
 
       <Dialog open={Boolean(editRow)} onOpenChange={(open) => !open && setEditRow(null)}>
-        <DialogContent dir="rtl" className="max-h-[92dvh] max-w-md overflow-y-auto rounded-2xl">
+        <DialogContent className="max-h-[92dvh] max-w-md overflow-y-auto rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-base font-bold">تعديل راتب الموظف</DialogTitle>
             <DialogDescription className="text-xs">{employeeById.get(editRow?.employee_id ?? "")?.full_name ?? ""}</DialogDescription>
@@ -931,7 +931,7 @@ function FieldSelect({
         <SelectTrigger className="h-11 w-full rounded-xl">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent dir="rtl" className="z-[200]">
+        <SelectContent className="z-[200]">
           {children}
         </SelectContent>
       </Select>

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+import { tr, trf } from "@/lib/i18n";
 export type AppRole = "admin" | "operator" | "viewer";
 
 export const ROLE_LABELS: Record<AppRole, string> = {
-  admin: "مدير النظام",
-  operator: "مشغّل",
-  viewer: "مشاهد",
+  admin: tr("مدير النظام"),
+  operator: tr("مشغّل"),
+  viewer: tr("مشاهد"),
 };
 
 export function useCurrentUser() {
@@ -54,7 +55,7 @@ export function useCurrentUser() {
     };
   }, []);
 
-  const initials = (fullName || email || "؟").trim().slice(0, 2).toUpperCase();
+  const initials = (fullName || email || tr("؟")).trim().slice(0, 2).toUpperCase();
 
   return { email, fullName, role, initials, loading, isAdmin: role === "admin" };
 }

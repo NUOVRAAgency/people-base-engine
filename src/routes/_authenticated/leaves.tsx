@@ -17,13 +17,14 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
+import { tr, trf, getLocale } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/leaves")({
   head: () => ({
     meta: [
-      { title: "الإجازات | نظام الموارد البشرية" },
-      { name: "description", content: "طلبات الإجازات والموافقات" },
-      { property: "og:title", content: "الإجازات | نظام الموارد البشرية" },
-      { property: "og:description", content: "طلبات الإجازات والموافقات" },
+      { title: tr("الإجازات | نظام الموارد البشرية") },
+      { name: "description", content: tr("طلبات الإجازات والموافقات") },
+      { property: "og:title", content: tr("الإجازات | نظام الموارد البشرية") },
+      { property: "og:description", content: tr("طلبات الإجازات والموافقات") },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -57,7 +58,7 @@ function LeavesPage() {
       supabase.from("employees").select("id,full_name").eq("status", "active").order("full_name"),
     ]);
     if (requestsResult.error || employeesResult.error) {
-      setError("تعذّر تحميل طلبات الإجازة. حاول مرة أخرى.");
+      setError(tr("تعذّر تحميل طلبات الإجازة. حاول مرة أخرى."));
     } else {
       setRequests((requestsResult.data ?? []) as LeaveRequest[]);
       setEmployees(employeesResult.data ?? []);
@@ -81,15 +82,15 @@ function LeavesPage() {
     event.preventDefault();
     setFeedback(null);
     if (!form.employeeId || !form.startDate || !form.endDate) {
-      setFeedback({ kind: "error", message: "أكمل جميع الحقول المطلوبة" });
+      setFeedback({ kind: "error", message: tr("أكمل جميع الحقول المطلوبة") });
       return;
     }
     if (form.leaveType === "other" && !form.leaveTypeOther.trim()) {
-      setFeedback({ kind: "error", message: "اكتب اسم نوع الإجازة" });
+      setFeedback({ kind: "error", message: tr("اكتب اسم نوع الإجازة") });
       return;
     }
     if (form.endDate < form.startDate) {
-      setFeedback({ kind: "error", message: "تاريخ النهاية يجب أن يكون بعد تاريخ البداية" });
+      setFeedback({ kind: "error", message: tr("تاريخ النهاية يجب أن يكون بعد تاريخ البداية") });
       return;
     }
     setSaving(true);
@@ -103,12 +104,12 @@ function LeavesPage() {
     });
     setSaving(false);
     if (insertError) {
-      setFeedback({ kind: "error", message: "لم يتم حفظ الطلب. تحقق من صلاحيات الموظف المختار." });
+      setFeedback({ kind: "error", message: tr("لم يتم حفظ الطلب. تحقق من صلاحيات الموظف المختار.") });
       return;
     }
     setDialogOpen(false);
     setForm({ employeeId: "", leaveType: "annual", leaveTypeOther: "", startDate: "", endDate: "" });
-    setFeedback({ kind: "success", message: "تم إرسال طلب الإجازة" });
+    setFeedback({ kind: "success", message: tr("تم إرسال طلب الإجازة") });
     window.dispatchEvent(new Event("hr-header-refresh"));
     await loadData();
   }
@@ -119,10 +120,10 @@ function LeavesPage() {
     const { error: updateError } = await supabase.from("leave_requests").update({ status }).eq("id", id);
     setActingId("");
     if (updateError) {
-      setFeedback({ kind: "error", message: "تعذّر تحديث حالة الطلب" });
+      setFeedback({ kind: "error", message: tr("تعذّر تحديث حالة الطلب") });
       return;
     }
-    setFeedback({ kind: "success", message: status === "approved" ? "تم اعتماد الطلب" : "تم رفض الطلب" });
+    setFeedback({ kind: "success", message: status === "approved" ? tr("تم اعتماد الطلب") : tr("تم رفض الطلب") });
     window.dispatchEvent(new Event("hr-header-refresh"));
     await loadData();
   }
@@ -131,58 +132,58 @@ function LeavesPage() {
     <section className="mx-auto w-full max-w-xl space-y-4 font-sans text-foreground" aria-labelledby="leaves-heading">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-normal text-muted-foreground">إدارة الطلبات</p>
-          <h2 id="leaves-heading" className="truncate text-xl font-semibold leading-relaxed">إجازات الفريق</h2>
+          <p className="text-xs font-normal text-muted-foreground">{tr("إدارة الطلبات")}</p>
+          <h2 id="leaves-heading" className="truncate text-xl font-semibold leading-relaxed">{tr("إجازات الفريق")}</h2>
         </div>
         {canCreate ? (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button aria-label="إضافة طلب إجازة" size="icon" className="min-h-11 min-w-11 rounded-full bg-primary text-primary-foreground shadow-nav hover:bg-primary/90">
+              <Button aria-label={tr("إضافة طلب إجازة")} size="icon" className="min-h-11 min-w-11 rounded-full bg-primary text-primary-foreground shadow-nav hover:bg-primary/90">
                 <Plus className="size-5" aria-hidden />
               </Button>
             </DialogTrigger>
-            <DialogContent dir="rtl" className="inset-x-3 bottom-3 top-auto w-auto max-w-none translate-x-0 translate-y-0 rounded-lg border-border bg-card p-5 font-sans text-foreground shadow-card sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(430px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
-              <DialogHeader className="text-right sm:text-right">
-                <DialogTitle className="text-lg leading-relaxed">طلب إجازة جديد</DialogTitle>
-                <DialogDescription className="text-muted-foreground">يُرسل الطلب بحالة معلّق للمراجعة.</DialogDescription>
+            <DialogContent className="inset-x-3 bottom-3 top-auto w-auto max-w-none translate-x-0 translate-y-0 rounded-lg border-border bg-card p-5 font-sans text-foreground shadow-card sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(430px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+              <DialogHeader className="text-start sm:text-start">
+                <DialogTitle className="text-lg leading-relaxed">{tr("طلب إجازة جديد")}</DialogTitle>
+                <DialogDescription className="text-muted-foreground">{tr("يُرسل الطلب بحالة معلّق للمراجعة.")}</DialogDescription>
               </DialogHeader>
               <form className="space-y-4" onSubmit={submitRequest}>
-                <Field label="الموظف">
+                <Field label={tr("الموظف")}>
                   <Select value={form.employeeId} onValueChange={(employeeId) => setForm((value) => ({ ...value, employeeId }))}>
                     <SelectTrigger className="h-11 border-input bg-background text-foreground focus:ring-ring">
-                      <SelectValue placeholder="اختر الموظف" />
+                      <SelectValue placeholder={tr("اختر الموظف")} />
                     </SelectTrigger>
-                    <SelectContent position="popper" dir="rtl" className="z-[60] max-h-64 border-border bg-popover">
+                    <SelectContent position="popper" className="z-[60] max-h-64 border-border bg-popover">
                       {employees.length === 0 ? (
-                        <p className="px-3 py-4 text-center text-sm text-muted-foreground">لا يوجد موظفون نشطون متاحون لك بعد</p>
+                        <p className="px-3 py-4 text-center text-sm text-muted-foreground">{tr("لا يوجد موظفون نشطون متاحون لك بعد")}</p>
                       ) : employees.map((employee) => <SelectItem key={employee.id} value={employee.id}>{employee.full_name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </Field>
-                <Field label="نوع الإجازة">
+                <Field label={tr("نوع الإجازة")}>
                   <Select value={form.leaveType} onValueChange={(leaveType) => setForm((value) => ({ ...value, leaveType }))}>
                     <SelectTrigger className="h-11 border-input bg-background text-foreground focus:ring-ring"><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper" dir="rtl" className="z-[60]">{Object.entries(LEAVE_TYPES).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent>
+                    <SelectContent position="popper" className="z-[60]">{Object.entries(LEAVE_TYPES).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent>
                   </Select>
                   {form.leaveType === "other" ? (
                     <div className="mt-2 animate-in fade-in-0 slide-in-from-top-2 duration-200 space-y-1.5">
-                      <label htmlFor="leave-type-other" className="text-xs text-muted-foreground">اسم نوع الإجازة</label>
+                      <label htmlFor="leave-type-other" className="text-xs text-muted-foreground">{tr("اسم نوع الإجازة")}</label>
                       <Input id="leave-type-other" required maxLength={60} value={form.leaveTypeOther} onChange={(event) => setForm((value) => ({ ...value, leaveTypeOther: event.target.value }))} className="h-10 border-input bg-background" />
                     </div>
                   ) : null}
                 </Field>
                 <div className="space-y-3 rounded-lg border border-primary/10 bg-primary/[0.025] p-3 shadow-sm backdrop-blur-md">
-                  <Field label="من تاريخ">
-                    <GlassDatePicker ariaLabel="تاريخ البداية" value={form.startDate} onChange={(startDate) => setForm((value) => ({ ...value, startDate, endDate: value.endDate && value.endDate < startDate ? "" : value.endDate }))} />
+                  <Field label={tr("من تاريخ")}>
+                    <GlassDatePicker ariaLabel={tr("تاريخ البداية")} value={form.startDate} onChange={(startDate) => setForm((value) => ({ ...value, startDate, endDate: value.endDate && value.endDate < startDate ? "" : value.endDate }))} />
                   </Field>
                   <div className="h-px bg-border/70" aria-hidden />
-                  <Field label="إلى تاريخ">
-                    <GlassDatePicker ariaLabel="تاريخ النهاية" value={form.endDate} minDate={form.startDate || undefined} onChange={(endDate) => setForm((value) => ({ ...value, endDate }))} />
+                  <Field label={tr("إلى تاريخ")}>
+                    <GlassDatePicker ariaLabel={tr("تاريخ النهاية")} value={form.endDate} minDate={form.startDate || undefined} onChange={(endDate) => setForm((value) => ({ ...value, endDate }))} />
                   </Field>
                 </div>
                 <Button type="submit" disabled={saving || employees.length === 0} className="h-11 w-full bg-primary text-primary-foreground hover:bg-primary/90">
                   {saving ? <LoaderCircle className="animate-spin" aria-hidden /> : null}
-                  إرسال الطلب
+                  {tr("إرسال الطلب")}
                 </Button>
               </form>
             </DialogContent>
@@ -190,7 +191,7 @@ function LeavesPage() {
         ) : null}
       </div>
 
-      <div className="grid grid-cols-4 gap-1 rounded-lg border border-border bg-card p-1.5 shadow-sm" role="tablist" aria-label="تصفية طلبات الإجازة">
+      <div className="grid grid-cols-4 gap-1 rounded-lg border border-border bg-card p-1.5 shadow-sm" role="tablist" aria-label={tr("تصفية طلبات الإجازة")}>
         {FILTERS.map((item) => (
           <Button key={item.value} type="button" role="tab" aria-selected={filter === item.value} variant="ghost" onClick={() => setFilter(item.value)} className={cn("h-10 min-w-0 gap-1 rounded-md px-1 text-[11px] font-normal text-muted-foreground hover:bg-accent hover:text-foreground", filter === item.value && "bg-primary/10 font-medium text-primary")}> 
             <span className="truncate">{item.label}</span>
@@ -206,11 +207,11 @@ function LeavesPage() {
       ) : null}
 
       {loading || roleLoading ? (
-        <div className="flex min-h-52 items-center justify-center text-muted-foreground"><LoaderCircle className="size-6 animate-spin" aria-label="جارٍ تحميل الطلبات" /></div>
+        <div className="flex min-h-52 items-center justify-center text-muted-foreground"><LoaderCircle className="size-6 animate-spin" aria-label={tr("جارٍ تحميل الطلبات")} /></div>
       ) : error ? (
-        <div className="rounded-lg border border-border bg-card p-6 text-center shadow-sm"><p className="text-sm text-muted-foreground">{error}</p><Button variant="ghost" className="mt-3 text-foreground" onClick={() => void loadData()}>إعادة المحاولة</Button></div>
+        <div className="rounded-lg border border-border bg-card p-6 text-center shadow-sm"><p className="text-sm text-muted-foreground">{error}</p><Button variant="ghost" className="mt-3 text-foreground" onClick={() => void loadData()}>{tr("إعادة المحاولة")}</Button></div>
       ) : visibleRequests.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card px-5 py-10 text-center shadow-sm"><CalendarDays className="mx-auto size-7 text-muted-foreground" aria-hidden /><p className="mt-3 text-sm font-medium">لا توجد طلبات هنا</p><p className="mt-1 text-xs text-muted-foreground">ستظهر الطلبات عند إضافتها.</p></div>
+        <div className="rounded-lg border border-border bg-card px-5 py-10 text-center shadow-sm"><CalendarDays className="mx-auto size-7 text-muted-foreground" aria-hidden /><p className="mt-3 text-sm font-medium">{tr("لا توجد طلبات هنا")}</p><p className="mt-1 text-xs text-muted-foreground">{tr("ستظهر الطلبات عند إضافتها.")}</p></div>
       ) : (
         <div className="space-y-3">
           {visibleRequests.map((request) => {
@@ -220,7 +221,7 @@ function LeavesPage() {
               <div key={request.id} className={cn("relative overflow-hidden rounded-lg border border-border bg-card p-4 shadow-sm", status.border)}>
                 <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
                   <div className="min-w-0">
-                    {isAdmin ? <p className="flex min-w-0 items-center gap-2 text-sm font-medium"><UserRound className="size-4 shrink-0 text-muted-foreground" aria-hidden /><span className="truncate">{employee?.full_name ?? "موظف"}</span></p> : null}
+                    {isAdmin ? <p className="flex min-w-0 items-center gap-2 text-sm font-medium"><UserRound className="size-4 shrink-0 text-muted-foreground" aria-hidden /><span className="truncate">{employee?.full_name ?? tr("موظف")}</span></p> : null}
                     <p className={cn("font-medium", isAdmin ? "mt-3 text-[15px]" : "text-[15px]")}>{request.leave_type === "other" && request.leave_type_other ? request.leave_type_other : (LEAVE_TYPES[request.leave_type] ?? request.leave_type)}</p>
                     <p className="mt-2 flex items-center gap-2 text-xs leading-6 text-muted-foreground"><CalendarDays className="size-4 shrink-0" aria-hidden /><span>{formatDate(request.start_date)} — {formatDate(request.end_date)}</span></p>
                   </div>
@@ -228,8 +229,8 @@ function LeavesPage() {
                 </div>
                 {isAdmin && request.status === "pending" ? (
                   <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-3">
-                    <Button type="button" variant="ghost" disabled={actingId === request.id} onClick={() => void updateStatus(request.id, "approved")} className="h-10 text-leave-approved hover:bg-accent hover:text-leave-approved"><Check aria-hidden />اعتماد</Button>
-                    <Button type="button" variant="ghost" disabled={actingId === request.id} onClick={() => void updateStatus(request.id, "rejected")} className="h-10 text-leave-rejected hover:bg-accent hover:text-leave-rejected"><X aria-hidden />رفض</Button>
+                    <Button type="button" variant="ghost" disabled={actingId === request.id} onClick={() => void updateStatus(request.id, "approved")} className="h-10 text-leave-approved hover:bg-accent hover:text-leave-approved"><Check aria-hidden />{tr("اعتماد")}</Button>
+                    <Button type="button" variant="ghost" disabled={actingId === request.id} onClick={() => void updateStatus(request.id, "rejected")} className="h-10 text-leave-rejected hover:bg-accent hover:text-leave-rejected"><X aria-hidden />{tr("رفض")}</Button>
                   </div>
                 ) : null}
               </div>
@@ -256,20 +257,20 @@ type LeaveRequest = {
 };
 
 const FILTERS: { value: Filter; label: string }[] = [
-  { value: "all", label: "الكل" },
-  { value: "pending", label: "معلّق" },
-  { value: "approved", label: "معتمد" },
-  { value: "rejected", label: "مرفوض" },
+  { value: "all", label: tr("الكل") },
+  { value: "pending", label: tr("معلّق") },
+  { value: "approved", label: tr("معتمد") },
+  { value: "rejected", label: tr("مرفوض") },
 ];
-const LEAVE_TYPES: Record<string, string> = { annual: "إجازة سنوية", sick: "إجازة مرضية", emergency: "إجازة طارئة", unpaid: "إجازة بدون راتب", other: "أخرى" };
+const LEAVE_TYPES: Record<string, string> = { annual: tr("إجازة سنوية"), sick: tr("إجازة مرضية"), emergency: tr("إجازة طارئة"), unpaid: tr("إجازة بدون راتب"), other: tr("أخرى") };
 const STATUS = {
-  pending: { label: "معلّق", dot: "bg-leave-pending", text: "text-leave-pending", border: "border-s-2 border-s-leave-pending" },
-  approved: { label: "معتمد", dot: "bg-leave-approved", text: "text-leave-approved", border: "border-s-2 border-s-leave-approved" },
-  rejected: { label: "مرفوض", dot: "bg-leave-rejected", text: "text-leave-rejected", border: "border-s-2 border-s-leave-rejected" },
+  pending: { label: tr("معلّق"), dot: "bg-leave-pending", text: "text-leave-pending", border: "border-s-2 border-s-leave-pending" },
+  approved: { label: tr("معتمد"), dot: "bg-leave-approved", text: "text-leave-approved", border: "border-s-2 border-s-leave-approved" },
+  rejected: { label: tr("مرفوض"), dot: "bg-leave-rejected", text: "text-leave-rejected", border: "border-s-2 border-s-leave-rejected" },
 } as const;
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("ar-YE-u-nu-latn", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
+  return new Intl.DateTimeFormat(getLocale(), { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {

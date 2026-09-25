@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+import { tr, trf } from "@/lib/i18n";
 export type HeaderNotification = {
   id: string;
   title: string;
@@ -10,10 +11,10 @@ export type HeaderNotification = {
 };
 
 const LEAVE_TYPE_LABELS: Record<string, string> = {
-  annual: "إجازة سنوية",
-  sick: "إجازة مرضية",
-  emergency: "إجازة طارئة",
-  unpaid: "إجازة بدون راتب",
+  annual: tr("إجازة سنوية"),
+  sick: tr("إجازة مرضية"),
+  emergency: tr("إجازة طارئة"),
+  unpaid: tr("إجازة بدون راتب"),
 };
 
 export function useHeaderData() {
@@ -48,16 +49,16 @@ export function useHeaderData() {
       const employee = Array.isArray(item.employees) ? item.employees[0] : item.employees;
       return {
         id: `attendance-${item.id}`,
-        title: item.status === "absent" ? "تنبيه غياب" : "تنبيه تأخر",
-        detail: `${employee?.full_name ?? "موظف"} — ${item.date}${item.note ? `، ${item.note}` : ""}`,
+        title: item.status === "absent" ? tr("تنبيه غياب") : tr("تنبيه تأخر"),
+        detail: `${employee?.full_name ?? tr("موظف")} — ${item.date}${item.note ? trf("، {0}", item.note) : ""}`,
         to: "/attendance",
         kind: "attendance",
       };
     });
     const reportItems: HeaderNotification[] = (reportsResult.data ?? []).map((item) => ({
       id: `report-${item.id}`,
-      title: "تقرير إداري جديد",
-      detail: item.month ? `تقرير شهر ${item.month.slice(0, 7)}` : "تم إنشاء تقرير جديد",
+      title: tr("تقرير إداري جديد"),
+      detail: item.month ? trf("تقرير شهر {0}", item.month.slice(0, 7)) : tr("تم إنشاء تقرير جديد"),
       to: "/reports",
       kind: "report",
     }));
@@ -65,8 +66,8 @@ export function useHeaderData() {
       const employee = Array.isArray(item.employees) ? item.employees[0] : item.employees;
       return {
         id: `leave-${item.id}`,
-        title: "طلب إجازة بانتظار الاعتماد",
-        detail: `${employee?.full_name ?? "موظف"} — ${LEAVE_TYPE_LABELS[item.leave_type] ?? item.leave_type} (${item.start_date} → ${item.end_date})`,
+        title: tr("طلب إجازة بانتظار الاعتماد"),
+        detail: `${employee?.full_name ?? tr("موظف")} — ${LEAVE_TYPE_LABELS[item.leave_type] ?? item.leave_type} (${item.start_date} → ${item.end_date})`,
         to: "/leaves",
         kind: "leave",
       };

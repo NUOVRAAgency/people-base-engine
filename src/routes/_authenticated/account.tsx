@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABELS, useCurrentUser } from "@/hooks/use-current-user";
 import { Button } from "@/components/ui/button";
 
+import { tr, trf } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/account")({
-  head: () => ({ meta: [{ title: "الحساب | نظام الموارد البشرية" }, { name: "description", content: "بيانات حسابك وصلاحيتك في نظام الموارد البشرية" }, { property: "og:title", content: "الحساب | نظام الموارد البشرية" }, { property: "og:description", content: "بيانات حسابك وصلاحيتك في نظام الموارد البشرية" }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
+  head: () => ({ meta: [{ title: tr("الحساب | نظام الموارد البشرية") }, { name: "description", content: tr("بيانات حسابك وصلاحيتك في نظام الموارد البشرية") }, { property: "og:title", content: tr("الحساب | نظام الموارد البشرية") }, { property: "og:description", content: tr("بيانات حسابك وصلاحيتك في نظام الموارد البشرية") }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }] }),
   component: AccountPage,
 });
 
@@ -25,7 +26,7 @@ function AccountPage() {
         className="h-11 w-full rounded-xl border-destructive/25 bg-destructive/5 text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
         onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth", replace: true }); }}
       >
-        <LogOut className="h-4 w-4" aria-hidden /> تسجيل الخروج
+        <LogOut className="h-4 w-4" aria-hidden /> {tr("تسجيل الخروج")}
       </Button>
     </div>
   );

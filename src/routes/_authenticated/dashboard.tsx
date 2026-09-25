@@ -28,13 +28,14 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
+import { tr, trf, getLocale } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "الرئيسية | نظام الموارد البشرية" },
-      { name: "description", content: "لوحة تحكم قيادية تعرض الحضور والاقسام والرواتب والطلبات المعلقة" },
-      { property: "og:title", content: "الرئيسية | نظام الموارد البشرية" },
-      { property: "og:description", content: "لوحة تحكم قيادية تعرض الحضور والاقسام والرواتب والطلبات المعلقة" },
+      { title: tr("الرئيسية | نظام الموارد البشرية") },
+      { name: "description", content: tr("لوحة تحكم قيادية تعرض الحضور والاقسام والرواتب والطلبات المعلقة") },
+      { property: "og:title", content: tr("الرئيسية | نظام الموارد البشرية") },
+      { property: "og:description", content: tr("لوحة تحكم قيادية تعرض الحضور والاقسام والرواتب والطلبات المعلقة") },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -42,42 +43,42 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
 });
 
-const dateFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", {
+const dateFormatter = new Intl.DateTimeFormat(getLocale(), {
   weekday: "long",
   day: "numeric",
   month: "long",
   year: "numeric",
 });
-const monthFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { month: "long", year: "numeric" });
-const weekdayFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { weekday: "short" });
+const monthFormatter = new Intl.DateTimeFormat(getLocale(), { month: "long", year: "numeric" });
+const weekdayFormatter = new Intl.DateTimeFormat(getLocale(), { weekday: "short" });
 const numberFormatter = new Intl.NumberFormat("en-US");
 
 const CHART_COLORS = ["#1f6bff", "#7c5cff", "#00b8a9", "#ff7a45", "#f2427f", "#17b26a", "#12a3e0", "#f5b544"];
 
 const SAMPLE_DEPARTMENTS = [
-  { name: "تقنية المعلومات", count: 8 },
-  { name: "المبيعات", count: 6 },
-  { name: "التسويق", count: 4 },
-  { name: "الموارد البشرية", count: 3 },
-  { name: "المالية", count: 3 },
-  { name: "العمليات", count: 2 },
+  { name: tr("تقنية المعلومات"), count: 8 },
+  { name: tr("المبيعات"), count: 6 },
+  { name: tr("التسويق"), count: 4 },
+  { name: tr("الموارد البشرية"), count: 3 },
+  { name: tr("المالية"), count: 3 },
+  { name: tr("العمليات"), count: 2 },
 ];
 
-const YEAR_MONTHS = ["يناير", "فبراير", "مارس", "ابريل", "مايو", "يونيو", "يوليو", "اغسطس", "سبتمبر", "اكتوبر", "نوفمبر", "ديسمبر"];
+const YEAR_MONTHS = [tr("يناير"), tr("فبراير"), tr("مارس"), tr("ابريل"), tr("مايو"), tr("يونيو"), tr("يوليو"), tr("اغسطس"), tr("سبتمبر"), tr("اكتوبر"), tr("نوفمبر"), tr("ديسمبر")];
 const SAMPLE_CURVE = [0.42, 0.48, 0.52, 0.58, 0.61, 0.68, 0.72, 0.79, 0.85, 0.9, 0.95, 1];
 
 const LEAVE_LABELS: Record<string, string> = {
-  annual: "سنوية",
-  sick: "مرضية",
-  unpaid: "بدون راتب",
-  emergency: "طارئة",
-  other: "اخرى",
+  annual: tr("سنوية"),
+  sick: tr("مرضية"),
+  unpaid: tr("بدون راتب"),
+  emergency: tr("طارئة"),
+  other: tr("اخرى"),
 };
 
 const PAYROLL_STATUS: Record<string, string> = {
-  draft: "مسودة",
-  review: "بانتظار الاعتماد",
-  approved: "معتمد",
+  draft: tr("مسودة"),
+  review: tr("بانتظار الاعتماد"),
+  approved: tr("معتمد"),
 };
 
 function pad(value: number) {
@@ -174,7 +175,7 @@ function DashboardPage() {
   const departments = useMemo(() => {
     const map = new Map<string, number>();
     for (const item of employees) {
-      const key = item.department?.trim() || "بدون قسم";
+      const key = item.department?.trim() || tr("بدون قسم");
       map.set(key, (map.get(key) ?? 0) + 1);
     }
     return [...map.entries()]
@@ -226,7 +227,7 @@ function DashboardPage() {
   const approvedNet = payroll
     .filter((row) => row.status === "approved")
     .reduce((sum, row) => sum + Number(row.net_salary ?? 0), 0);
-  const payrollStatus = payroll[0]?.status ? (PAYROLL_STATUS[payroll[0].status] ?? "مسودة") : "لم يولد بعد";
+  const payrollStatus = payroll[0]?.status ? (PAYROLL_STATUS[payroll[0].status] ?? tr("مسودة")) : tr("لم يولد بعد");
   const disbursedRatio = totalNet > 0 ? Math.round((approvedNet / totalNet) * 100) : 0;
 
   const decideLeave = useCallback(
@@ -243,7 +244,7 @@ function DashboardPage() {
     return (
       <p className="flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/75 p-10 text-sm text-muted-foreground shadow-glass backdrop-blur-sm">
         <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
-        جاري تجهيز اللوحة
+        {tr("جاري تجهيز اللوحة")}
       </p>
     );
   }
@@ -252,7 +253,7 @@ function DashboardPage() {
     <div className="mx-auto w-full max-w-7xl space-y-3 pb-6">
       <header className="rounded-2xl border border-border/40 bg-card/75 px-3 py-2 shadow-glass backdrop-blur-sm">
         <div className="min-w-0">
-          <h2 className="truncate text-base font-medium leading-[1.6] text-foreground md:text-lg">أهلا بك</h2>
+          <h2 className="truncate text-base font-medium leading-[1.6] text-foreground md:text-lg">{tr("أهلا بك")}</h2>
           <p className="mt-0.5 truncate text-[12px] leading-[1.7] text-muted-foreground md:text-sm">
             {dateFormatter.format(today)}
           </p>
@@ -261,7 +262,7 @@ function DashboardPage() {
 
       <section className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
         <KpiCard
-          title="إجمالي الموظفين"
+          title={tr("إجمالي الموظفين")}
           value={numberFormatter.format(employees.length)}
           icon={<Users className="h-3 w-3" aria-hidden />}
           to="/employees"
@@ -269,7 +270,7 @@ function DashboardPage() {
           onPress={() => openSection("/employees")}
         />
         <KpiCard
-          title="الحاضرون اليوم"
+          title={tr("الحاضرون اليوم")}
           value={numberFormatter.format(presentToday)}
           icon={<CalendarCheck className="h-3 w-3" aria-hidden />}
           to="/attendance"
@@ -277,7 +278,7 @@ function DashboardPage() {
           onPress={() => openSection("/attendance")}
         />
         <KpiCard
-          title="في إجازة اليوم"
+          title={tr("في إجازة اليوم")}
           value={numberFormatter.format(onLeaveToday)}
           icon={<Plane className="h-3 w-3" aria-hidden />}
           to="/leaves"
@@ -296,7 +297,7 @@ function DashboardPage() {
       </section>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        <Panel title="توزيع الموظفين حسب الأقسام" action={departments.length > 0 ? "الاقسام" : "بيانات توضيحية"}>
+        <Panel title={tr("توزيع الموظفين حسب الأقسام")} action={departments.length > 0 ? tr("الاقسام") : tr("بيانات توضيحية")}>
           <div className="relative mx-auto h-[210px] w-full max-w-[280px]" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -316,7 +317,7 @@ function DashboardPage() {
                 </Pie>
                 <Tooltip
                   formatter={(value: number, name: string) => [
-                    `${numberFormatter.format(value)} موظف (${Math.round((value / donutTotal) * 100)}%)`,
+                    trf("{0} موظف ({1}%)", numberFormatter.format(value), Math.round((value / donutTotal) * 100)),
                     name,
                   ]}
                   contentStyle={{
@@ -328,8 +329,8 @@ function DashboardPage() {
                 />
               </PieChart>
             </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center" dir="rtl">
-              <span className="text-[11px] text-muted-foreground">إجمالي الموظفين</span>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-[11px] text-muted-foreground">{tr("إجمالي الموظفين")}</span>
               <span className="text-2xl font-medium leading-tight text-foreground">
                 {numberFormatter.format(donutTotal)}
               </span>
@@ -351,7 +352,7 @@ function DashboardPage() {
           </ul>
         </Panel>
 
-        <Panel title="اتجاه صرف الرواتب خلال السنة" action="ر.ي">
+        <Panel title={tr("اتجاه صرف الرواتب خلال السنة")} action={tr("ر.ي")}>
           <div className="mt-3 h-[252px] w-full" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={yearSeries} margin={{ top: 12, right: 6, left: 0, bottom: 8 }}>
@@ -379,7 +380,7 @@ function DashboardPage() {
                 />
                 <Tooltip
                   cursor={{ stroke: "rgba(0,184,169,0.35)", strokeWidth: 1 }}
-                  formatter={(value: number) => [`${numberFormatter.format(value)} ر.ي`, "الرواتب"]}
+                  formatter={(value: number) => [trf("{0} ر.ي", numberFormatter.format(value)), tr("الرواتب")]}
                   contentStyle={{
                     borderRadius: 14,
                     border: "1px solid rgba(0,0,0,0.06)",
@@ -402,10 +403,10 @@ function DashboardPage() {
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        <Panel title="الحضور مقابل الإجازات" action="آخر 7 أيام">
+        <Panel title={tr("الحضور مقابل الإجازات")} action={tr("آخر 7 أيام")}>
           <div className="mb-2 flex items-center gap-4">
-            <Legend color="#1f6bff" label="الحضور" />
-            <Legend color="#9dc0ff" label="الإجازات" />
+            <Legend color="#1f6bff" label={tr("الحضور")} />
+            <Legend color="#9dc0ff" label={tr("الإجازات")} />
           </div>
           <div className="h-[196px] w-full" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
@@ -420,14 +421,14 @@ function DashboardPage() {
                   tick={{ fontSize: 10, fill: "#9aa4b4" }}
                 />
                 <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid rgba(0,0,0,0.06)", fontSize: 12 }} />
-                <Line type="monotone" dataKey="حضور" stroke="#1f6bff" strokeWidth={2.5} dot={false} />
-                <Line type="monotone" dataKey="إجازات" stroke="#9dc0ff" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey={tr("حضور")} stroke="#1f6bff" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey={tr("إجازات")} stroke="#9dc0ff" strokeWidth={2.5} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </Panel>
 
-        <Panel title="صرف الرواتب" action={monthFormatter.format(new Date(`${month}T00:00:00`))}>
+        <Panel title={tr("صرف الرواتب")} action={monthFormatter.format(new Date(`${month}T00:00:00`))}>
           <div className="relative mx-auto h-[150px] w-full max-w-[260px]" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={weekSeries} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
@@ -437,30 +438,30 @@ function DashboardPage() {
                     <stop offset="100%" stopColor="#1f6bff" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <Area type="monotone" dataKey="حضور" stroke="#1f6bff" strokeWidth={2} fill="url(#areaBlue)" />
+                <Area type="monotone" dataKey={tr("حضور")} stroke="#1f6bff" strokeWidth={2} fill="url(#areaBlue)" />
               </AreaChart>
             </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center" dir="rtl">
-              <span className="text-xl font-medium text-foreground">{numberFormatter.format(totalNet)} ر.ي</span>
-              <span className="mt-0.5 text-[11px] text-muted-foreground">إجمالي المبلغ</span>
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-xl font-medium text-foreground">{numberFormatter.format(totalNet)} {tr("ر.ي")}</span>
+              <span className="mt-0.5 text-[11px] text-muted-foreground">{tr("إجمالي المبلغ")}</span>
             </div>
           </div>
           <div className="mt-2 space-y-1.5">
             <div className="flex items-center justify-between text-[12px]">
-              <span className="text-muted-foreground">المصروف فعليا</span>
-              <span className="font-medium text-foreground">{numberFormatter.format(approvedNet)} ر.ي</span>
+              <span className="text-muted-foreground">{tr("المصروف فعليا")}</span>
+              <span className="font-medium text-foreground">{numberFormatter.format(approvedNet)} {tr("ر.ي")}</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <div className="h-full rounded-full bg-primary" style={{ width: `${disbursedRatio}%` }} />
             </div>
-            <p className="text-[11px] text-muted-foreground">{disbursedRatio}% من إجمالي المسير</p>
+            <p className="text-[11px] text-muted-foreground">{disbursedRatio}{tr("% من إجمالي المسير")}</p>
           </div>
         </Panel>
       </div>
 
-      <Panel title="طلبات الإجازة المعلقة" action={`${pendingLeaves.length} طلب`}>
+      <Panel title={tr("طلبات الإجازة المعلقة")} action={trf("{0} طلب", pendingLeaves.length)}>
         {pendingLeaves.length === 0 ? (
-          <Empty text="لا توجد طلبات معلقة" />
+          <Empty text={tr("لا توجد طلبات معلقة")} />
         ) : (
           <ul className="space-y-2">
             {pendingLeaves.slice(0, 5).map((row) => {
@@ -475,15 +476,15 @@ function DashboardPage() {
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[13px] font-medium text-foreground">
-                      {employee?.full_name ?? "موظف"}
+                      {employee?.full_name ?? tr("موظف")}
                     </span>
                     <span className="block truncate text-[11px] leading-[1.7] text-muted-foreground">
-                      {employee?.position || "بدون مسمى"} · {LEAVE_LABELS[row.leave_type] ?? "اجازة"} ·{" "}
-                      {numberFormatter.format(daysBetween(row.start_date, row.end_date))} أيام
+                      {employee?.position || tr("بدون مسمى")} · {LEAVE_LABELS[row.leave_type] ?? tr("اجازة")} ·{" "}
+                      {numberFormatter.format(daysBetween(row.start_date, row.end_date))} {tr("أيام")}
                     </span>
                   </span>
                   <span className="hidden shrink-0 rounded-md bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-600 sm:block">
-                    معلق
+                    {tr("معلق")}
                   </span>
                   {isAdmin ? (
                     <span className="flex shrink-0 items-center gap-1.5">
@@ -492,7 +493,7 @@ function DashboardPage() {
                         disabled={saving === row.id}
                         onClick={() => void decideLeave(row.id, "approved")}
                         className="flex size-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 transition-colors hover:bg-emerald-500/20 disabled:opacity-50"
-                        aria-label="اعتماد"
+                        aria-label={tr("اعتماد")}
                       >
                         <Check className="h-4 w-4" aria-hidden />
                       </button>
@@ -501,7 +502,7 @@ function DashboardPage() {
                         disabled={saving === row.id}
                         onClick={() => void decideLeave(row.id, "rejected")}
                         className="flex size-8 items-center justify-center rounded-full bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20 disabled:opacity-50"
-                        aria-label="رفض"
+                        aria-label={tr("رفض")}
                       >
                         <X className="h-4 w-4" aria-hidden />
                       </button>
@@ -516,13 +517,13 @@ function DashboardPage() {
           to="/leaves"
           className="mt-2.5 block rounded-xl border border-border/40 bg-background/40 py-2 text-center text-[12px] text-primary transition-colors hover:bg-muted/60"
         >
-          عرض كل الطلبات
+          {tr("عرض كل الطلبات")}
         </Link>
       </Panel>
 
       {!roleLoading && !isAdmin ? (
         <p className="rounded-2xl border border-border/40 bg-card/75 p-4 text-center text-xs leading-[1.8] text-muted-foreground shadow-glass backdrop-blur-sm">
-          بعض الاجراءات متاحة لمدير النظام فقط.
+          {tr("بعض الاجراءات متاحة لمدير النظام فقط.")}
         </p>
       ) : null}
     </div>
