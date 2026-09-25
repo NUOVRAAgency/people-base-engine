@@ -24,7 +24,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-import { tr, trf } from "@/lib/i18n";
+import { tr, trf, getLocale } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/attendance")({
   head: () => ({
     meta: [

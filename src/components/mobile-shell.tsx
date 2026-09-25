@@ -134,7 +134,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
                       key={notification.id}
                       type="button"
                       variant="ghost"
-                      className="h-auto w-full justify-start gap-3 whitespace-normal rounded-md px-2.5 py-3 text-right"
+                      className="h-auto w-full justify-start gap-3 whitespace-normal rounded-md px-2.5 py-3 text-start"
                       onClick={() => navigate({ to: notification.to })}
                     >
                       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">

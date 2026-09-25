@@ -46,7 +46,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-import { tr, trf } from "@/lib/i18n";
+import { tr, trf, getLocale } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/employees")({
   head: () => ({
     meta: [
@@ -511,12 +511,12 @@ function EmployeesPage() {
           <Table>
             <TableHeader className="bg-muted/45">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="min-w-52 text-right">{tr("الصورة والاسم الكامل")}</TableHead>
-                <TableHead className="min-w-28 text-right">{tr("الرقم الوظيفي")}</TableHead>
-                <TableHead className="min-w-32 text-right">{tr("القسم")}</TableHead>
-                <TableHead className="min-w-40 text-right">{tr("المسمى الوظيفي")}</TableHead>
-                <TableHead className="min-w-32 text-right">{tr("تاريخ التعيين")}</TableHead>
-                <TableHead className="min-w-24 text-right">{tr("الحالة")}</TableHead>
+                <TableHead className="min-w-52 text-start">{tr("الصورة والاسم الكامل")}</TableHead>
+                <TableHead className="min-w-28 text-start">{tr("الرقم الوظيفي")}</TableHead>
+                <TableHead className="min-w-32 text-start">{tr("القسم")}</TableHead>
+                <TableHead className="min-w-40 text-start">{tr("المسمى الوظيفي")}</TableHead>
+                <TableHead className="min-w-32 text-start">{tr("تاريخ التعيين")}</TableHead>
+                <TableHead className="min-w-24 text-start">{tr("الحالة")}</TableHead>
                 <TableHead className="w-20 text-center">{tr("إجراءات")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -529,7 +529,7 @@ function EmployeesPage() {
                       <div className="min-w-0"><p className="font-medium leading-6">{employee.full_name}</p><p dir="ltr" className="truncate text-left text-xs text-muted-foreground">{employee.work_email ?? "—"}</p></div>
                     </div>
                   </TableCell>
-                  <TableCell dir="ltr" className="text-right font-medium text-primary">{employee.employee_number}</TableCell>
+                  <TableCell dir="ltr" className="text-start font-medium text-primary">{employee.employee_number}</TableCell>
                   <TableCell>{employee.department ?? "—"}</TableCell>
                   <TableCell>{employee.position ?? "—"}</TableCell>
                   <TableCell>{formatArabicDate(employee.hire_date)}</TableCell>
@@ -578,7 +578,7 @@ function EmployeesPage() {
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-sm rounded-xl font-sans">
-          <AlertDialogHeader className="text-right sm:text-right">
+          <AlertDialogHeader className="text-start sm:text-start">
             <AlertDialogTitle>{tr("حذف الموظف")}</AlertDialogTitle>
             <AlertDialogDescription>{tr("سيُحذف سجل")} {selected?.full_name} {tr("نهائياً. لا يمكن التراجع عن هذه الخطوة.")}</AlertDialogDescription>
           </AlertDialogHeader>
@@ -649,7 +649,7 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="z-[100] flex max-h-[88dvh] w-[calc(100vw-1.25rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl border-primary/15 bg-card p-0 font-sans shadow-card">
-        <DialogHeader className="border-b border-border bg-muted/25 px-5 py-4 pe-12 text-right sm:text-right">
+        <DialogHeader className="border-b border-border bg-muted/25 px-5 py-4 pe-12 text-start sm:text-start">
           <DialogTitle className="font-kufi text-base font-normal leading-7">{editing ? tr("تعديل بيانات الموظف") : tr("إضافة موظف جديد")}</DialogTitle>
           <DialogDescription className="text-xs leading-6">{tr("أدخل بيانات الموظف على ثلاث خطوات متتالية")}</DialogDescription>
         </DialogHeader>
@@ -800,7 +800,7 @@ function EmploymentFields({ form, setField, branches, managers, departments, isA
 
       <Dialog open={quickAdd !== null} onOpenChange={(open) => { if (!open) setQuickAdd(null); }}>
         <DialogContent className="z-[300] w-[calc(100vw-2.5rem)] max-w-sm rounded-xl font-sans">
-          <DialogHeader className="text-right sm:text-right">
+          <DialogHeader className="text-start sm:text-start">
             <DialogTitle className="font-kufi text-base font-normal leading-7">{quickAdd ? QUICK_ADD_LABELS[quickAdd].title : ""}</DialogTitle>
             <DialogDescription className="text-xs">{tr("سيُضاف مباشرة إلى خيارات النظام ويُحدد في النموذج")}</DialogDescription>
           </DialogHeader>
@@ -869,7 +869,7 @@ function EmployeeDetails({ employee, open, onOpenChange }: { employee: Employee 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md rounded-xl font-sans">
-        <DialogHeader className="text-right sm:text-right"><DialogTitle className="font-kufi text-base font-normal leading-7">{tr("ملف الموظف")}</DialogTitle><DialogDescription>{tr("بيانات الموظف الوظيفية والشخصية")}</DialogDescription></DialogHeader>
+        <DialogHeader className="text-start sm:text-start"><DialogTitle className="font-kufi text-base font-normal leading-7">{tr("ملف الموظف")}</DialogTitle><DialogDescription>{tr("بيانات الموظف الوظيفية والشخصية")}</DialogDescription></DialogHeader>
         {employee ? <div className="space-y-4"><div className="flex items-center gap-3 rounded-lg border bg-muted/25 p-3"><EmployeeAvatar name={employee.full_name} /><div><p className="font-medium">{employee.full_name}</p><p dir="ltr" className="text-left text-xs text-muted-foreground">{employee.employee_number}</p></div></div><dl className="grid grid-cols-2 gap-3 text-sm"><Detail label={tr("القسم")} value={employee.department} /><Detail label={tr("المسمى")} value={employee.position} /><Detail label={tr("نوع الدوام")} value={EMPLOYMENT_LABELS[employee.employment_type]} /><Detail label={tr("تاريخ التعيين")} value={formatArabicDate(employee.hire_date)} /><Detail label={tr("البريد العملي")} value={employee.work_email} /><Detail label={tr("الهاتف")} value={employee.phone} /></dl></div> : null}
       </DialogContent>
     </Dialog>

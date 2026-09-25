@@ -17,7 +17,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-import { tr, trf } from "@/lib/i18n";
+import { tr, trf, getLocale } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/leaves")({
   head: () => ({
     meta: [
@@ -143,7 +143,7 @@ function LeavesPage() {
               </Button>
             </DialogTrigger>
             <DialogContent className="inset-x-3 bottom-3 top-auto w-auto max-w-none translate-x-0 translate-y-0 rounded-lg border-border bg-card p-5 font-sans text-foreground shadow-card sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(430px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
-              <DialogHeader className="text-right sm:text-right">
+              <DialogHeader className="text-start sm:text-start">
                 <DialogTitle className="text-lg leading-relaxed">{tr("طلب إجازة جديد")}</DialogTitle>
                 <DialogDescription className="text-muted-foreground">{tr("يُرسل الطلب بحالة معلّق للمراجعة.")}</DialogDescription>
               </DialogHeader>

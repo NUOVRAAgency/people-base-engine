@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { chatWithAssistant } from "@/lib/ai-reports.functions";
 import { cn } from "@/lib/utils";
 
-import { tr, trf } from "@/lib/i18n";
+import { tr, trf, getLocale } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/assistant")({
   validateSearch: (search: Record<string, unknown>) => ({
     month: typeof search["month"] === "string" ? (search["month"] as string) : undefined,

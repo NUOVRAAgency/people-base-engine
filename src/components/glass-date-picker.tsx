@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
-import { ar } from "date-fns/locale";
+import { ar, enUS } from "date-fns/locale";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-import { tr, trf } from "@/lib/i18n";
+import { tr, trf, getLocale, getLanguage } from "@/lib/i18n";
 type Props = {
   value: string; // yyyy-MM-dd
   onChange: (value: string) => void;
@@ -29,7 +29,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
           variant="outline"
           aria-label={ariaLabel}
           className={cn(
-            "group relative h-14 w-full justify-start overflow-hidden rounded-lg border border-primary/15 bg-card/75 px-4 text-right font-normal shadow-card backdrop-blur-xl transition-all hover:border-primary/30 hover:bg-card/90 focus-visible:ring-2 focus-visible:ring-primary/25",
+            "group relative h-14 w-full justify-start overflow-hidden rounded-lg border border-primary/15 bg-card/75 px-4 text-start font-normal shadow-card backdrop-blur-xl transition-all hover:border-primary/30 hover:bg-card/90 focus-visible:ring-2 focus-visible:ring-primary/25",
             !selected && "text-muted-foreground",
           )}
         >
@@ -52,17 +52,17 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
         className="z-[120] w-[calc(100vw-1.5rem)] max-w-xs overflow-hidden rounded-xl border border-primary/15 bg-card p-3 font-sans text-foreground shadow-card"
       >
         <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-primary/25" aria-hidden />
-        <div className="mb-2 border-b border-border/60 px-2 pb-2 pt-1 text-right">
+        <div className="mb-2 border-b border-border/60 px-2 pb-2 pt-1 text-start">
           <p className="font-kufi text-sm font-normal leading-7">{ariaLabel}</p>
           <p className="text-xs leading-6 text-muted-foreground">{tr("اختر اليوم المناسب من التقويم")}</p>
         </div>
         <Calendar
           mode="single"
-          locale={ar}
+          locale={getLanguage() === "en" ? enUS : ar}
          
           showOutsideDays={false}
           formatters={{
-            formatWeekdayName: (date) => format(date, "EEEEE", { locale: ar }),
+            formatWeekdayName: (date) => format(date, "EEEEE", { locale: getLanguage() === "en" ? enUS : ar }),
             formatDay: (date) => String(date.getDate()),
           }}
           {...(selected ? { selected } : {})}
