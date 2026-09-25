@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ROLE_LABELS, useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
 
-import { tr, trf } from "@/lib/i18n";
+import { tr, trf, getLanguage, setLanguage } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
@@ -42,7 +42,7 @@ function SettingsPage() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { role, isAdmin, loading } = useCurrentUser();
   const [branchesOpen, setBranchesOpen] = useState(false);
-  const [language, setLanguage] = useState<"ar" | "en">("ar");
+  const language = getLanguage();
   const [helpOpen, setHelpOpen] = useState(false);
 
   if (pathname !== "/settings") return <Outlet />;
@@ -117,7 +117,7 @@ function SettingsPage() {
                 <button
                   key={code}
                   type="button"
-                  onClick={() => setLanguage(code)}
+                  onClick={() => { if (code !== language) setLanguage(code); }}
                   className={cn(
                     "rounded-full px-3 py-1 text-[12px] font-medium transition-colors",
                     language === code ? "bg-primary text-primary-foreground" : "text-muted-foreground",

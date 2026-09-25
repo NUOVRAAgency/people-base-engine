@@ -283,3 +283,8 @@
     margin: 14mm;
   }
 }
+
+/* LTR (English): mirror directional icons so arrows point the right way */
+html[dir="ltr"] :is(.lucide-chevron-left, .lucide-chevron-right, .lucide-arrow-left, .lucide-arrow-right, .lucide-chevrons-left, .lucide-chevrons-right) {
+  transform: scaleX(-1);
+}
