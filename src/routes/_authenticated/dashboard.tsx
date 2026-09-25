@@ -43,14 +43,14 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
 });
 
-const dateFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", {
+const dateFormatter = new Intl.DateTimeFormat(getLocale(), {
   weekday: "long",
   day: "numeric",
   month: "long",
   year: "numeric",
 });
-const monthFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { month: "long", year: "numeric" });
-const weekdayFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { weekday: "short" });
+const monthFormatter = new Intl.DateTimeFormat(getLocale(), { month: "long", year: "numeric" });
+const weekdayFormatter = new Intl.DateTimeFormat(getLocale(), { weekday: "short" });
 const numberFormatter = new Intl.NumberFormat("en-US");
 
 const CHART_COLORS = ["#1f6bff", "#7c5cff", "#00b8a9", "#ff7a45", "#f2427f", "#17b26a", "#12a3e0", "#f5b544"];
@@ -329,7 +329,7 @@ function DashboardPage() {
                 />
               </PieChart>
             </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center" dir="rtl">
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-[11px] text-muted-foreground">{tr("إجمالي الموظفين")}</span>
               <span className="text-2xl font-medium leading-tight text-foreground">
                 {numberFormatter.format(donutTotal)}
@@ -441,7 +441,7 @@ function DashboardPage() {
                 <Area type="monotone" dataKey={tr("حضور")} stroke="#1f6bff" strokeWidth={2} fill="url(#areaBlue)" />
               </AreaChart>
             </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center" dir="rtl">
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-xl font-medium text-foreground">{numberFormatter.format(totalNet)} {tr("ر.ي")}</span>
               <span className="mt-0.5 text-[11px] text-muted-foreground">{tr("إجمالي المبلغ")}</span>
             </div>

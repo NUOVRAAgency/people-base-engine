@@ -142,7 +142,7 @@ function LeavesPage() {
                 <Plus className="size-5" aria-hidden />
               </Button>
             </DialogTrigger>
-            <DialogContent dir="rtl" className="inset-x-3 bottom-3 top-auto w-auto max-w-none translate-x-0 translate-y-0 rounded-lg border-border bg-card p-5 font-sans text-foreground shadow-card sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(430px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+            <DialogContent className="inset-x-3 bottom-3 top-auto w-auto max-w-none translate-x-0 translate-y-0 rounded-lg border-border bg-card p-5 font-sans text-foreground shadow-card sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(430px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
               <DialogHeader className="text-right sm:text-right">
                 <DialogTitle className="text-lg leading-relaxed">{tr("طلب إجازة جديد")}</DialogTitle>
                 <DialogDescription className="text-muted-foreground">{tr("يُرسل الطلب بحالة معلّق للمراجعة.")}</DialogDescription>
@@ -153,7 +153,7 @@ function LeavesPage() {
                     <SelectTrigger className="h-11 border-input bg-background text-foreground focus:ring-ring">
                       <SelectValue placeholder={tr("اختر الموظف")} />
                     </SelectTrigger>
-                    <SelectContent position="popper" dir="rtl" className="z-[60] max-h-64 border-border bg-popover">
+                    <SelectContent position="popper" className="z-[60] max-h-64 border-border bg-popover">
                       {employees.length === 0 ? (
                         <p className="px-3 py-4 text-center text-sm text-muted-foreground">{tr("لا يوجد موظفون نشطون متاحون لك بعد")}</p>
                       ) : employees.map((employee) => <SelectItem key={employee.id} value={employee.id}>{employee.full_name}</SelectItem>)}
@@ -163,7 +163,7 @@ function LeavesPage() {
                 <Field label={tr("نوع الإجازة")}>
                   <Select value={form.leaveType} onValueChange={(leaveType) => setForm((value) => ({ ...value, leaveType }))}>
                     <SelectTrigger className="h-11 border-input bg-background text-foreground focus:ring-ring"><SelectValue /></SelectTrigger>
-                    <SelectContent position="popper" dir="rtl" className="z-[60]">{Object.entries(LEAVE_TYPES).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent>
+                    <SelectContent position="popper" className="z-[60]">{Object.entries(LEAVE_TYPES).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent>
                   </Select>
                   {form.leaveType === "other" ? (
                     <div className="mt-2 animate-in fade-in-0 slide-in-from-top-2 duration-200 space-y-1.5">
@@ -270,7 +270,7 @@ const STATUS = {
 } as const;
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("ar-YE-u-nu-latn", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
+  return new Intl.DateTimeFormat(getLocale(), { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`));
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {

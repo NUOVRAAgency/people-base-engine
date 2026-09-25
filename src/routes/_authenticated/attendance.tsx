@@ -73,9 +73,9 @@ type WorkSettings = {
 
 type TabKey = "today" | "monthly" | "settings";
 
-const numberFormatter = new Intl.NumberFormat("ar-YE-u-nu-latn", { maximumFractionDigits: 0 });
-const monthFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { month: "long", year: "numeric" });
-const dayFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { weekday: "long", day: "numeric", month: "long" });
+const numberFormatter = new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 0 });
+const monthFormatter = new Intl.DateTimeFormat(getLocale(), { month: "long", year: "numeric" });
+const dayFormatter = new Intl.DateTimeFormat(getLocale(), { weekday: "long", day: "numeric", month: "long" });
 
 function dateKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -429,7 +429,7 @@ function ManualDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent dir="rtl" className="max-w-md rounded-3xl border-border/40 bg-card/95 backdrop-blur-md">
+      <DialogContent className="max-w-md rounded-3xl border-border/40 bg-card/95 backdrop-blur-md">
         <DialogHeader className="text-start">
           <DialogTitle className="text-base font-medium">{tr("تسجيل حضور يدوي")}</DialogTitle>
           <DialogDescription className="text-xs">{tr("سجل وقت الدخول والخروج ليوم")} {date}</DialogDescription>
@@ -727,7 +727,7 @@ function FieldSelect({
         <SelectTrigger className="h-11 w-full rounded-xl">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent dir="rtl" className="z-[200]">
+        <SelectContent className="z-[200]">
           {children}
         </SelectContent>
       </Select>

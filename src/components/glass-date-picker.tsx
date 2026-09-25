@@ -38,14 +38,14 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
             <span className="grid size-9 shrink-0 place-items-center rounded-md border border-header-deep/15 bg-header-deep/5 shadow-sm transition-colors group-hover:bg-header-deep/10">
               <CalendarDays className="size-4 text-header-deep" aria-hidden />
             </span>
-            <span dir="rtl" className={cn("min-w-0 flex-1 whitespace-nowrap text-sm leading-7", selected && "font-medium text-foreground")}>
-              {selected ? new Intl.DateTimeFormat("ar-YE-u-nu-latn", { day: "numeric", month: "long", year: "numeric" }).format(selected) : placeholder}
+            <span className={cn("min-w-0 flex-1 whitespace-nowrap text-sm leading-7", selected && "font-medium text-foreground")}>
+              {selected ? new Intl.DateTimeFormat(getLocale(), { day: "numeric", month: "long", year: "numeric" }).format(selected) : placeholder}
             </span>
           </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        dir="rtl"
+       
         align="center"
         side="bottom"
         collisionPadding={12}
@@ -59,7 +59,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
         <Calendar
           mode="single"
           locale={ar}
-          dir="rtl"
+         
           showOutsideDays={false}
           formatters={{
             formatWeekdayName: (date) => format(date, "EEEEE", { locale: ar }),

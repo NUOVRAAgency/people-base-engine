@@ -155,7 +155,7 @@ function SettingsPage() {
       <BranchesDialog open={branchesOpen} onOpenChange={setBranchesOpen} />
 
       <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
-        <DialogContent dir="rtl" className="max-w-md rounded-2xl border-border/50 bg-card/95 backdrop-blur-md">
+        <DialogContent className="max-w-md rounded-2xl border-border/50 bg-card/95 backdrop-blur-md">
           <DialogHeader className="text-start">
             <DialogTitle className="text-base font-semibold">{tr("مركز المساعدة")}</DialogTitle>
             <DialogDescription className="text-xs leading-[1.9]">
@@ -263,7 +263,7 @@ function BranchesDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent dir="rtl" className="max-h-[88dvh] max-w-md overflow-y-auto rounded-2xl border-border/50 bg-card/95 backdrop-blur-md">
+      <DialogContent className="max-h-[88dvh] max-w-md overflow-y-auto rounded-2xl border-border/50 bg-card/95 backdrop-blur-md">
         <DialogHeader className="text-start">
           <DialogTitle className="text-base font-semibold">{tr("إدارة الفروع")}</DialogTitle>
           <DialogDescription className="text-xs">{tr("اضف الفروع وتحكم بتفعيلها او ايقافها")}</DialogDescription>

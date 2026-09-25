@@ -69,7 +69,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const visibleItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
 
   return (
-    <div dir="rtl" className="min-h-dvh bg-background font-kufi">
+    <div className="min-h-dvh bg-background font-kufi">
       <header className="fixed inset-x-0 top-0 z-30 overflow-hidden rounded-b-2xl shadow-nav backdrop-blur-md">
         <div className="w-full bg-white pt-[max(7px,env(safe-area-inset-top))]" />
         <div className="relative flex h-[52px] items-center gap-3 px-3 text-primary-foreground [background:var(--header-gradient)] md:h-[56px] md:px-6">

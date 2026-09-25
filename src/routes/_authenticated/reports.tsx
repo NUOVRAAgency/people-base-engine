@@ -77,9 +77,9 @@ type LeaveRow = {
 
 type TabKey = "finance" | "attendance" | "leaves" | "insights";
 
-const numberFormatter = new Intl.NumberFormat("ar-YE-u-nu-latn", { maximumFractionDigits: 0 });
-const decimalFormatter = new Intl.NumberFormat("ar-YE-u-nu-latn", { maximumFractionDigits: 1 });
-const monthFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { month: "long", year: "numeric" });
+const numberFormatter = new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 0 });
+const decimalFormatter = new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 1 });
+const monthFormatter = new Intl.DateTimeFormat(getLocale(), { month: "long", year: "numeric" });
 
 const LEAVE_LABELS: Record<string, string> = {
   annual: tr("سنوية"),

@@ -28,8 +28,8 @@ export const Route = createFileRoute("/_authenticated/assistant")({
 
 type ChatMessage = { id: string; role: "user" | "assistant"; text: string; at: string };
 
-const timeFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { hour: "2-digit", minute: "2-digit" });
-const monthFormatter = new Intl.DateTimeFormat("ar-YE-u-nu-latn", { month: "long", year: "numeric" });
+const timeFormatter = new Intl.DateTimeFormat(getLocale(), { hour: "2-digit", minute: "2-digit" });
+const monthFormatter = new Intl.DateTimeFormat(getLocale(), { month: "long", year: "numeric" });
 
 function monthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-01`;
@@ -216,7 +216,7 @@ function AssistantPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background" dir="rtl">
+    <div className="fixed inset-0 z-50 flex flex-col bg-background">
       <header className="shrink-0 bg-[linear-gradient(180deg,#0c4bbc_0%,#0f52d8_100%)] px-4 pb-2.5 pt-2.5 text-primary-foreground">
         <div className="mx-auto flex w-full max-w-4xl items-center gap-2.5">
           <button

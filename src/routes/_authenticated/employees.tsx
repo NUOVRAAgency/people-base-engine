@@ -577,7 +577,7 @@ function EmployeesPage() {
       <EmployeeDetails employee={selected} open={detailsOpen} onOpenChange={setDetailsOpen} />
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent dir="rtl" className="w-[calc(100vw-2rem)] max-w-sm rounded-xl font-sans">
+        <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-sm rounded-xl font-sans">
           <AlertDialogHeader className="text-right sm:text-right">
             <AlertDialogTitle>{tr("حذف الموظف")}</AlertDialogTitle>
             <AlertDialogDescription>{tr("سيُحذف سجل")} {selected?.full_name} {tr("نهائياً. لا يمكن التراجع عن هذه الخطوة.")}</AlertDialogDescription>
@@ -594,9 +594,9 @@ function EmployeesPage() {
 
 function FilterSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: { value: string; label: string }[] }) {
   return (
-    <Select dir="rtl" value={value} onValueChange={onChange}>
+    <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="h-10 rounded-lg border-primary/10 bg-background"><SelectValue placeholder={label} /></SelectTrigger>
-      <SelectContent dir="rtl" position="popper" className="z-[120] max-h-64"><SelectItem value="all">{tr("كل")} {label === "القسم" ? tr("الأقسام") : label === "الحالة" ? tr("الحالات") : tr("أنواع الدوام")}</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
+      <SelectContent position="popper" className="z-[120] max-h-64"><SelectItem value="all">{tr("كل")} {label === tr("القسم") ? tr("الأقسام") : label === tr("الحالة") ? tr("الحالات") : tr("أنواع الدوام")}</SelectItem>{options.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
     </Select>
   );
 }
@@ -613,7 +613,7 @@ function StatusBadge({ status }: { status: string }) {
 
 function EmployeeActions({ employee, canEdit, canDelete, onView, onEdit, onDelete }: { employee: Employee; canEdit: boolean; canDelete: boolean; onView: () => void; onEdit: () => void; onDelete: () => void }) {
   return (
-    <DropdownMenu dir="rtl">
+    <DropdownMenu>
       <DropdownMenuTrigger asChild><Button type="button" variant="ghost" size="icon" aria-label={trf("إجراءات {0}", employee.full_name)}><MoreHorizontal /></Button></DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuItem onSelect={onView}><Eye />{tr("عرض الملف")}</DropdownMenuItem>
@@ -648,7 +648,7 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent dir="rtl" className="z-[100] flex max-h-[88dvh] w-[calc(100vw-1.25rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl border-primary/15 bg-card p-0 font-sans shadow-card">
+      <DialogContent className="z-[100] flex max-h-[88dvh] w-[calc(100vw-1.25rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl border-primary/15 bg-card p-0 font-sans shadow-card">
         <DialogHeader className="border-b border-border bg-muted/25 px-5 py-4 pe-12 text-right sm:text-right">
           <DialogTitle className="font-kufi text-base font-normal leading-7">{editing ? tr("تعديل بيانات الموظف") : tr("إضافة موظف جديد")}</DialogTitle>
           <DialogDescription className="text-xs leading-6">{tr("أدخل بيانات الموظف على ثلاث خطوات متتالية")}</DialogDescription>
@@ -767,9 +767,9 @@ function EmploymentFields({ form, setField, branches, managers, departments, isA
       </Field>
       <Field label={tr("البريد الإلكتروني العملي")} required error={errors.workEmail}><Input dir="ltr" type="email" value={form.workEmail} onChange={(event) => setField("workEmail", event.target.value)} placeholder="name@company.com" aria-invalid={Boolean(errors.workEmail)} className="h-11 text-left" /></Field>
       <Field label={tr("القسم")} required error={errors.department}>
-        <Select dir="rtl" value={form.department} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("department") : setField("department", value)}>
+        <Select value={form.department} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("department") : setField("department", value)}>
           <SelectTrigger aria-invalid={Boolean(errors.department)} className="h-11"><SelectValue placeholder={tr("اختر القسم")} /></SelectTrigger>
-          <SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">
+          <SelectContent position="popper" className="z-[200] max-h-64">
             {departments.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}
             <SelectItem value={ADD_VALUE} className={addRowClass}>{QUICK_ADD_LABELS.department.trigger}</SelectItem>
           </SelectContent>
@@ -777,9 +777,9 @@ function EmploymentFields({ form, setField, branches, managers, departments, isA
       </Field>
       <Field label={tr("المسمى الوظيفي")} required error={errors.position}><Input value={form.position} onChange={(event) => setField("position", event.target.value)} placeholder={tr("مثال: أخصائي موارد بشرية")} aria-invalid={Boolean(errors.position)} className="h-11" /></Field>
       <Field label={tr("المدير المباشر")}>
-        <Select dir="rtl" value={form.managerId} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("manager") : setField("managerId", value)}>
+        <Select value={form.managerId} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("manager") : setField("managerId", value)}>
           <SelectTrigger className="h-11"><SelectValue placeholder={tr("اختر المدير")} /></SelectTrigger>
-          <SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">
+          <SelectContent position="popper" className="z-[200] max-h-64">
             <SelectItem value="none">{tr("بدون مدير مباشر")}</SelectItem>
             {managers.map((manager) => <SelectItem key={manager.id} value={manager.id}>{manager.full_name}</SelectItem>)}
             <SelectItem value={ADD_VALUE} className={addRowClass}>{QUICK_ADD_LABELS.manager.trigger}</SelectItem>
@@ -787,19 +787,19 @@ function EmploymentFields({ form, setField, branches, managers, departments, isA
         </Select>
       </Field>
       <Field label={tr("الفرع")} required error={errors.branchId}>
-        <Select dir="rtl" value={form.branchId} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("branch") : setField("branchId", value)} disabled={!isAdmin}>
+        <Select value={form.branchId} onValueChange={(value) => value === ADD_VALUE ? openQuickAdd("branch") : setField("branchId", value)} disabled={!isAdmin}>
           <SelectTrigger aria-invalid={Boolean(errors.branchId)} className="h-11"><SelectValue placeholder={tr("اختر الفرع")} /></SelectTrigger>
-          <SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">
+          <SelectContent position="popper" className="z-[200] max-h-64">
             {branches.map((branch) => <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>)}
             <SelectItem value={ADD_VALUE} className={addRowClass}>{QUICK_ADD_LABELS.branch.trigger}</SelectItem>
           </SelectContent>
         </Select>
       </Field>
       <Field label={tr("تاريخ التعيين")} required error={errors.hireDate}><GlassDatePicker ariaLabel={tr("تاريخ التعيين")} value={form.hireDate} onChange={(value) => setField("hireDate", value)} /></Field>
-      <Field label={tr("نوع الدوام")} required><Select dir="rtl" value={form.employmentType} onValueChange={(value) => setField("employmentType", value)}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64">{Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></Field>
+      <Field label={tr("نوع الدوام")} required><Select value={form.employmentType} onValueChange={(value) => setField("employmentType", value)}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent position="popper" className="z-[200] max-h-64">{Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></Field>
 
       <Dialog open={quickAdd !== null} onOpenChange={(open) => { if (!open) setQuickAdd(null); }}>
-        <DialogContent dir="rtl" className="z-[300] w-[calc(100vw-2.5rem)] max-w-sm rounded-xl font-sans">
+        <DialogContent className="z-[300] w-[calc(100vw-2.5rem)] max-w-sm rounded-xl font-sans">
           <DialogHeader className="text-right sm:text-right">
             <DialogTitle className="font-kufi text-base font-normal leading-7">{quickAdd ? QUICK_ADD_LABELS[quickAdd].title : ""}</DialogTitle>
             <DialogDescription className="text-xs">{tr("سيُضاف مباشرة إلى خيارات النظام ويُحدد في النموذج")}</DialogDescription>
@@ -839,7 +839,7 @@ function PersonalFields({ form, setField, errors }: { form: EmployeeForm; setFie
         />
       </Field>
       <Field label={tr("تاريخ الميلاد")} required error={errors.birthDate}><GlassDatePicker ariaLabel={tr("تاريخ الميلاد")} value={form.birthDate} onChange={(value) => setField("birthDate", value)} /></Field>
-      <Field label={tr("الجنس")} required error={errors.gender}><Select dir="rtl" value={form.gender} onValueChange={(value) => setField("gender", value)}><SelectTrigger aria-invalid={Boolean(errors.gender)} className="h-11"><SelectValue placeholder={tr("اختر الجنس")} /></SelectTrigger><SelectContent dir="rtl" position="popper" className="z-[200] max-h-64"><SelectItem value="male">{tr("ذكر")}</SelectItem><SelectItem value="female">{tr("أنثى")}</SelectItem></SelectContent></Select></Field>
+      <Field label={tr("الجنس")} required error={errors.gender}><Select value={form.gender} onValueChange={(value) => setField("gender", value)}><SelectTrigger aria-invalid={Boolean(errors.gender)} className="h-11"><SelectValue placeholder={tr("اختر الجنس")} /></SelectTrigger><SelectContent position="popper" className="z-[200] max-h-64"><SelectItem value="male">{tr("ذكر")}</SelectItem><SelectItem value="female">{tr("أنثى")}</SelectItem></SelectContent></Select></Field>
       <Field label={tr("الجنسية")} required error={errors.nationality} className="sm:col-span-2"><Input value={form.nationality} onChange={(event) => setField("nationality", event.target.value)} placeholder={tr("الجنسية")} aria-invalid={Boolean(errors.nationality)} className="h-11" /></Field>
     </div>
   );
@@ -868,7 +868,7 @@ function MoneyInput({ value, onChange, invalid }: { value: string; onChange: (va
 function EmployeeDetails({ employee, open, onOpenChange }: { employee: Employee | null; open: boolean; onOpenChange: (open: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent dir="rtl" className="w-[calc(100vw-1.5rem)] max-w-md rounded-xl font-sans">
+      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md rounded-xl font-sans">
         <DialogHeader className="text-right sm:text-right"><DialogTitle className="font-kufi text-base font-normal leading-7">{tr("ملف الموظف")}</DialogTitle><DialogDescription>{tr("بيانات الموظف الوظيفية والشخصية")}</DialogDescription></DialogHeader>
         {employee ? <div className="space-y-4"><div className="flex items-center gap-3 rounded-lg border bg-muted/25 p-3"><EmployeeAvatar name={employee.full_name} /><div><p className="font-medium">{employee.full_name}</p><p dir="ltr" className="text-left text-xs text-muted-foreground">{employee.employee_number}</p></div></div><dl className="grid grid-cols-2 gap-3 text-sm"><Detail label={tr("القسم")} value={employee.department} /><Detail label={tr("المسمى")} value={employee.position} /><Detail label={tr("نوع الدوام")} value={EMPLOYMENT_LABELS[employee.employment_type]} /><Detail label={tr("تاريخ التعيين")} value={formatArabicDate(employee.hire_date)} /><Detail label={tr("البريد العملي")} value={employee.work_email} /><Detail label={tr("الهاتف")} value={employee.phone} /></dl></div> : null}
       </DialogContent>
@@ -882,5 +882,5 @@ function Detail({ label, value }: { label: string; value: string | null | undefi
 
 function formatArabicDate(value: string | null) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("ar-YE-u-nu-latn", { year: "numeric", month: "short", day: "numeric" }).format(new Date(`${value}T12:00:00`));
+  return new Intl.DateTimeFormat(getLocale(), { year: "numeric", month: "short", day: "numeric" }).format(new Date(`${value}T12:00:00`));
 }
