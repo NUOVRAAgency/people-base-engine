@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import {
   Area,
   AreaChart,
+  CartesianGrid,
   Cell,
   Line,
   LineChart,
@@ -249,7 +250,7 @@ function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-3 pb-6">
-      <header className="rounded-none border border-border/40 bg-card/75 px-3 py-2">
+      <header className="rounded-2xl border border-border/40 bg-card/75 px-3 py-2 shadow-glass backdrop-blur-sm">
         <div className="min-w-0">
           <h2 className="truncate text-base font-medium leading-[1.6] text-foreground md:text-lg">أهلا بك</h2>
           <p className="mt-0.5 truncate text-[12px] leading-[1.7] text-muted-foreground md:text-sm">
@@ -351,22 +352,23 @@ function DashboardPage() {
         </Panel>
 
         <Panel title="اتجاه صرف الرواتب خلال السنة" action="ر.ي">
-          <div className="h-[252px] w-full" dir="ltr">
+          <div className="mt-3 h-[252px] w-full" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={yearSeries} margin={{ top: 10, right: 6, left: 0, bottom: 0 }}>
+              <AreaChart data={yearSeries} margin={{ top: 12, right: 6, left: 0, bottom: 8 }}>
                 <defs>
                   <linearGradient id="areaTrend" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#00b8a9" stopOpacity={0.35} />
                     <stop offset="100%" stopColor="#00b8a9" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
+                <CartesianGrid stroke="rgba(148, 163, 184, 0.4)" strokeDasharray="4 4" vertical={false} />
                 <XAxis
                   dataKey="label"
                   tickLine={false}
                   axisLine={false}
                   interval="preserveStartEnd"
                   minTickGap={8}
-                  tick={{ fontSize: 9, fill: "#9aa4b4" }}
+                  tick={{ fontSize: 9, fill: "#9aa4b4", dy: 8 }}
                 />
                 <YAxis
                   tickLine={false}
@@ -407,8 +409,9 @@ function DashboardPage() {
           </div>
           <div className="h-[196px] w-full" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={weekSeries} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#7a8699" }} />
+              <LineChart data={weekSeries} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
+                <CartesianGrid stroke="rgba(148, 163, 184, 0.35)" strokeDasharray="4 4" vertical={false} />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#7a8699", dy: 6 }} />
                 <YAxis
                   tickLine={false}
                   axisLine={false}
@@ -554,13 +557,13 @@ function KpiCard({
         >
           {icon}
         </span>
-        <p className={cn("truncate text-[11px] font-normal", pressed ? "text-primary" : "text-white/90")}>
+        <p className={cn("truncate text-[11px] font-semibold", pressed ? "text-primary" : "text-white")}>
           {title}
         </p>
       </div>
       <p
         className={cn(
-          "mt-1 truncate font-medium leading-tight",
+          "mt-1 truncate font-semibold leading-tight",
           compact ? "text-sm" : "text-lg",
           pressed ? "text-primary" : "text-white",
         )}
@@ -571,8 +574,8 @@ function KpiCard({
   );
 
   const classes = cn(
-    "rounded-none border p-2.5 text-start transition-colors duration-150",
-    pressed ? "border-border bg-card" : "border-primary bg-primary",
+    "rounded-2xl border p-2.5 text-start shadow-glass backdrop-blur-sm transition-colors duration-150",
+    pressed ? "border-border/40 bg-card/75" : "border-primary bg-primary",
   );
 
   if (!to || !onPress) {

@@ -69,8 +69,8 @@ export function MobileShell({ children }: { children: ReactNode }) {
 
   return (
     <div dir="rtl" className="min-h-dvh bg-background font-kufi">
-      <header className="fixed inset-x-0 top-0 z-30 shadow-nav">
-        <div className="h-[7px] w-full bg-white" />
+      <header className="fixed inset-x-0 top-0 z-30 overflow-hidden rounded-b-2xl shadow-nav backdrop-blur-md">
+        <div className="w-full bg-white pt-[max(7px,env(safe-area-inset-top))]" />
         <div className="relative flex h-[52px] items-center gap-3 px-3 text-primary-foreground [background:var(--header-gradient)] md:h-[56px] md:px-6">
         <div className="flex min-w-0 items-center gap-2.5">
           {companyName ? (
@@ -155,7 +155,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="min-h-dvh bg-background px-4 pb-[96px] pt-[72px] md:px-6 md:pt-[76px]">{children}</main>
+      <main className="min-h-dvh bg-background px-4 pb-[96px] pt-[calc(max(7px,env(safe-area-inset-top))+64px)] md:px-6 md:pt-[calc(max(7px,env(safe-area-inset-top))+68px)]">{children}</main>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur-md">
         <ul ref={listRef} className="scrollbar-hide mx-auto flex max-w-[480px] items-stretch gap-1 overflow-x-auto px-3 pb-[env(safe-area-inset-bottom)]">

@@ -147,7 +147,7 @@
   --warning: oklch(0.84 0.14 78);
   --warning-foreground: oklch(0.42 0.11 58);
   --login-grid: oklch(0.5 0.18 263 / 7%);
-  --header-gradient: linear-gradient(180deg, #0c4bbc 0%, #0055ff 100%);
+  --header-gradient: linear-gradient(180deg, rgba(23, 105, 232, 0.94) 0%, rgba(9, 64, 178, 0.94) 100%);
   --glass-foreground: oklch(0.97 0.006 250);
   --glass-muted: oklch(0.77 0.018 255);
   --glass-surface: oklch(1 0 0 / 7%);
