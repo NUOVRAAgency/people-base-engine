@@ -534,17 +534,15 @@ function InsightsTab({ month, summary }: { month: string; summary: string }) {
       <Link
         to="/assistant"
         search={{ month }}
-        className="group flex items-center gap-3 rounded-2xl bg-gradient-to-b from-[#1f6bff] to-[#0c4bbc] p-4 text-primary-foreground shadow-[0_10px_24px_-8px_rgba(12,75,188,0.65),inset_0_1px_0_rgba(255,255,255,0.35)] transition-transform active:translate-y-0.5 md:hover:-translate-y-0.5"
+        className="group flex items-center gap-2.5 rounded-xl bg-[#2b5fb8] px-3 py-2 text-primary-foreground transition-transform active:translate-y-0.5 md:hover:-translate-y-0.5"
       >
-        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-white/15 text-base font-medium tracking-wide shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/15 text-[12px] font-medium">
           AI
         </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-medium">المساعد الذكي للموارد البشرية</span>
-          <span className="block text-[12px] leading-[1.7] text-primary-foreground/80">افتح المحادثة ونناقش بيانات الشهر نصا وصوتا</span>
-        </span>
-        <ChevronLeft className="h-5 w-5 shrink-0 text-primary-foreground/80" aria-hidden />
+        <span className="min-w-0 flex-1 truncate text-[13px] font-medium">المساعد الذكي</span>
+        <ChevronLeft className="h-4 w-4 shrink-0 text-primary-foreground/80" aria-hidden />
       </Link>
+
 
     </section>
   );

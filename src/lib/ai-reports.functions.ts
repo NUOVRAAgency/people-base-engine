@@ -2,6 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+// النموذج المعتمد في استدعاءات Gemini (يُحدّث من مكان واحد فقط).
+const GEMINI_MODEL = "gemini-3.7-flash";
+
 /**
  * وسيط الذكاء الاصطناعي (Gemini).
  *
@@ -37,7 +40,7 @@ export const generateSmartReport = createServerFn({ method: "POST" })
     }
 
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
@@ -109,7 +112,7 @@ export const chatWithAssistant = createServerFn({ method: "POST" })
     }
 
     const res = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
