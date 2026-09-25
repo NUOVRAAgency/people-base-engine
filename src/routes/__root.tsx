@@ -12,7 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { supabase } from "@/integrations/supabase/client";
 
-import { tr, trf } from "@/lib/i18n";
+import { DirectionProvider } from "@radix-ui/react-direction";
+import { tr, getDirection, LANGUAGE_BOOT_SCRIPT } from "@/lib/i18n";
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -178,7 +179,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <DirectionProvider dir={getDirection()}>
+        <Outlet />
+      </DirectionProvider>
     </QueryClientProvider>
   );
 }
