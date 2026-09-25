@@ -57,7 +57,7 @@ function SettingsPage() {
     {
       key: "system",
       label: "إعدادات النظام",
-      description: "اسم المنشاة ومواعيد الدوام",
+      description: "اسم المنشأة ومواعيد الدوام",
       icon: SlidersHorizontal,
       action: () => navigate({ to: "/settings/system" }),
     },
@@ -92,7 +92,7 @@ function SettingsPage() {
 
       {isAdmin ? (
         <section className="space-y-2.5">
-          <p className="px-1 text-xs font-medium text-muted-foreground">الادارة والصلاحيات</p>
+          <p className="px-1 text-xs font-medium text-muted-foreground">الإدارة والصلاحيات</p>
           <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/75 shadow-glass backdrop-blur-sm">
             {adminItems.map(({ key, ...item }, index) => (
               <SettingsRow key={key} {...item} withBorderTop={index > 0} />
