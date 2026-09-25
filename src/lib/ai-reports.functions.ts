@@ -9,7 +9,12 @@ async function callGemini(apiKey: string, body: unknown): Promise<Response> {
   let last: Response | null = null;
   for (const model of GEMINI_MODELS) {
     for (let attempt = 0; attempt < 2; attempt++) {
-      const res = await callGemini(apiKey, (body),
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+          body: JSON.stringify(body),
         },
       );
       if (res.ok) return res;
@@ -57,21 +62,19 @@ export const generateSmartReport = createServerFn({ method: "POST" })
       };
     }
 
-    const res = await callGemini(apiKey, ({
-          contents: [
+    const res = await callGemini(apiKey, {
+      contents: [
+        {
+          parts: [
             {
-              parts: [
-                {
-                  text:
-                    data.prompt ??
-                    `اكتب تقريرًا موجزًا عن أداء الموارد البشرية لشهر ${data.month}.`,
-                },
-              ],
+              text:
+                data.prompt ??
+                `اكتب تقريرًا موجزًا عن أداء الموارد البشرية لشهر ${data.month}.`,
             },
           ],
-        }),
-      },
-    );
+        },
+      ],
+    });
 
     if (!res.ok) {
       // لا نمرر نص الخطأ الخام حتى لا تتسرب أي تفاصيل عن المفتاح.
@@ -124,26 +127,19 @@ export const chatWithAssistant = createServerFn({ method: "POST" })
       };
     }
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [
-              {
-                text: `انت مساعد موارد بشرية عربي. اجب بلغة عربية بسيطة وبدون تشكيل وبجمل قصيرة. اعتمد على هذه البيانات:\n${data.context}`,
-              },
-            ],
+    const res = await callGemini(apiKey, {
+      systemInstruction: {
+        parts: [
+          {
+            text: `انت مساعد موارد بشرية عربي. اجب بلغة عربية بسيطة وبدون تشكيل وبجمل قصيرة. اعتمد على هذه البيانات:\n${data.context}`,
           },
-          contents: data.messages.map((item) => ({
-            role: item.role === "user" ? "user" : "model",
-            parts: [{ text: item.text }],
-          })),
-        }),
+        ],
       },
-    );
+      contents: data.messages.map((item) => ({
+        role: item.role === "user" ? "user" : "model",
+        parts: [{ text: item.text }],
+      })),
+    });
 
     if (!res.ok) {
       return { ready: true as const, error: `Gemini error ${res.status}`, content: null };
