@@ -409,8 +409,9 @@ function DashboardPage() {
           </div>
           <div className="h-[196px] w-full" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={weekSeries} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#7a8699" }} />
+              <LineChart data={weekSeries} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
+                <CartesianGrid stroke="rgba(148, 163, 184, 0.35)" strokeDasharray="4 4" vertical={false} />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "#7a8699", dy: 6 }} />
                 <YAxis
                   tickLine={false}
                   axisLine={false}
