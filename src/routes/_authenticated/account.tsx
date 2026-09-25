@@ -15,12 +15,9 @@ function AccountPage() {
   return (
     <div className="space-y-4">
       <section className="rounded-2xl border border-border/50 bg-card/75 p-5 shadow-glass backdrop-blur-sm">
-        <p className="truncate text-end text-xs text-muted-foreground">{fullName || "مستخدم"}</p>
-        <div className="mt-3">
-          <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-            {role ? ROLE_LABELS[role] : "—"}
-          </span>
-        </div>
+        <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+          {role ? ROLE_LABELS[role] : "—"}
+        </span>
       </section>
 
       <Button
