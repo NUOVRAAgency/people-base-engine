@@ -3,7 +3,25 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // النموذج المعتمد في استدعاءات Gemini (يُحدّث من مكان واحد فقط).
-const GEMINI_MODEL = "gemini-3.7-flash";
+const GEMINI_MODELS = ["gemini-3.8-flash", "gemini-3.7-flash"];
+
+async function callGemini(apiKey: string, body: unknown): Promise<Response> {
+  let last: Response | null = null;
+  for (const model of GEMINI_MODELS) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const res = await callGemini(apiKey, (body),
+        },
+      );
+      if (res.ok) return res;
+      const text = await res.clone().text();
+      console.error(`[Gemini] model=${model} status=${res.status} body=${text}`);
+      last = res;
+      if (res.status !== 503 && res.status !== 429) break;
+      await new Promise((r) => setTimeout(r, 800));
+    }
+  }
+  return last!;
+}
 
 /**
  * وسيط الذكاء الاصطناعي (Gemini).
@@ -39,12 +57,7 @@ export const generateSmartReport = createServerFn({ method: "POST" })
       };
     }
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-        body: JSON.stringify({
+    const res = await callGemini(apiKey, ({
           contents: [
             {
               parts: [
