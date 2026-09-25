@@ -450,6 +450,7 @@ export type Database = {
           branch_id: string | null
           created_at: string
           email: string
+          full_name: string | null
           id: string
         }
         Insert: {
@@ -457,6 +458,7 @@ export type Database = {
           branch_id?: string | null
           created_at?: string
           email: string
+          full_name?: string | null
           id: string
         }
         Update: {
@@ -464,6 +466,7 @@ export type Database = {
           branch_id?: string | null
           created_at?: string
           email?: string
+          full_name?: string | null
           id?: string
         }
         Relationships: [
