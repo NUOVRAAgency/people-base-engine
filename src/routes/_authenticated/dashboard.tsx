@@ -549,12 +549,12 @@ function KpiCard({
         <span
           className={cn(
             "flex size-6 shrink-0 items-center justify-center [&_svg]:size-3",
-            pressed ? "bg-white/15 text-white" : "bg-muted text-muted-foreground",
+            pressed ? "bg-primary/10 text-primary" : "bg-white/15 text-white",
           )}
         >
           {icon}
         </span>
-        <p className={cn("truncate text-[11px] font-normal", pressed ? "text-white" : "text-muted-foreground")}>
+        <p className={cn("truncate text-[11px] font-normal", pressed ? "text-primary" : "text-white/90")}>
           {title}
         </p>
       </div>
@@ -562,7 +562,7 @@ function KpiCard({
         className={cn(
           "mt-1 truncate font-medium leading-tight",
           compact ? "text-sm" : "text-lg",
-          pressed ? "text-white" : "text-foreground",
+          pressed ? "text-primary" : "text-white",
         )}
       >
         {value}
@@ -572,7 +572,7 @@ function KpiCard({
 
   const classes = cn(
     "rounded-none border p-2.5 text-start transition-colors duration-150",
-    pressed ? "border-primary bg-primary" : "border-border bg-card",
+    pressed ? "border-border bg-card" : "border-primary bg-primary",
   );
 
   if (!to || !onPress) {

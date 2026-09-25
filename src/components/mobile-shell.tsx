@@ -84,7 +84,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
               {companyName}
             </span>
           ) : null}
-          <h1 className="truncate text-lg font-bold leading-[1.5] text-white md:text-xl">{title}</h1>
+          <h1 className="truncate rounded-full bg-white px-3.5 py-1 text-[13px] font-bold leading-[1.5] text-header-deep md:text-base">{title}</h1>
         </div>
 
         <div className="hidden min-w-0 flex-1 justify-center md:flex">
