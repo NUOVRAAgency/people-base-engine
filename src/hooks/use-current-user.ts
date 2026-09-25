@@ -28,8 +28,16 @@ export function useCurrentUser() {
       }
       setEmail(user.email ?? "");
       const meta = user.user_metadata as Record<string, unknown> | null;
-      const name = (meta?.["full_name"] as string | undefined) ?? (user.email ?? "").split("@")[0];
-      setFullName(name ?? "");
+      let name = (meta?.["full_name"] as string | undefined)?.trim() ?? "";
+      if (!name) {
+        const { data: profile } = await supabase
+          .from("users")
+          .select("full_name")
+          .eq("id", user.id)
+          .maybeSingle();
+        name = (profile?.full_name as string | undefined)?.trim() ?? "";
+      }
+      setFullName(name);
 
       const { data: roles } = await supabase
         .from("user_roles")
