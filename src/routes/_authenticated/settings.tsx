@@ -72,18 +72,12 @@ function SettingsPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-4 pb-6">
-      <section className="rounded-2xl border border-border/50 bg-card/75 p-4 shadow-glass backdrop-blur-sm">
-        <div className="flex items-center gap-3">
-          <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary/10 text-base font-semibold text-primary">
-            {initials}
+      <section className="rounded-2xl border border-border/50 bg-card/75 p-5 shadow-glass backdrop-blur-sm">
+        <div className="min-w-0">
+          <p className="truncate text-lg font-semibold leading-snug text-foreground">{fullName || "مستخدم"}</p>
+          <span className="mt-2 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            {loading ? "جاري التحميل" : role ? ROLE_LABELS[role] : "بدون دور"}
           </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-base font-semibold leading-[1.6] text-foreground">{fullName || "مستخدم"}</p>
-            <p dir="ltr" className="truncate text-start text-xs text-muted-foreground">{email}</p>
-            <span className="mt-1.5 inline-flex rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-primary">
-              {loading ? "جاري التحميل" : role ? ROLE_LABELS[role] : "بدون دور"}
-            </span>
-          </div>
         </div>
         <Button
           type="button"
