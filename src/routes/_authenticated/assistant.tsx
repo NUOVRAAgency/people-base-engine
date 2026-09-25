@@ -231,8 +231,9 @@ function AssistantPage() {
       </header>
 
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6">
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-2.5">
+
           {!roleLoading && !isAdmin ? (
             <p className="rounded-2xl border border-border bg-card p-6 text-center text-sm leading-[1.8] text-muted-foreground shadow-glass">
               المساعد الذكي متاح لمدير النظام فقط.
@@ -249,11 +250,12 @@ function AssistantPage() {
                 >
                   <div
                     className={cn(
-                      "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-[1.9] md:max-w-[70%]",
+                      "max-w-[85%] rounded-xl px-3.5 py-1.5 text-sm leading-[1.6] md:max-w-[70%]",
                       message.role === "user"
-                        ? "bg-primary text-primary-foreground shadow-[0_8px_20px_-10px_rgba(12,75,188,0.7)]"
+                        ? "bg-[#2b5fb8] text-primary-foreground"
                         : "bg-muted/70 text-foreground",
                     )}
+
                   >
                     <p className="whitespace-pre-wrap font-normal">{message.text}</p>
                   </div>
