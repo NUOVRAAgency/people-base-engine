@@ -166,6 +166,11 @@ function RootComponent() {
     navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
 
+  useEffect(() => {
+    document.documentElement.dir = getDirection();
+    document.documentElement.lang = getDirection() === "ltr" ? "en" : "ar";
+  }, []);
+
   // تحديث حالة الجلسة عند تسجيل الدخول أو الخروج
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
