@@ -11,22 +11,24 @@ export const Route = createFileRoute("/_authenticated/account")({
 
 function AccountPage() {
   const navigate = useNavigate();
-  const { email, fullName, role, initials } = useCurrentUser();
+  const { fullName, role } = useCurrentUser();
   return (
     <div className="space-y-4">
-      <section className="rounded-lg bg-card p-5 shadow-sm">
-        <div className="flex items-center gap-3">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">{initials}</span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-base font-bold text-foreground">{fullName || "مستخدم"}</p>
-            <p className="truncate text-sm text-muted-foreground">{email}</p>
-          </div>
+      <section className="rounded-2xl border border-border/50 bg-card/75 p-5 shadow-glass backdrop-blur-sm">
+        <p className="truncate text-end text-xs text-muted-foreground">{fullName || "مستخدم"}</p>
+        <div className="mt-3">
+          <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            {role ? ROLE_LABELS[role] : "—"}
+          </span>
         </div>
-        <p className="mt-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">{role ? ROLE_LABELS[role] : "—"}</p>
       </section>
 
-      <Button variant="outline" className="w-full" onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth", replace: true }); }}>
-        <LogOut aria-hidden /> تسجيل الخروج
+      <Button
+        variant="outline"
+        className="h-11 w-full rounded-xl border-destructive/25 bg-destructive/5 text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+        onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth", replace: true }); }}
+      >
+        <LogOut className="h-4 w-4" aria-hidden /> تسجيل الخروج
       </Button>
     </div>
   );
