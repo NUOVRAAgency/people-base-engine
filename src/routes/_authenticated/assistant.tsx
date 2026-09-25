@@ -252,7 +252,7 @@ function AssistantPage() {
                     className={cn(
                       "max-w-[85%] rounded-xl px-3.5 py-1.5 text-sm leading-[1.6] md:max-w-[70%]",
                       message.role === "user"
-                        ? "bg-[#2b5fb8] text-primary-foreground"
+                        ? "bg-[#0c4bbc] text-primary-foreground"
                         : "bg-muted/70 text-foreground",
                     )}
 
