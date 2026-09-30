@@ -55,17 +55,8 @@ const numberFormatter = new Intl.NumberFormat("en-US");
 
 const CHART_COLORS = ["#1f6bff", "#7c5cff", "#00b8a9", "#ff7a45", "#f2427f", "#17b26a", "#12a3e0", "#f5b544"];
 
-const SAMPLE_DEPARTMENTS = [
-  { name: tr("تقنية المعلومات"), count: 8 },
-  { name: tr("المبيعات"), count: 6 },
-  { name: tr("التسويق"), count: 4 },
-  { name: tr("الموارد البشرية"), count: 3 },
-  { name: tr("المالية"), count: 3 },
-  { name: tr("العمليات"), count: 2 },
-];
-
 const YEAR_MONTHS = [tr("يناير"), tr("فبراير"), tr("مارس"), tr("ابريل"), tr("مايو"), tr("يونيو"), tr("يوليو"), tr("اغسطس"), tr("سبتمبر"), tr("اكتوبر"), tr("نوفمبر"), tr("ديسمبر")];
-const SAMPLE_CURVE = [0.42, 0.48, 0.52, 0.58, 0.61, 0.68, 0.72, 0.79, 0.85, 0.9, 0.95, 1];
+
 
 const LEAVE_LABELS: Record<string, string> = {
   annual: tr("سنوية"),
