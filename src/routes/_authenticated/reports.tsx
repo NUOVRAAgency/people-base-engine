@@ -121,6 +121,42 @@ function ReportsPage() {
   const [attendance, setAttendance] = useState<AttendanceRow[]>([]);
   const [leaves, setLeaves] = useState<LeaveRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [archiveYear, setArchiveYear] = useState(() => new Date().getFullYear());
+  const [archivedMonths, setArchivedMonths] = useState<string[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    async function loadArchive() {
+      const [payrollMonths, attendanceDates] = await Promise.all([
+        supabase.from("payroll").select("month"),
+        supabase.from("attendance").select("date"),
+      ]);
+      if (!active) return;
+      const keys = new Set<string>();
+      (payrollMonths.data ?? []).forEach((row) => {
+        const value = String((row as { month: string }).month);
+        keys.add(`${value.slice(0, 7)}-01`);
+      });
+      (attendanceDates.data ?? []).forEach((row) => {
+        const value = String((row as { date: string }).date);
+        keys.add(`${value.slice(0, 7)}-01`);
+      });
+      setArchivedMonths([...keys].sort());
+    }
+    void loadArchive();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const archiveYears = useMemo(() => {
+    const now = new Date().getFullYear();
+    const years = new Set<number>([now, Number(month.slice(0, 4))]);
+    archivedMonths.forEach((key) => years.add(Number(key.slice(0, 4))));
+    return [...years].filter((year) => Number.isFinite(year)).sort((a, b) => b - a);
+  }, [archivedMonths, month]);
+
 
   const load = useCallback(async () => {
     setLoading(true);
