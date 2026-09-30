@@ -117,6 +117,8 @@ function DashboardPage() {
   const [attendance, setAttendance] = useState<AttendanceRow[]>([]);
   const [leaves, setLeaves] = useState<LeaveRow[]>([]);
   const [payroll, setPayroll] = useState<PayrollRow[]>([]);
+  const [yearPayroll, setYearPayroll] = useState<{ month: string; net_salary: number }[]>([]);
+
 
   const today = useMemo(() => new Date(), []);
   const dayKey = dayKeyOf(today);
