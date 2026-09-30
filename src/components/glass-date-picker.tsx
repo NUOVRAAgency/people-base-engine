@@ -99,11 +99,11 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
             month: "w-full gap-3",
             month_caption: "mx-12 flex h-11 items-center justify-center pt-1.5",
             caption_label: "font-kufi text-sm font-normal leading-7",
-            nav: "absolute inset-x-0 top-0 flex h-11 items-center justify-between px-1",
+            nav: "pointer-events-none absolute inset-x-0 top-0 flex h-11 items-center justify-between px-1",
             button_previous:
-              "grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
+              "pointer-events-auto grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
             button_next:
-              "grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
+              "pointer-events-auto grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
             chevron: "size-4 fill-header-deep",
             weekdays: "grid w-full grid-cols-7",
             weekday: "grid min-w-0 place-items-center p-0 text-center",
