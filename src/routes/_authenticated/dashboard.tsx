@@ -186,21 +186,20 @@ function DashboardPage() {
   }, [employees]);
 
 
-  const donutData = useMemo(
-    () => (departments.length > 0 ? departments : SAMPLE_DEPARTMENTS),
-    [departments],
-  );
+  const donutData = departments;
   const donutTotal = useMemo(() => donutData.reduce((sum, item) => sum + item.count, 0), [donutData]);
 
   const yearSeries = useMemo(() => {
-    const currentMonth = today.getMonth();
-    const actual = payroll.reduce((sum, row) => sum + Number(row.net_salary ?? 0), 0);
-    const peak = actual > 0 ? actual / (SAMPLE_CURVE[currentMonth] ?? 1) : 2_400_000;
-    return YEAR_MONTHS.map((label, index) => ({
-      label,
-      value: Math.round(peak * (SAMPLE_CURVE[index] ?? 0)),
-    }));
-  }, [payroll, today]);
+    const totals = new Array(12).fill(0) as number[];
+    for (const row of yearPayroll) {
+      const index = Number(String(row.month).slice(5, 7)) - 1;
+      if (index >= 0 && index < 12) totals[index] = (totals[index] ?? 0) + Number(row.net_salary ?? 0);
+    }
+    return YEAR_MONTHS.map((label, index) => ({ label, value: Math.round(totals[index] ?? 0) }));
+  }, [yearPayroll]);
+
+  const hasYearPayroll = useMemo(() => yearSeries.some((point) => point.value > 0), [yearSeries]);
+
 
 
   const weekSeries = useMemo(() => {
