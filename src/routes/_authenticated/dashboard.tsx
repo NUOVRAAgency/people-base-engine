@@ -355,10 +355,16 @@ function DashboardPage() {
               </li>
             ))}
           </ul>
+          </>
+          )}
         </Panel>
 
         <Panel title={tr("اتجاه صرف الرواتب خلال السنة")} action={tr("ر.ي")}>
+          {!hasYearPayroll ? (
+            <Empty text={tr("لا توجد مسيرات رواتب مسجلة لهذا العام بعد")} />
+          ) : (
           <div className="mt-3 h-[252px] w-full" dir="ltr">
+
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={yearSeries} margin={{ top: 12, right: 6, left: 0, bottom: 8 }}>
                 <defs>
