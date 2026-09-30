@@ -11,6 +11,7 @@ import {
   FileSearch,
   HandCoins,
   LoaderCircle,
+  X,
   TrendingDown,
   UserRound,
   Wallet,
@@ -122,6 +123,7 @@ function ReportsPage() {
   const [leaves, setLeaves] = useState<LeaveRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [archiveOpen, setArchiveOpen] = useState(false);
+  const [yearPickerOpen, setYearPickerOpen] = useState(false);
   const [archiveYear, setArchiveYear] = useState(() => new Date().getFullYear());
   const [archivedMonths, setArchivedMonths] = useState<string[]>([]);
 
@@ -308,18 +310,18 @@ function ReportsPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-5 pb-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
+    <div className="mx-auto w-full min-w-0 max-w-6xl overflow-x-hidden pb-6">
+      <header className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="hidden text-xl font-medium leading-[1.6] text-foreground md:block md:text-2xl">{tr("التقارير")}</h2>
           <p className="text-sm leading-[1.7] text-muted-foreground">{tr("ملخص مالي وحضور واجازات مع تحليل ذكي")}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 rounded-full border border-border/60 bg-card/75 p-1 shadow-glass backdrop-blur-sm">
+        <div className="flex w-full min-w-0 items-center gap-2 md:w-auto">
+          <div className="flex min-w-0 flex-1 items-center gap-1 rounded-full border border-border/60 bg-card/75 p-1 shadow-glass backdrop-blur-sm md:flex-none">
             <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر السابق")} onClick={() => shiftMonth(-1)}>
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Button>
-            <span className="min-w-[120px] text-center text-sm font-medium text-foreground">{monthLabel(month)}</span>
+            <span className="min-w-0 flex-1 truncate text-center text-sm font-medium text-foreground md:min-w-[120px]">{monthLabel(month)}</span>
             <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر التالي")} onClick={() => shiftMonth(1)}>
               <ChevronLeft className="h-4 w-4" aria-hidden />
             </Button>
@@ -330,13 +332,14 @@ function ReportsPage() {
             className="h-10 rounded-xl px-4 text-sm font-medium"
             onClick={() => {
               setArchiveYear(Number(month.slice(0, 4)));
+              setYearPickerOpen(false);
               setArchiveOpen((value) => !value);
             }}
           >
             <CalendarDays className="h-4 w-4" aria-hidden />
             {tr("السجل")}
           </Button>
-          <Button type="button" className="h-10 rounded-xl px-4 text-sm font-medium" onClick={exportReport}>
+          <Button type="button" className="hidden h-10 rounded-xl px-4 text-sm font-medium sm:flex" onClick={exportReport}>
             <Download className="h-4 w-4" aria-hidden />
             {tr("تصدير التقرير")}
           </Button>
@@ -344,28 +347,51 @@ function ReportsPage() {
       </header>
 
       {archiveOpen ? (
-        <section className="rounded-2xl border border-border/40 bg-card/75 p-4 shadow-glass backdrop-blur-sm">
-          <div className="mb-3 flex items-center justify-between gap-2">
+        <section className="mt-5 min-w-0 rounded-2xl border border-border/40 bg-card/75 p-4 shadow-glass backdrop-blur-sm">
+          <div className="mb-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
             <h3 className="text-sm font-medium text-foreground">{tr("سجل السنوات والأشهر")}</h3>
-            <button type="button" onClick={() => setArchiveOpen(false)} className="text-[12px] text-muted-foreground">
-              {tr("إغلاق")}
-            </button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-9 rounded-lg px-3 text-base font-medium"
+              onClick={() => setYearPickerOpen((value) => !value)}
+              aria-expanded={yearPickerOpen}
+            >
+              {String(archiveYear)}
+              <ChevronLeft className={cn("size-4 transition-transform", yearPickerOpen && "rotate-90")} aria-hidden />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setArchiveOpen(false);
+                setYearPickerOpen(false);
+              }}
+              className="ms-auto size-9 rounded-full text-muted-foreground"
+              aria-label={tr("إغلاق")}
+            >
+              <X className="size-4" aria-hidden />
+            </Button>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {archiveYears.map((year) => (
-              <button
-                key={year}
-                type="button"
-                onClick={() => setArchiveYear(year)}
-                className={cn(
-                  "shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors",
-                  year === archiveYear ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
-                )}
-              >
-                {String(year)}
-              </button>
-            ))}
-          </div>
+          {yearPickerOpen ? (
+            <div className="mb-3 grid grid-cols-3 gap-2 rounded-xl border border-border/40 bg-background/60 p-2 sm:grid-cols-4">
+              {archiveYears.map((year) => (
+                <Button
+                  key={year}
+                  type="button"
+                  variant={year === archiveYear ? "default" : "ghost"}
+                  onClick={() => {
+                    setArchiveYear(year);
+                    setYearPickerOpen(false);
+                  }}
+                  className="h-9 rounded-lg text-sm font-medium"
+                >
+                  {String(year)}
+                </Button>
+              ))}
+            </div>
+          ) : null}
           <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
             {Array.from({ length: 12 }, (_, index) => {
               const key = `${archiveYear}-${String(index + 1).padStart(2, "0")}-01`;
@@ -408,7 +434,7 @@ function ReportsPage() {
         </p>
       ) : (
         <>
-          <nav className="flex gap-1 overflow-x-auto rounded-full border border-border/60 bg-card/75 p-1 shadow-glass backdrop-blur-sm scrollbar-hide">
+          <nav className="mt-5 flex w-full min-w-0 gap-1 overflow-x-auto overscroll-x-contain rounded-full border border-border/60 bg-card/75 p-1 shadow-glass backdrop-blur-sm touch-pan-x scrollbar-hide">
             {(
               [
                 { key: "finance", label: tr("المالي والرواتب") },
@@ -422,7 +448,7 @@ function ReportsPage() {
                 type="button"
                 onClick={() => setTab(item.key)}
                 className={cn(
-                  "flex-1 whitespace-nowrap rounded-full px-2.5 py-2 text-[13px] font-medium transition-colors md:px-4 md:text-sm",
+                  "min-w-max flex-1 shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-medium transition-colors md:px-4 md:text-sm",
                   tab === item.key ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted",
                 )}
               >
@@ -432,12 +458,12 @@ function ReportsPage() {
           </nav>
 
           {loading ? (
-            <p className="flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/75 p-10 text-sm text-muted-foreground shadow-glass backdrop-blur-sm">
+            <p className="mt-5 flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-card/75 p-10 text-sm text-muted-foreground shadow-glass backdrop-blur-sm">
               <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
               {tr("جاري تجهيز التقارير")}
             </p>
           ) : tab === "finance" ? (
-            <section className="space-y-4">
+            <section className="mt-5 space-y-4">
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
                 <KpiCard icon={<Wallet className="h-5 w-5" aria-hidden />} title={tr("الرواتب المصروفة")} value={money(finance.net)} tone="text-primary" />
                 <KpiCard icon={<TrendingDown className="h-5 w-5" aria-hidden />} title={tr("الخصومات والاستقطاعات")} value={money(finance.deductions)} tone="text-destructive" />
@@ -468,7 +494,7 @@ function ReportsPage() {
               </Panel>
             </section>
           ) : tab === "attendance" ? (
-            <section className="space-y-4">
+            <section className="mt-5 space-y-4">
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
                 <KpiCard
                   icon={<ClipboardList className="h-5 w-5" aria-hidden />}
@@ -522,7 +548,7 @@ function ReportsPage() {
               </Panel>
             </section>
           ) : tab === "leaves" ? (
-            <section className="space-y-4">
+            <section className="mt-5 space-y-4">
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <KpiCard
                   icon={<CalendarDays className="h-5 w-5" aria-hidden />}
