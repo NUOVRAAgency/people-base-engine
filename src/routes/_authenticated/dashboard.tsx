@@ -297,7 +297,12 @@ function DashboardPage() {
       </section>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        <Panel title={tr("توزيع الموظفين حسب الأقسام")} action={departments.length > 0 ? tr("الاقسام") : tr("بيانات توضيحية")}>
+        <Panel title={tr("توزيع الموظفين حسب الأقسام")} action={tr("الاقسام")}>
+          {donutData.length === 0 ? (
+            <Empty text={tr("لا توجد بيانات موظفين أو أقسام بعد")} />
+          ) : (
+          <>
+
           <div className="relative mx-auto h-[210px] w-full max-w-[280px]" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
