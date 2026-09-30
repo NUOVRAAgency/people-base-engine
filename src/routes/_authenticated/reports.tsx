@@ -324,12 +324,83 @@ function ReportsPage() {
               <ChevronLeft className="h-4 w-4" aria-hidden />
             </Button>
           </div>
+          <Button
+            type="button"
+            variant={archiveOpen ? "default" : "outline"}
+            className="h-10 rounded-xl px-4 text-sm font-medium"
+            onClick={() => {
+              setArchiveYear(Number(month.slice(0, 4)));
+              setArchiveOpen((value) => !value);
+            }}
+          >
+            <CalendarDays className="h-4 w-4" aria-hidden />
+            {tr("السجل")}
+          </Button>
           <Button type="button" className="h-10 rounded-xl px-4 text-sm font-medium" onClick={exportReport}>
             <Download className="h-4 w-4" aria-hidden />
             {tr("تصدير التقرير")}
           </Button>
         </div>
       </header>
+
+      {archiveOpen ? (
+        <section className="rounded-2xl border border-border/40 bg-card/75 p-4 shadow-glass backdrop-blur-sm">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h3 className="text-sm font-medium text-foreground">{tr("سجل السنوات والأشهر")}</h3>
+            <button type="button" onClick={() => setArchiveOpen(false)} className="text-[12px] text-muted-foreground">
+              {tr("إغلاق")}
+            </button>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {archiveYears.map((year) => (
+              <button
+                key={year}
+                type="button"
+                onClick={() => setArchiveYear(year)}
+                className={cn(
+                  "shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors",
+                  year === archiveYear ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
+                )}
+              >
+                {numberFormatter.format(year)}
+              </button>
+            ))}
+          </div>
+          <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-6">
+            {Array.from({ length: 12 }, (_, index) => {
+              const key = `${archiveYear}-${String(index + 1).padStart(2, "0")}-01`;
+              const hasData = archivedMonths.includes(key);
+              const selected = key === month;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    setMonth(key);
+                    setArchiveOpen(false);
+                  }}
+                  className={cn(
+                    "rounded-xl border px-2 py-2 text-[12px] font-medium transition-colors",
+                    selected
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : hasData
+                        ? "border-primary/30 bg-primary/10 text-foreground"
+                        : "border-border/40 bg-background/40 text-muted-foreground",
+                  )}
+                >
+                  <span className="block truncate">
+                    {new Intl.DateTimeFormat(getLocale(), { month: "long" }).format(new Date(`${key}T00:00:00`))}
+                  </span>
+                  <span className="mt-0.5 block text-[10px] opacity-80">
+                    {hasData ? tr("يوجد سجل") : tr("لا يوجد")}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
 
       {!roleLoading && !isAdmin ? (
         <p className="rounded-2xl border border-border bg-card p-6 text-center text-sm leading-[1.8] text-muted-foreground shadow-glass">
