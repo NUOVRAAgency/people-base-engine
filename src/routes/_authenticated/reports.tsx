@@ -81,6 +81,8 @@ type TabKey = "finance" | "attendance" | "leaves" | "insights";
 const numberFormatter = new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 0 });
 const decimalFormatter = new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 1 });
 const monthFormatter = new Intl.DateTimeFormat(getLocale(), { month: "long", year: "numeric" });
+// أول سنة يبدأ منها سجل النظام (سنة تشغيله) — لا تظهر سنوات أقدم منها أبداً
+const SYSTEM_START_YEAR = 2026;
 
 const LEAVE_LABELS: Record<string, string> = {
   annual: tr("سنوية"),
@@ -156,7 +158,9 @@ function ReportsPage() {
     const now = new Date().getFullYear();
     const years = new Set<number>([now, Number(month.slice(0, 4))]);
     archivedMonths.forEach((key) => years.add(Number(key.slice(0, 4))));
-    return [...years].filter((year) => Number.isFinite(year)).sort((a, b) => b - a);
+    return [...years]
+      .filter((year) => Number.isFinite(year) && year >= SYSTEM_START_YEAR)
+      .sort((a, b) => b - a);
   }, [archivedMonths, month]);
 
 
