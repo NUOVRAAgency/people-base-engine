@@ -131,7 +131,8 @@ function DashboardPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [employeesResult, attendanceResult, leavesResult, payrollResult] = await Promise.all([
+    const year = Number(month.slice(0, 4));
+    const [employeesResult, attendanceResult, leavesResult, payrollResult, yearPayrollResult] = await Promise.all([
       supabase.from("employees").select("id,full_name,department,position").eq("status", "active").order("full_name"),
       supabase.from("attendance").select("employee_id,status,date").gte("date", weekStartKey).lte("date", dayKey),
       supabase
@@ -140,13 +141,20 @@ function DashboardPage() {
         .order("created_at", { ascending: false })
         .limit(30),
       supabase.from("payroll").select("employee_id,net_salary,status").eq("month", month),
+      supabase
+        .from("payroll")
+        .select("month,net_salary")
+        .gte("month", `${year}-01-01`)
+        .lte("month", `${year}-12-31`),
     ]);
     setEmployees((employeesResult.data ?? []) as EmployeeRow[]);
     setAttendance((attendanceResult.data ?? []) as AttendanceRow[]);
     setLeaves((leavesResult.data ?? []) as LeaveRow[]);
     setPayroll((payrollResult.data ?? []) as PayrollRow[]);
+    setYearPayroll((yearPayrollResult.data ?? []) as { month: string; net_salary: number }[]);
     setLoading(false);
   }, [dayKey, weekStartKey, month]);
+
 
   useEffect(() => {
     void load();
