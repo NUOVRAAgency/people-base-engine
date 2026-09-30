@@ -55,17 +55,8 @@ const numberFormatter = new Intl.NumberFormat("en-US");
 
 const CHART_COLORS = ["#1f6bff", "#7c5cff", "#00b8a9", "#ff7a45", "#f2427f", "#17b26a", "#12a3e0", "#f5b544"];
 
-const SAMPLE_DEPARTMENTS = [
-  { name: tr("تقنية المعلومات"), count: 8 },
-  { name: tr("المبيعات"), count: 6 },
-  { name: tr("التسويق"), count: 4 },
-  { name: tr("الموارد البشرية"), count: 3 },
-  { name: tr("المالية"), count: 3 },
-  { name: tr("العمليات"), count: 2 },
-];
-
 const YEAR_MONTHS = [tr("يناير"), tr("فبراير"), tr("مارس"), tr("ابريل"), tr("مايو"), tr("يونيو"), tr("يوليو"), tr("اغسطس"), tr("سبتمبر"), tr("اكتوبر"), tr("نوفمبر"), tr("ديسمبر")];
-const SAMPLE_CURVE = [0.42, 0.48, 0.52, 0.58, 0.61, 0.68, 0.72, 0.79, 0.85, 0.9, 0.95, 1];
+
 
 const LEAVE_LABELS: Record<string, string> = {
   annual: tr("سنوية"),
@@ -126,6 +117,8 @@ function DashboardPage() {
   const [attendance, setAttendance] = useState<AttendanceRow[]>([]);
   const [leaves, setLeaves] = useState<LeaveRow[]>([]);
   const [payroll, setPayroll] = useState<PayrollRow[]>([]);
+  const [yearPayroll, setYearPayroll] = useState<{ month: string; net_salary: number }[]>([]);
+
 
   const today = useMemo(() => new Date(), []);
   const dayKey = dayKeyOf(today);
@@ -138,7 +131,8 @@ function DashboardPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [employeesResult, attendanceResult, leavesResult, payrollResult] = await Promise.all([
+    const year = Number(month.slice(0, 4));
+    const [employeesResult, attendanceResult, leavesResult, payrollResult, yearPayrollResult] = await Promise.all([
       supabase.from("employees").select("id,full_name,department,position").eq("status", "active").order("full_name"),
       supabase.from("attendance").select("employee_id,status,date").gte("date", weekStartKey).lte("date", dayKey),
       supabase
@@ -147,13 +141,20 @@ function DashboardPage() {
         .order("created_at", { ascending: false })
         .limit(30),
       supabase.from("payroll").select("employee_id,net_salary,status").eq("month", month),
+      supabase
+        .from("payroll")
+        .select("month,net_salary")
+        .gte("month", `${year}-01-01`)
+        .lte("month", `${year}-12-31`),
     ]);
     setEmployees((employeesResult.data ?? []) as EmployeeRow[]);
     setAttendance((attendanceResult.data ?? []) as AttendanceRow[]);
     setLeaves((leavesResult.data ?? []) as LeaveRow[]);
     setPayroll((payrollResult.data ?? []) as PayrollRow[]);
+    setYearPayroll((yearPayrollResult.data ?? []) as { month: string; net_salary: number }[]);
     setLoading(false);
   }, [dayKey, weekStartKey, month]);
+
 
   useEffect(() => {
     void load();
@@ -185,21 +186,20 @@ function DashboardPage() {
   }, [employees]);
 
 
-  const donutData = useMemo(
-    () => (departments.length > 0 ? departments : SAMPLE_DEPARTMENTS),
-    [departments],
-  );
+  const donutData = departments;
   const donutTotal = useMemo(() => donutData.reduce((sum, item) => sum + item.count, 0), [donutData]);
 
   const yearSeries = useMemo(() => {
-    const currentMonth = today.getMonth();
-    const actual = payroll.reduce((sum, row) => sum + Number(row.net_salary ?? 0), 0);
-    const peak = actual > 0 ? actual / (SAMPLE_CURVE[currentMonth] ?? 1) : 2_400_000;
-    return YEAR_MONTHS.map((label, index) => ({
-      label,
-      value: Math.round(peak * (SAMPLE_CURVE[index] ?? 0)),
-    }));
-  }, [payroll, today]);
+    const totals = new Array(12).fill(0) as number[];
+    for (const row of yearPayroll) {
+      const index = Number(String(row.month).slice(5, 7)) - 1;
+      if (index >= 0 && index < 12) totals[index] = (totals[index] ?? 0) + Number(row.net_salary ?? 0);
+    }
+    return YEAR_MONTHS.map((label, index) => ({ label, value: Math.round(totals[index] ?? 0) }));
+  }, [yearPayroll]);
+
+  const hasYearPayroll = useMemo(() => yearSeries.some((point) => point.value > 0), [yearSeries]);
+
 
 
   const weekSeries = useMemo(() => {
@@ -297,7 +297,12 @@ function DashboardPage() {
       </section>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        <Panel title={tr("توزيع الموظفين حسب الأقسام")} action={departments.length > 0 ? tr("الاقسام") : tr("بيانات توضيحية")}>
+        <Panel title={tr("توزيع الموظفين حسب الأقسام")} action={tr("الاقسام")}>
+          {donutData.length === 0 ? (
+            <Empty text={tr("لا توجد بيانات موظفين أو أقسام بعد")} />
+          ) : (
+          <>
+
           <div className="relative mx-auto h-[210px] w-full max-w-[280px]" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -350,10 +355,16 @@ function DashboardPage() {
               </li>
             ))}
           </ul>
+          </>
+          )}
         </Panel>
 
         <Panel title={tr("اتجاه صرف الرواتب خلال السنة")} action={tr("ر.ي")}>
+          {!hasYearPayroll ? (
+            <Empty text={tr("لا توجد مسيرات رواتب مسجلة لهذا العام بعد")} />
+          ) : (
           <div className="mt-3 h-[252px] w-full" dir="ltr">
+
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={yearSeries} margin={{ top: 12, right: 6, left: 0, bottom: 8 }}>
                 <defs>
@@ -399,7 +410,9 @@ function DashboardPage() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
+          )}
         </Panel>
+
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
@@ -429,24 +442,15 @@ function DashboardPage() {
         </Panel>
 
         <Panel title={tr("صرف الرواتب")} action={monthFormatter.format(new Date(`${month}T00:00:00`))}>
-          <div className="relative mx-auto h-[150px] w-full max-w-[260px]" dir="ltr">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={weekSeries} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="areaBlue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1f6bff" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#1f6bff" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <Area type="monotone" dataKey={tr("حضور")} stroke="#1f6bff" strokeWidth={2} fill="url(#areaBlue)" />
-              </AreaChart>
-            </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xl font-medium text-foreground">{numberFormatter.format(totalNet)} {tr("ر.ي")}</span>
-              <span className="mt-0.5 text-[11px] text-muted-foreground">{tr("إجمالي المبلغ")}</span>
-            </div>
+          <div className="relative mx-auto flex h-[150px] w-full max-w-[260px] flex-col items-center justify-center" dir="ltr">
+            <span className="text-xl font-medium text-foreground">{numberFormatter.format(totalNet)} {tr("ر.ي")}</span>
+            <span className="mt-0.5 text-[11px] text-muted-foreground">{tr("إجمالي المبلغ")}</span>
+            {totalNet === 0 ? (
+              <span className="mt-2 text-[11px] text-muted-foreground">{tr("لا يوجد مسير رواتب لهذا الشهر بعد")}</span>
+            ) : null}
           </div>
           <div className="mt-2 space-y-1.5">
+
             <div className="flex items-center justify-between text-[12px]">
               <span className="text-muted-foreground">{tr("المصروف فعليا")}</span>
               <span className="font-medium text-foreground">{numberFormatter.format(approvedNet)} {tr("ر.ي")}</span>
