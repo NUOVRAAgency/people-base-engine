@@ -156,7 +156,9 @@ function ReportsPage() {
     const now = new Date().getFullYear();
     const years = new Set<number>([now, Number(month.slice(0, 4))]);
     archivedMonths.forEach((key) => years.add(Number(key.slice(0, 4))));
-    return [...years].filter((year) => Number.isFinite(year)).sort((a, b) => b - a);
+    return [...years]
+      .filter((year) => Number.isFinite(year) && year >= SYSTEM_START_YEAR)
+      .sort((a, b) => b - a);
   }, [archivedMonths, month]);
 
 
