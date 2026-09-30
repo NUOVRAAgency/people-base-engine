@@ -46,10 +46,11 @@ function monthBounds(key: string) {
 }
 
 const SUGGESTIONS = [
-  tr("ما هو القسم الاكثر كفاءة ماليا؟"),
-  tr("لخص لي الخصومات هذا الشهر"),
-  tr("من هم الاكثر تاخيرا وكيف اعالج ذلك؟"),
+  tr("لخص لي اداء هذا الشهر"),
+  tr("لخص لي الشهر السابق"),
+  tr("قارن هذا الشهر بالشهر السابق"),
 ];
+
 
 function AssistantPage() {
   const navigate = useNavigate();
