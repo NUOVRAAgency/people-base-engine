@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
@@ -6,6 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import type { MonthCaptionProps } from "react-day-picker";
 
 import { tr, trf, getLocale, getLanguage } from "@/lib/i18n";
 type Props = {
@@ -20,6 +21,23 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
   const [open, setOpen] = useState(false);
   const selected = value ? parseISO(value) : undefined;
   const min = minDate ? parseISO(minDate) : undefined;
+  const [viewMonth, setViewMonth] = useState<Date>(() => selected ?? min ?? new Date());
+  const [yearEditing, setYearEditing] = useState(false);
+  const [yearDraft, setYearDraft] = useState("");
+
+  // Reset the quick-year editor whenever the popover closes.
+  useEffect(() => {
+    if (!open) setYearEditing(false);
+  }, [open]);
+
+  function applyYear() {
+    const year = Number.parseInt(yearDraft, 10);
+    if (Number.isFinite(year) && year >= 1900 && year <= 2100) {
+      setViewMonth(new Date(year, viewMonth.getMonth(), 1));
+    }
+    setYearEditing(false);
+  }
+
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -45,9 +63,9 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
         </Button>
       </PopoverTrigger>
       <PopoverContent
-       
         align="center"
         side="bottom"
+        sideOffset={12}
         collisionPadding={12}
         className="z-[120] w-[calc(100vw-1.5rem)] max-w-xs overflow-hidden rounded-xl border border-primary/15 bg-card p-3 font-sans text-foreground shadow-card"
       >
@@ -59,14 +77,15 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
         <Calendar
           mode="single"
           locale={getLanguage() === "en" ? enUS : ar}
-         
+          month={viewMonth}
+          onMonthChange={setViewMonth}
           showOutsideDays={false}
+
           formatters={{
             formatWeekdayName: (date) => format(date, "EEEEE", { locale: getLanguage() === "en" ? enUS : ar }),
             formatDay: (date) => String(date.getDate()),
           }}
           {...(selected ? { selected } : {})}
-          {...((selected ?? min) ? { defaultMonth: (selected ?? min) as Date } : {})}
           {...(min ? { disabled: { before: min } } : {})}
           onSelect={(date) => {
             if (!date) return;
@@ -80,11 +99,11 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
             month: "w-full gap-3",
             month_caption: "mx-12 flex h-11 items-center justify-center pt-1.5",
             caption_label: "font-kufi text-sm font-normal leading-7",
-            nav: "absolute inset-x-0 top-0 flex h-11 items-center justify-between px-1",
+            nav: "pointer-events-none absolute inset-x-0 top-0 flex h-11 items-center justify-between px-1",
             button_previous:
-              "grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
+              "pointer-events-auto grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
             button_next:
-              "grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
+              "pointer-events-auto grid size-9 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-header-deep shadow-sm backdrop-blur-md transition-colors hover:bg-header-deep/10 disabled:opacity-40",
             chevron: "size-4 fill-header-deep",
             weekdays: "grid w-full grid-cols-7",
             weekday: "grid min-w-0 place-items-center p-0 text-center",
@@ -94,6 +113,51 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
             today: "rounded-full bg-header-deep/5 text-header-deep",
           }}
           components={{
+            MonthCaption: ({ calendarMonth }: MonthCaptionProps) =>
+              yearEditing ? (
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    applyYear();
+                  }}
+                  className="flex h-11 items-center justify-center gap-2"
+                >
+                  <input
+                    autoFocus
+                    dir="ltr"
+                    inputMode="numeric"
+                    value={yearDraft}
+                    onChange={(event) => setYearDraft(event.target.value.replace(/[^\d]/g, "").slice(0, 4))}
+                    onBlur={applyYear}
+                    placeholder="2003"
+                    aria-label={tr("اكتب السنة")}
+                    className="h-8 w-20 rounded-md border border-primary/20 bg-background text-center text-sm font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
+                  />
+                  <button
+                    type="submit"
+                    className="h-8 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-sm"
+                  >
+                    {tr("موافق")}
+                  </button>
+                </form>
+              ) : (
+                <div className="flex h-11 items-center justify-center gap-1.5 pt-1.5">
+                  <span className="font-kufi text-sm font-normal leading-7">
+                    {format(calendarMonth.date, "MMMM", { locale: getLanguage() === "en" ? enUS : ar })}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setYearDraft(String(calendarMonth.date.getFullYear()));
+                      setYearEditing(true);
+                    }}
+                    aria-label={tr("تغيير السنة")}
+                    className="rounded-md border border-header-deep/15 bg-header-deep/[0.05] px-2 py-0.5 text-sm font-medium text-header-deep shadow-sm transition-colors hover:bg-header-deep/10"
+                  >
+                    {calendarMonth.date.getFullYear()}
+                  </button>
+                </div>
+              ),
             Chevron: ({ orientation, className, ...props }) => orientation === "left"
               ? <ChevronRight className={cn("size-4", className)} {...props} />
               : <ChevronLeft className={cn("size-4", className)} {...props} />,
