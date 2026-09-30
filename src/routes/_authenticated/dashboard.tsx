@@ -442,24 +442,15 @@ function DashboardPage() {
         </Panel>
 
         <Panel title={tr("صرف الرواتب")} action={monthFormatter.format(new Date(`${month}T00:00:00`))}>
-          <div className="relative mx-auto h-[150px] w-full max-w-[260px]" dir="ltr">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={weekSeries} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="areaBlue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#1f6bff" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#1f6bff" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <Area type="monotone" dataKey={tr("حضور")} stroke="#1f6bff" strokeWidth={2} fill="url(#areaBlue)" />
-              </AreaChart>
-            </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-xl font-medium text-foreground">{numberFormatter.format(totalNet)} {tr("ر.ي")}</span>
-              <span className="mt-0.5 text-[11px] text-muted-foreground">{tr("إجمالي المبلغ")}</span>
-            </div>
+          <div className="relative mx-auto flex h-[150px] w-full max-w-[260px] flex-col items-center justify-center" dir="ltr">
+            <span className="text-xl font-medium text-foreground">{numberFormatter.format(totalNet)} {tr("ر.ي")}</span>
+            <span className="mt-0.5 text-[11px] text-muted-foreground">{tr("إجمالي المبلغ")}</span>
+            {totalNet === 0 ? (
+              <span className="mt-2 text-[11px] text-muted-foreground">{tr("لا يوجد مسير رواتب لهذا الشهر بعد")}</span>
+            ) : null}
           </div>
           <div className="mt-2 space-y-1.5">
+
             <div className="flex items-center justify-between text-[12px]">
               <span className="text-muted-foreground">{tr("المصروف فعليا")}</span>
               <span className="font-medium text-foreground">{numberFormatter.format(approvedNet)} {tr("ر.ي")}</span>
