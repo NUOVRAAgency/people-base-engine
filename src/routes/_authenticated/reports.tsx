@@ -128,13 +128,16 @@ function ReportsPage() {
   const [yearPickerOpen, setYearPickerOpen] = useState(false);
   const [archiveYear, setArchiveYear] = useState(() => new Date().getFullYear());
   const [archivedMonths, setArchivedMonths] = useState<string[]>([]);
+  const [startYear, setStartYear] = useState<number>(() => new Date().getFullYear());
 
   useEffect(() => {
     let active = true;
     async function loadArchive() {
-      const [payrollMonths, attendanceDates] = await Promise.all([
+      const [payrollMonths, attendanceDates, firstEmployee, firstBranch] = await Promise.all([
         supabase.from("payroll").select("month"),
         supabase.from("attendance").select("date"),
+        supabase.from("employees").select("created_at,hire_date").order("created_at", { ascending: true }).limit(1),
+        supabase.from("branches").select("created_at").order("created_at", { ascending: true }).limit(1),
       ]);
       if (!active) return;
       const keys = new Set<string>();
@@ -146,7 +149,19 @@ function ReportsPage() {
         const value = String((row as { date: string }).date);
         keys.add(`${value.slice(0, 7)}-01`);
       });
-      setArchivedMonths([...keys].sort());
+      const sorted = [...keys].sort();
+      setArchivedMonths(sorted);
+
+      // سنة تشغيل النظام لدى هذه المنشأة = أقدم سنة فيها أي بيانات فعلية، وإلا السنة الحالية
+      const candidates: number[] = [];
+      if (sorted[0]) candidates.push(Number(sorted[0].slice(0, 4)));
+      const employeeRow = (firstEmployee.data ?? [])[0] as { created_at?: string; hire_date?: string | null } | undefined;
+      if (employeeRow?.created_at) candidates.push(new Date(employeeRow.created_at).getFullYear());
+      if (employeeRow?.hire_date) candidates.push(Number(String(employeeRow.hire_date).slice(0, 4)));
+      const branchRow = (firstBranch.data ?? [])[0] as { created_at?: string } | undefined;
+      if (branchRow?.created_at) candidates.push(new Date(branchRow.created_at).getFullYear());
+      const valid = candidates.filter((year) => Number.isFinite(year) && year > 1990);
+      setStartYear(valid.length ? Math.min(...valid) : new Date().getFullYear());
     }
     void loadArchive();
     return () => {
@@ -158,10 +173,12 @@ function ReportsPage() {
     const now = new Date().getFullYear();
     const years = new Set<number>([now, Number(month.slice(0, 4))]);
     archivedMonths.forEach((key) => years.add(Number(key.slice(0, 4))));
+    for (let year = startYear; year <= now; year += 1) years.add(year);
     return [...years]
-      .filter((year) => Number.isFinite(year) && year >= SYSTEM_START_YEAR)
+      .filter((year) => Number.isFinite(year) && year >= startYear)
       .sort((a, b) => b - a);
-  }, [archivedMonths, month]);
+  }, [archivedMonths, month, startYear]);
+
 
 
   const load = useCallback(async () => {
