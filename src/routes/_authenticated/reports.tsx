@@ -362,7 +362,7 @@ function ReportsPage() {
                   year === archiveYear ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
                 )}
               >
-                {numberFormatter.format(year)}
+                {String(year)}
               </button>
             ))}
           </div>
