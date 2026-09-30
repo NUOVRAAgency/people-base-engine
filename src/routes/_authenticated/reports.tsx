@@ -81,8 +81,8 @@ type TabKey = "finance" | "attendance" | "leaves" | "insights";
 const numberFormatter = new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 0 });
 const decimalFormatter = new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 1 });
 const monthFormatter = new Intl.DateTimeFormat(getLocale(), { month: "long", year: "numeric" });
-// أول سنة يبدأ منها سجل النظام (سنة تشغيله) — لا تظهر سنوات أقدم منها أبداً
-const SYSTEM_START_YEAR = 2026;
+// سنة بداية السجل تُحسب تلقائياً من أقدم بيانات فعلية للمنشأة (سنة تشغيل النظام لديها)
+
 
 const LEAVE_LABELS: Record<string, string> = {
   annual: tr("سنوية"),
