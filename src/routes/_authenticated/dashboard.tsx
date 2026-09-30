@@ -410,7 +410,9 @@ function DashboardPage() {
               </AreaChart>
             </ResponsiveContainer>
           </div>
+          )}
         </Panel>
+
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
