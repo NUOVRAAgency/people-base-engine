@@ -535,7 +535,7 @@ function InsightsTab({ month, summary }: { month: string; summary: string }) {
       <Link
         to="/assistant"
         search={{ month }}
-        className="group flex items-center gap-2.5 rounded-xl bg-[#2b5fb8] px-3 py-2 text-primary-foreground transition-transform active:translate-y-0.5 md:hover:-translate-y-0.5"
+        className="group flex items-center gap-2.5 rounded-xl bg-primary/90 px-3 py-2 text-primary-foreground transition-transform active:translate-y-0.5 md:hover:-translate-y-0.5"
       >
         <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/15 text-[12px] font-medium">
           AI
