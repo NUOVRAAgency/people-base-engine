@@ -832,7 +832,7 @@ function PersonalFields({ form, setField, errors }: { form: EmployeeForm; setFie
           inputMode="tel"
           value={form.phone}
           onChange={(event) => setField("phone", event.target.value.replace(/[^\d+\s-]/g, ""))}
-          placeholder="+967 7XXXXXXXX"
+          placeholder=""
           aria-label={tr("رقم الجوال")}
           aria-invalid={Boolean(errors.phone)}
           className="h-11 text-left"
@@ -862,7 +862,7 @@ function Field({ label, hint, required, error, className, children }: { label: s
 }
 
 function MoneyInput({ value, onChange, invalid }: { value: string; onChange: (value: string) => void; invalid?: boolean }) {
-  return <div className="relative"><Input dir="ltr" type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(event.target.value)} placeholder="" aria-invalid={invalid} className="h-11 pe-14 text-left" /><span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{tr("ر.ي")}</span></div>;
+  return <div className="relative"><Input dir="ltr" type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(event.target.value)} placeholder="" aria-invalid={invalid} className={cn("h-11 text-left", value ? "pe-3" : "pe-14")} />{value ? null : <span className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{tr("ر.ي")}</span>}</div>;
 }
 
 function EmployeeDetails({ employee, open, onOpenChange }: { employee: Employee | null; open: boolean; onOpenChange: (open: boolean) => void }) {
