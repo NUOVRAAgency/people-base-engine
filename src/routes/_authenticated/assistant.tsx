@@ -46,10 +46,11 @@ function monthBounds(key: string) {
 }
 
 const SUGGESTIONS = [
-  tr("ما هو القسم الاكثر كفاءة ماليا؟"),
-  tr("لخص لي الخصومات هذا الشهر"),
-  tr("من هم الاكثر تاخيرا وكيف اعالج ذلك؟"),
+  tr("لخص لي اداء هذا الشهر"),
+  tr("لخص لي الشهر السابق"),
+  tr("قارن هذا الشهر بالشهر السابق"),
 ];
+
 
 function AssistantPage() {
   const navigate = useNavigate();
@@ -77,15 +78,14 @@ function AssistantPage() {
 
   useEffect(() => {
     let active = true;
-    async function loadContext() {
-      const bounds = monthBounds(month);
+    async function summarize(key: string) {
+      const bounds = monthBounds(key);
       const [employeesResult, payrollResult, attendanceResult, leavesResult] = await Promise.all([
         supabase.from("employees").select("id,department").eq("status", "active"),
-        supabase.from("payroll").select("net_salary,deductions").eq("month", month),
+        supabase.from("payroll").select("net_salary,deductions").eq("month", key),
         supabase.from("attendance").select("status,late_minutes").gte("date", bounds.from).lte("date", bounds.to),
         supabase.from("leave_requests").select("status").lte("start_date", bounds.to).gte("end_date", bounds.from),
       ]);
-      if (!active) return;
       const employees = employeesResult.data ?? [];
       const payroll = payrollResult.data ?? [];
       const attendance = attendanceResult.data ?? [];
@@ -95,15 +95,31 @@ function AssistantPage() {
       const late = attendance.filter((row) => row.status === "late").length;
       const absent = attendance.filter((row) => row.status === "absent").length;
       const lateMinutes = attendance.reduce((sum, row) => sum + Number(row.late_minutes ?? 0), 0);
+      return [
+        trf("الشهر: {0}", monthFormatter.format(new Date(`${key}T00:00:00`))),
+        trf("عدد الموظفين النشطين: {0}", employees.length),
+        trf("اجمالي الرواتب: {0} ريال يمني", Math.round(net)),
+        trf("اجمالي الخصومات: {0} ريال يمني", Math.round(deductions)),
+        trf("ايام التاخير: {0}, دقائق التاخير: {1}, ايام الغياب: {2}", late, lateMinutes, absent),
+        trf("طلبات الاجازات في الشهر: {0}, المعتمدة: {1}", leaves.length, leaves.filter((row) => row.status === "approved").length),
+        trf("الاقسام: {0}", [...new Set(employees.map((row) => row.department ?? "بدون قسم"))].join(", ") || "لا يوجد"),
+      ].join("\n");
+    }
+    async function loadContext() {
+      const current = new Date(`${month}T00:00:00`);
+      const previousDate = new Date(current.getFullYear(), current.getMonth() - 1, 1);
+      const previous = monthKey(previousDate);
+      const [currentText, previousText] = await Promise.all([summarize(month), summarize(previous)]);
+      if (!active) return;
       setContextText(
         [
-          trf("الشهر: {0}", monthFormatter.format(new Date(`${month}T00:00:00`))),
-          trf("عدد الموظفين النشطين: {0}", employees.length),
-          trf("اجمالي الرواتب: {0} ريال يمني", Math.round(net)),
-          trf("اجمالي الخصومات: {0} ريال يمني", Math.round(deductions)),
-          trf("ايام التاخير: {0}, دقائق التاخير: {1}, ايام الغياب: {2}", late, lateMinutes, absent),
-          trf("طلبات الاجازات في الشهر: {0}, المعتمدة: {1}", leaves.length, leaves.filter((row) => row.status === "approved").length),
-          trf("الاقسام: {0}", [...new Set(employees.map((row) => row.department ?? "بدون قسم"))].join(", ") || "لا يوجد"),
+          tr("بيانات الشهر المختار حاليا:"),
+          currentText,
+          "",
+          tr("بيانات الشهر السابق للمقارنة:"),
+          previousText,
+          "",
+          tr("اذا سال المستخدم عن الشهر الحالي استخدم بيانات الشهر المختار، واذا سال عن الشهر السابق او طلب مقارنة استخدم بيانات الشهر السابق."),
         ].join("\n"),
       );
     }
@@ -112,6 +128,7 @@ function AssistantPage() {
       active = false;
     };
   }, [month]);
+
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -228,6 +245,10 @@ function AssistantPage() {
             <X className="h-4 w-4" aria-hidden />
           </button>
           <h1 className="min-w-0 truncate text-[15px] font-medium">{tr("المساعد الذكي")}</h1>
+          <span className="shrink-0 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-medium">
+            {monthFormatter.format(new Date(`${month}T00:00:00`))}
+          </span>
+
         </div>
       </header>
 
