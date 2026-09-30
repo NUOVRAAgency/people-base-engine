@@ -245,6 +245,10 @@ function AssistantPage() {
             <X className="h-4 w-4" aria-hidden />
           </button>
           <h1 className="min-w-0 truncate text-[15px] font-medium">{tr("المساعد الذكي")}</h1>
+          <span className="shrink-0 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-medium">
+            {monthFormatter.format(new Date(`${month}T00:00:00`))}
+          </span>
+
         </div>
       </header>
 
