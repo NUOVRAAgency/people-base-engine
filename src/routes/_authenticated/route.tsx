@@ -14,9 +14,12 @@ function AuthenticatedLayout() {
   useEffect(() => {
     let isMounted = true;
 
-    supabase.auth.getUser().then(({ data, error }) => {
+    const check = navigator.onLine
+      ? supabase.auth.getUser().then(({ data, error }) => ({ ok: !error && !!data.user }))
+      : supabase.auth.getSession().then(({ data }) => ({ ok: !!data.session }));
+    check.then(({ ok }) => {
       if (!isMounted) return;
-      if (error || !data.user) {
+      if (!ok) {
         navigate({ to: "/auth", replace: true });
         return;
       }

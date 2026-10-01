@@ -168,7 +168,7 @@ function RootComponent() {
       if ("caches" in window) caches.keys().then((ks) => ks.forEach((k) => caches.delete(k)));
       return;
     }
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
+    navigator.serviceWorker.register(`/sw.js?sb=${encodeURIComponent(new URL(import.meta.env.VITE_SUPABASE_URL).origin)}`).catch(() => {});
   }, []);
 
   useEffect(() => {

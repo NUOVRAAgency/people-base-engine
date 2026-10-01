@@ -1,3 +1,4 @@
+import { signOutAndClear } from "@/lib/offline";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -54,7 +55,7 @@ function AccountPage() {
       <Button
         variant="outline"
         className="h-11 w-full rounded-xl border-destructive/25 bg-destructive/5 text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
-        onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth", replace: true }); }}
+        onClick={async () => { await signOutAndClear(); navigate({ to: "/auth", replace: true }); }}
       >
         <LogOut className="h-4 w-4" aria-hidden /> {tr("تسجيل الخروج")}
       </Button>

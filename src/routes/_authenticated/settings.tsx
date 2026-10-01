@@ -1,3 +1,4 @@
+import { signOutAndClear } from "@/lib/offline";
 import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Building2,
@@ -154,7 +155,7 @@ function SettingsPage() {
         variant="outline"
         className="h-11 w-full rounded-xl border-destructive/25 bg-destructive/5 text-sm font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
         onClick={async () => {
-          await supabase.auth.signOut();
+          await signOutAndClear();
           navigate({ to: "/auth", replace: true });
         }}
       >
