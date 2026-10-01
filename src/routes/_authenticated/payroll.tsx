@@ -311,11 +311,11 @@ function PayrollPage() {
             <p className="text-sm leading-[1.7] text-muted-foreground">{tr("مسير الرواتب الشهري والمؤثرات المالية وقسائم الرواتب")}</p>
           </div>
           <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1 shadow-glass">
-            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label=tr("الشهر السابق") onClick={() => shiftMonth(-1)}>
+            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر السابق")} onClick={() => shiftMonth(-1)}>
               <ChevronRight className="h-4 w-4" aria-hidden />
             </Button>
             <span className="min-w-[124px] text-center text-sm font-bold text-foreground">{monthLabel(month)}</span>
-            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label=tr("الشهر التالي") onClick={() => shiftMonth(1)}>
+            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر التالي")} onClick={() => shiftMonth(1)}>
               <ChevronLeft className="h-4 w-4" aria-hidden />
             </Button>
           </div>
@@ -327,22 +327,22 @@ function PayrollPage() {
       ) : (
         <>
           <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <KpiCard icon={<Wallet className="h-5 w-5" aria-hidden />} title=tr("إجمالي رواتب الشهر") value={money(totals.net)} tone="text-primary" />
+            <KpiCard icon={<Wallet className="h-5 w-5" aria-hidden />} title={tr("إجمالي رواتب الشهر")} value={money(totals.net)} tone="text-primary" />
             <KpiCard
               icon={<BadgeCheck className="h-5 w-5" aria-hidden />}
-              title=tr("حالة المسير")
+              title={tr("حالة المسير")}
               value={sheetStatus.label}
               tone="text-foreground"
               badgeClass={sheetStatus.tone}
             />
-            <KpiCard icon={<CircleMinus className="h-5 w-5" aria-hidden />} title=tr("إجمالي الخصومات") value={money(totals.deductions)} tone="text-destructive" />
-            <KpiCard icon={<CirclePlus className="h-5 w-5" aria-hidden />} title=tr("إجمالي الإضافات") value={money(totals.additions)} tone="text-success" />
+            <KpiCard icon={<CircleMinus className="h-5 w-5" aria-hidden />} title={tr("إجمالي الخصومات")} value={money(totals.deductions)} tone="text-destructive" />
+            <KpiCard icon={<CirclePlus className="h-5 w-5" aria-hidden />} title={tr("إجمالي الإضافات")} value={money(totals.additions)} tone="text-success" />
           </section>
 
           <section className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 shadow-glass sm:flex-row sm:items-center">
             <Button type="button" className="h-11 flex-1 rounded-xl text-sm font-bold" onClick={() => void generateSheet()} disabled={busy === "generate"}>
               {busy === "generate" ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <Calculator className="h-4 w-4" aria-hidden />}
-              توليد مسير رواتب الشهر
+              {tr("توليد مسير رواتب الشهر")}
             </Button>
             <Button
               type="button"
@@ -352,7 +352,7 @@ function PayrollPage() {
               disabled={busy === "approve" || sheetStatus.key === "approved"}
             >
               {busy === "approve" ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <BadgeCheck className="h-4 w-4" aria-hidden />}
-              اعتماد وصرف الرواتب
+              {tr("اعتماد وصرف الرواتب")}
             </Button>
           </section>
 
@@ -395,7 +395,7 @@ function PayrollPage() {
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder=tr("ابحث باسم الموظف أو رقمه الوظيفي")
+                placeholder={tr("ابحث باسم الموظف أو رقمه الوظيفي")}
                 className="h-11 rounded-xl"
               />
 
@@ -428,10 +428,10 @@ function PayrollPage() {
                             </span>
                           </div>
                           <dl className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3 text-xs">
-                            <MiniStat label=tr("الراتب الأساسي") value={money(Number(line.row.base_salary))} />
-                            <MiniStat label=tr("البدلات والإضافات") value={money(line.allowances)} />
-                            <MiniStat label=tr("ساعات الإضافي") value={numberFormatter.format(Number(line.row.overtime_hours))} />
-                            <MiniStat label=tr("الخصومات") value={money(line.totalDeductions)} className="text-destructive" />
+                            <MiniStat label={tr("الراتب الأساسي")} value={money(Number(line.row.base_salary))} />
+                            <MiniStat label={tr("البدلات والإضافات")} value={money(line.allowances)} />
+                            <MiniStat label={tr("ساعات الإضافي")} value={numberFormatter.format(Number(line.row.overtime_hours))} />
+                            <MiniStat label={tr("الخصومات")} value={money(line.totalDeductions)} className="text-destructive" />
                           </dl>
                         </button>
                       </li>
@@ -442,9 +442,9 @@ function PayrollPage() {
                     <table className="w-full text-sm">
                       <thead className="bg-muted/60 text-xs text-muted-foreground">
                         <tr>
-                          <th className="px-4 py-3 text-start font-bold">الموظف</th>
+                          <th className="px-4 py-3 text-start font-bold">{tr("الموظف")}</th>
                           <th className="px-4 py-3 text-start font-bold">{tr("الأساسي")}</th>
-                          <th className="px-4 py-3 text-start font-bold">البدلات والإضافات</th>
+                          <th className="px-4 py-3 text-start font-bold">{tr("البدلات والإضافات")}</th>
                           <th className="px-4 py-3 text-start font-bold">{tr("الإضافي (ساعة)")}</th>
                           <th className="px-4 py-3 text-start font-bold">{tr("الخصومات والغياب")}</th>
                           <th className="px-4 py-3 text-start font-bold">{tr("الصافي")}</th>
@@ -510,30 +510,30 @@ function PayrollPage() {
                 </div>
 
                 <dl className="grid grid-cols-2 gap-2 text-xs">
-                  <MiniStat label=tr("الموظف") value={payslip.employee?.full_name ?? tr("موظف")} />
-                  <MiniStat label=tr("الرقم الوظيفي") value={payslip.employee?.employee_number ?? "—"} />
-                  <MiniStat label=tr("القسم") value={payslip.employee?.department ?? "—"} />
-                  <MiniStat label=tr("المسمى الوظيفي") value={payslip.employee?.position ?? "—"} />
-                  <MiniStat label=tr("البنك") value={payslip.row.bank_name ?? "—"} />
-                  <MiniStat label=tr("حالة المسير") value={sheetStatus.label} />
+                  <MiniStat label={tr("الموظف")} value={payslip.employee?.full_name ?? tr("موظف")} />
+                  <MiniStat label={tr("الرقم الوظيفي")} value={payslip.employee?.employee_number ?? "—"} />
+                  <MiniStat label={tr("القسم")} value={payslip.employee?.department ?? "—"} />
+                  <MiniStat label={tr("المسمى الوظيفي")} value={payslip.employee?.position ?? "—"} />
+                  <MiniStat label={tr("البنك")} value={payslip.row.bank_name ?? "—"} />
+                  <MiniStat label={tr("حالة المسير")} value={sheetStatus.label} />
                 </dl>
 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="rounded-xl border border-success/25 bg-success/5 p-3">
                     <p className="mb-2 text-xs font-bold text-success">{tr("المستحقات")}</p>
-                    <PayslipLine label=tr("الراتب الأساسي") value={money(Number(payslip.row.base_salary))} />
-                    <PayslipLine label=tr("بدل السكن") value={money(Number(payslip.row.housing_allowance))} />
-                    <PayslipLine label=tr("بدل النقل") value={money(Number(payslip.row.transport_allowance))} />
-                    <PayslipLine label=tr("أجر الإضافي") value={money(Number(payslip.row.overtime_amount))} />
-                    <PayslipLine label=tr("مكافآت") value={money(Number(payslip.row.bonuses))} />
-                    <PayslipLine label=tr("مستحقات أخرى") value={money(payslip.additions)} />
+                    <PayslipLine label={tr("الراتب الأساسي")} value={money(Number(payslip.row.base_salary))} />
+                    <PayslipLine label={tr("بدل السكن")} value={money(Number(payslip.row.housing_allowance))} />
+                    <PayslipLine label={tr("بدل النقل")} value={money(Number(payslip.row.transport_allowance))} />
+                    <PayslipLine label={tr("أجر الإضافي")} value={money(Number(payslip.row.overtime_amount))} />
+                    <PayslipLine label={tr("مكافآت")} value={money(Number(payslip.row.bonuses))} />
+                    <PayslipLine label={tr("مستحقات أخرى")} value={money(payslip.additions)} />
                   </div>
                   <div className="rounded-xl border border-destructive/25 bg-destructive/5 p-3">
                     <p className="mb-2 text-xs font-bold text-destructive">{tr("الاستقطاعات")}</p>
-                    <PayslipLine label=tr("خصومات ثابتة") value={money(Number(payslip.row.deductions))} />
-                    <PayslipLine label=tr("استقطاعات أخرى") value={money(payslip.extraDeductions)} />
-                    <PayslipLine label=tr("قسط سلفة") value={money(payslip.installment)} />
-                    <PayslipLine label=tr("خصم الغياب غير المبرر") value={money(payslip.absenceDeduction)} />
+                    <PayslipLine label={tr("خصومات ثابتة")} value={money(Number(payslip.row.deductions))} />
+                    <PayslipLine label={tr("استقطاعات أخرى")} value={money(payslip.extraDeductions)} />
+                    <PayslipLine label={tr("قسط سلفة")} value={money(payslip.installment)} />
+                    <PayslipLine label={tr("خصم الغياب غير المبرر")} value={money(payslip.absenceDeduction)} />
                   </div>
                 </div>
 
@@ -560,13 +560,13 @@ function PayrollPage() {
           {editRow ? (
             <form className="space-y-3" onSubmit={(event) => void saveRow(event)}>
               <div className="grid grid-cols-2 gap-3">
-                <MoneyField name="base_salary" label=tr("الراتب الأساسي") defaultValue={editRow.base_salary} />
-                <MoneyField name="housing_allowance" label=tr("بدل السكن") defaultValue={editRow.housing_allowance} />
-                <MoneyField name="transport_allowance" label=tr("بدل النقل") defaultValue={editRow.transport_allowance} />
-                <MoneyField name="bonuses" label=tr("مكافآت") defaultValue={editRow.bonuses} />
-                <MoneyField name="overtime_hours" label=tr("ساعات الإضافي") defaultValue={editRow.overtime_hours} />
-                <MoneyField name="overtime_amount" label=tr("أجر الإضافي") defaultValue={editRow.overtime_amount} />
-                <MoneyField name="deductions" label=tr("خصومات ثابتة") defaultValue={editRow.deductions} />
+                <MoneyField name="base_salary" label={tr("الراتب الأساسي")} defaultValue={editRow.base_salary} />
+                <MoneyField name="housing_allowance" label={tr("بدل السكن")} defaultValue={editRow.housing_allowance} />
+                <MoneyField name="transport_allowance" label={tr("بدل النقل")} defaultValue={editRow.transport_allowance} />
+                <MoneyField name="bonuses" label={tr("مكافآت")} defaultValue={editRow.bonuses} />
+                <MoneyField name="overtime_hours" label={tr("ساعات الإضافي")} defaultValue={editRow.overtime_hours} />
+                <MoneyField name="overtime_amount" label={tr("أجر الإضافي")} defaultValue={editRow.overtime_amount} />
+                <MoneyField name="deductions" label={tr("خصومات ثابتة")} defaultValue={editRow.deductions} />
                 <label className="space-y-1.5 text-sm">
                   <span className="block font-bold text-foreground">{tr("اسم البنك")}</span>
                   <Input name="bank_name" defaultValue={editRow.bank_name ?? ""} className="h-11 rounded-xl" />
@@ -574,7 +574,7 @@ function PayrollPage() {
               </div>
               <Button type="submit" className="h-11 w-full rounded-xl text-sm font-bold" disabled={busy === "row"}>
                 {busy === "row" ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : null}
-                حفظ التعديلات
+                {tr("حفظ التعديلات")}
               </Button>
             </form>
           ) : null}
@@ -643,20 +643,20 @@ function AdjustmentsTab({
     <section className="grid gap-3 lg:grid-cols-[minmax(0,320px)_1fr]">
       <form onSubmit={(event) => void submit(event)} className="space-y-3 rounded-2xl border border-border bg-card p-4 shadow-glass">
         <p className="text-sm font-bold text-foreground">{tr("إضافة مستحق أو استقطاع")}</p>
-        <FieldSelect label=tr("الموظف") value={employeeId} onChange={setEmployeeId} placeholder=tr("اختر الموظف")>
+        <FieldSelect label={tr("الموظف")} value={employeeId} onChange={setEmployeeId} placeholder={tr("اختر الموظف")}>
           {employees.map((employee) => (
             <SelectItem key={employee.id} value={employee.id}>
               {employee.full_name}
             </SelectItem>
           ))}
         </FieldSelect>
-        <FieldSelect label=tr("النوع") value={kind} onChange={setKind} placeholder=tr("النوع")>
+        <FieldSelect label={tr("النوع")} value={kind} onChange={setKind} placeholder={tr("النوع")}>
           <SelectItem value="addition">{tr("مستحق (مكافأة / بدل)")}</SelectItem>
           <SelectItem value="deduction">{tr("استقطاع (خصم / جزاء)")}</SelectItem>
         </FieldSelect>
         <label className="block space-y-1.5 text-sm">
           <span className="block font-bold text-foreground">{tr("البيان")}</span>
-          <Input value={label} onChange={(event) => setLabel(event.target.value)} className="h-11 rounded-xl" placeholder=tr("مكافأة أداء") />
+          <Input value={label} onChange={(event) => setLabel(event.target.value)} className="h-11 rounded-xl" placeholder={tr("مكافأة أداء")} />
         </label>
         <label className="block space-y-1.5 text-sm">
           <span className="block font-bold text-foreground">{tr("المبلغ")}</span>
@@ -670,13 +670,13 @@ function AdjustmentsTab({
         </label>
         <Button type="submit" className="h-11 w-full rounded-xl text-sm font-bold" disabled={saving}>
           {saving ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <CirclePlus className="h-4 w-4" aria-hidden />}
-          إضافة وحفظ
+          {tr("إضافة وحفظ")}
         </Button>
       </form>
 
       <div className="space-y-2">
         {!adjustments.length ? (
-          <EmptyState title=tr("لا توجد مؤثرات مالية لهذا الشهر") detail=tr("أضف مكافأة أو خصماً ليظهر أثره مباشرة في مسير الرواتب") />
+          <EmptyState title={tr("لا توجد مؤثرات مالية لهذا الشهر")} detail={tr("أضف مكافأة أو خصماً ليظهر أثره مباشرة في مسير الرواتب")} />
         ) : (
           adjustments.map((item) => (
             <div key={item.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-glass">
@@ -693,7 +693,7 @@ function AdjustmentsTab({
                 <span className="block text-xs text-muted-foreground">{employeeById.get(item.employee_id)?.full_name ?? tr("موظف")}</span>
               </span>
               <span className={cn("text-sm font-bold", item.kind === "addition" ? "text-success" : "text-destructive")}>{money(Number(item.amount))}</span>
-              <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full text-muted-foreground" aria-label=tr("حذف") onClick={() => void remove(item.id)}>
+              <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full text-muted-foreground" aria-label={tr("حذف")} onClick={() => void remove(item.id)}>
                 <Trash2 className="h-4 w-4" aria-hidden />
               </Button>
             </div>
@@ -768,7 +768,7 @@ function LoansTab({
     <section className="grid gap-3 lg:grid-cols-[minmax(0,320px)_1fr]">
       <form onSubmit={(event) => void submit(event)} className="space-y-3 rounded-2xl border border-border bg-card p-4 shadow-glass">
         <p className="text-sm font-bold text-foreground">{tr("تسجيل سلفة جديدة")}</p>
-        <FieldSelect label=tr("الموظف") value={employeeId} onChange={setEmployeeId} placeholder=tr("اختر الموظف")>
+        <FieldSelect label={tr("الموظف")} value={employeeId} onChange={setEmployeeId} placeholder={tr("اختر الموظف")}>
           {employees.map((employee) => (
             <SelectItem key={employee.id} value={employee.id}>
               {employee.full_name}
@@ -791,13 +791,13 @@ function LoansTab({
         </label>
         <Button type="submit" className="h-11 w-full rounded-xl text-sm font-bold" disabled={saving}>
           {saving ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <HandCoins className="h-4 w-4" aria-hidden />}
-          إضافة وحفظ
+          {tr("إضافة وحفظ")}
         </Button>
       </form>
 
       <div className="space-y-2">
         {!loans.length ? (
-          <EmptyState title=tr("لا توجد سُلف مسجلة") detail=tr("سجّل سلفة ليُخصم قسطها تلقائياً من مسير الرواتب الشهري") />
+          <EmptyState title={tr("لا توجد سُلف مسجلة")} detail={tr("سجّل سلفة ليُخصم قسطها تلقائياً من مسير الرواتب الشهري")} />
         ) : (
           loans.map((loan) => {
             const remaining = Math.max(0, Number(loan.total_amount) - Number(loan.paid_amount));
