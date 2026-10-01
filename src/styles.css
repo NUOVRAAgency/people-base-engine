@@ -288,3 +288,11 @@
 html[dir="ltr"] :is(.lucide-chevron-left, .lucide-chevron-right, .lucide-arrow-left, .lucide-arrow-right, .lucide-chevrons-left, .lucide-chevrons-right) {
   transform: scaleX(-1);
 }
+
+/* Offline read-only mode: every write control is disabled (no queued writes). */
+html[data-offline] main form button[type="submit"],
+html[data-offline] main [data-write],
+html[data-offline] main button.bg-primary {
+  pointer-events: none;
+  opacity: 0.45;
+}

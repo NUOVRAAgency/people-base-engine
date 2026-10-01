@@ -1,4 +1,6 @@
-import { signOutAndClear } from "@/lib/offline";
+import { readLastSync, signOutAndClear, useOnline } from "@/lib/offline";
+import { getLocale } from "@/lib/i18n";
+import { WifiOff } from "lucide-react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   BarChart3,
@@ -58,6 +60,8 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const title = TITLES[pathname] ?? tr("نظام الموارد البشرية");
   const { isAdmin, role } = useCurrentUser();
+  const online = useOnline();
+  const lastSync = online ? null : readLastSync();
   const { companyName, notifications } = useHeaderData();
   const companyNameIsArabic = /[\u0600-\u06ff]/.test(companyName);
   const listRef = useRef<HTMLUListElement>(null);
@@ -195,7 +199,18 @@ export function MobileShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="min-h-dvh bg-background px-4 pb-[96px] md:pb-8 md:ps-[calc(15rem+1.5rem)] pt-[calc(max(7px,env(safe-area-inset-top))+64px)] md:px-6 md:pt-[calc(max(7px,env(safe-area-inset-top))+68px)]">{children}</main>
+      <main className="min-h-dvh bg-background px-4 pb-[96px] md:pb-8 md:ps-[calc(15rem+1.5rem)] pt-[calc(max(7px,env(safe-area-inset-top))+64px)] md:px-6 md:pt-[calc(max(7px,env(safe-area-inset-top))+68px)]">
+        {!online ? (
+          <div role="status" className="mx-auto mb-3 flex w-full max-w-6xl items-center gap-2 rounded-xl border border-warning/40 bg-warning/15 px-3 py-2 text-xs text-warning-foreground">
+            <WifiOff className="h-4 w-4 shrink-0" aria-hidden />
+            <span className="font-bold">{tr("لا يوجد اتصال - وضع القراءة فقط")}</span>
+            {lastSync ? (
+              <span className="ms-auto">{trf("آخر مزامنة: {0}", new Intl.DateTimeFormat(getLocale(), { dateStyle: "medium", timeStyle: "short" }).format(new Date(lastSync)))}</span>
+            ) : null}
+          </div>
+        ) : null}
+        {children}
+      </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-30 md:hidden border-t border-border bg-card/95 backdrop-blur-md">
         <ul ref={listRef} className="scrollbar-hide mx-auto flex max-w-[480px] items-stretch gap-1 overflow-x-auto px-3 pb-[env(safe-area-inset-bottom)]">
