@@ -1,3 +1,4 @@
+import { currencyLabel, withCurrency } from "@/lib/currency";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   BadgeCheck,
@@ -30,6 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getLocale, tr, trf } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
+import { ExportMenu } from "@/components/export-menu";
 export const Route = createFileRoute("/_authenticated/payroll")({
   head: () => ({
     meta: [
@@ -93,7 +95,7 @@ const numberFormatter = new Intl.NumberFormat(getLocale(), { maximumFractionDigi
 const monthFormatter = new Intl.DateTimeFormat(getLocale(), { month: "long", year: "numeric" });
 
 function money(value: number) {
-  return trf("{0} ر.ي", numberFormatter.format(Math.round(value)));
+  return withCurrency(numberFormatter.format(Math.round(value)));
 }
 
 function monthKey(date: Date) {
@@ -310,6 +312,18 @@ function PayrollPage() {
             <h2 className="hidden text-xl font-bold leading-[1.6] text-foreground md:block md:text-2xl">{tr("الرواتب")}</h2>
             <p className="text-sm leading-[1.7] text-muted-foreground">{tr("مسير الرواتب الشهري والمؤثرات المالية وقسائم الرواتب")}</p>
           </div>
+          <div className="flex items-center gap-2">
+          <ExportMenu
+            payroll
+            build={() => ({
+              fileName: `${tr("الرواتب")} ${month.slice(0, 7)}`,
+              tables: [{
+                title: `${tr("مسير الرواتب")} — ${monthLabel(month)}`,
+                columns: [tr("الموظف"), tr("الراتب الأساسي"), tr("البدلات"), tr("الإضافات"), tr("الخصومات"), tr("قسط السلفة"), tr("صافي الراتب")],
+                rows: lines.map((l) => [l.employee?.full_name ?? "", Number(l.row.base_salary), l.allowances, l.additions, l.totalDeductions + l.extraDeductions, l.installment, Math.round(l.net)]),
+              }],
+            })}
+          />
           <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1 shadow-glass">
             <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر السابق")} onClick={() => shiftMonth(-1)}>
               <ChevronRight className="h-4 w-4" aria-hidden />
@@ -318,6 +332,7 @@ function PayrollPage() {
             <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر التالي")} onClick={() => shiftMonth(1)}>
               <ChevronLeft className="h-4 w-4" aria-hidden />
             </Button>
+          </div>
           </div>
         </div>
       </header>

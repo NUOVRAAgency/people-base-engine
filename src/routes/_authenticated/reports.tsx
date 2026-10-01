@@ -1,3 +1,4 @@
+import { currencyLabel, withCurrency } from "@/lib/currency";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -26,6 +27,7 @@ import { generateSmartReport } from "@/lib/ai-reports.functions";
 import { cn } from "@/lib/utils";
 
 import { tr, trf, getLocale } from "@/lib/i18n";
+import { ExportMenu } from "@/components/export-menu";
 export const Route = createFileRoute("/_authenticated/reports")({
   head: () => ({
     meta: [
@@ -93,7 +95,7 @@ const LEAVE_LABELS: Record<string, string> = {
 };
 
 function money(value: number) {
-  return trf("{0} ر.ي", numberFormatter.format(Math.round(value)));
+  return withCurrency(numberFormatter.format(Math.round(value)));
 }
 
 function monthKey(date: Date) {
@@ -125,6 +127,7 @@ function ReportsPage() {
   const [leaves, setLeaves] = useState<LeaveRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [archiveOpen, setArchiveOpen] = useState(false);
+  const [yearlyOpen, setYearlyOpen] = useState(false);
   const [yearPickerOpen, setYearPickerOpen] = useState(false);
   const [archiveYear, setArchiveYear] = useState(() => new Date().getFullYear());
   const [archivedMonths, setArchivedMonths] = useState<string[]>([]);
@@ -287,32 +290,18 @@ function ReportsPage() {
     setMonth(monthKey(current));
   }
 
-  function exportReport() {
-    const rows: string[][] = [
-      [tr("التقرير"), monthLabel(month)],
-      [],
-      [tr("إجمالي الرواتب المصروفة"), String(Math.round(finance.net))],
-      [tr("إجمالي الخصومات"), String(Math.round(finance.deductions))],
-      [tr("السلف القائمة"), String(Math.round(finance.outstanding))],
-      [],
-      [tr("القسم"), tr("إجمالي المصروف")],
-      ...finance.departments.map((item) => [item.name, String(Math.round(item.total))]),
-      [],
-      [tr("أيام الحضور"), String(attendanceStats.present)],
-      [tr("أيام التأخير"), String(attendanceStats.late)],
-      [tr("دقائق التأخير"), String(attendanceStats.lateMinutes)],
-      [tr("أيام الغياب"), String(attendanceStats.absent)],
-      [],
-      [tr("نوع الإجازة"), tr("الأيام")],
-      ...leaveStats.types.map((item) => [item.label, String(item.days)]),
+  function exportPayload() {
+    const tables = [
+      ...(isAdmin
+        ? [
+            { title: tr("الملخص المالي"), columns: [tr("البند"), tr("القيمة")], rows: [[tr("إجمالي الرواتب المصروفة"), Math.round(finance.net)], [tr("إجمالي الخصومات"), Math.round(finance.deductions)], [tr("السلف القائمة"), Math.round(finance.outstanding)]] },
+            { title: tr("المصروف حسب القسم"), columns: [tr("القسم"), tr("إجمالي المصروف")], rows: finance.departments.map((item) => [item.name, Math.round(item.total)]) },
+          ]
+        : []),
+      { title: tr("الحضور"), columns: [tr("البند"), tr("القيمة")], rows: [[tr("أيام الحضور"), attendanceStats.present], [tr("أيام التأخير"), attendanceStats.late], [tr("دقائق التأخير"), attendanceStats.lateMinutes], [tr("أيام الغياب"), attendanceStats.absent]] },
+      { title: tr("الإجازات"), columns: [tr("نوع الإجازة"), tr("الأيام")], rows: leaveStats.types.map((item) => [item.label, item.days]) },
     ];
-    const csv = "\uFEFF" + rows.map((row) => row.join(",")).join("\n");
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `report-${month}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    return { fileName: `${tr("التقرير")} ${monthLabel(month)}`, tables };
   }
 
   const summaryForAi = useMemo(
@@ -360,12 +349,20 @@ function ReportsPage() {
             <CalendarDays className="h-4 w-4" aria-hidden />
             {tr("السجل")}
           </Button>
-          <Button type="button" className="hidden h-10 rounded-xl px-4 text-sm font-medium sm:flex" onClick={exportReport}>
-            <Download className="h-4 w-4" aria-hidden />
-            {tr("تصدير التقرير")}
+          <Button
+            type="button"
+            variant={yearlyOpen ? "default" : "outline"}
+            className="h-10 rounded-xl px-4 text-sm font-medium"
+            aria-pressed={yearlyOpen}
+            onClick={() => setYearlyOpen((value) => !value)}
+          >
+            {tr("العرض السنوي")}
           </Button>
+          <ExportMenu build={exportPayload} label={tr("تصدير التقرير")} />
         </div>
       </header>
+
+      {yearlyOpen ? <YearlyView year={Number(month.slice(0, 4))} isAdmin={isAdmin} /> : null}
 
       {archiveOpen ? (
         <section className="mt-5 min-w-0 rounded-2xl border border-border/40 bg-card/75 p-4 shadow-glass backdrop-blur-sm">
@@ -615,6 +612,90 @@ function ReportsPage() {
         </>
       )}
     </div>
+  );
+}
+
+type YearRow = { key: string; present: number; late: number; absent: number; leaves: number; net: number };
+
+function YearlyView({ year, isAdmin }: { year: number; isAdmin: boolean }) {
+  const [rows, setRows] = useState<YearRow[] | null>(null);
+  useEffect(() => {
+    let active = true;
+    setRows(null);
+    (async () => {
+      const from = `${year}-01-01`;
+      const to = `${year}-12-31`;
+      const [att, lv, pay] = await Promise.all([
+        supabase.from("attendance").select("date,status").gte("date", from).lte("date", to),
+        supabase.from("leave_requests").select("start_date,status").eq("status", "approved").gte("start_date", from).lte("start_date", to),
+        isAdmin ? supabase.from("payroll").select("month,net_salary").gte("month", from).lte("month", to) : Promise.resolve({ data: [] as { month: string; net_salary: number }[] }),
+      ]);
+      const map = new Map<string, YearRow>();
+      for (let m = 0; m < 12; m++) {
+        const key = `${year}-${String(m + 1).padStart(2, "0")}`;
+        map.set(key, { key, present: 0, late: 0, absent: 0, leaves: 0, net: 0 });
+      }
+      for (const r of att.data ?? []) {
+        const row = map.get(r.date.slice(0, 7));
+        if (!row) continue;
+        if (r.status === "present") row.present++;
+        else if (r.status === "late") row.late++;
+        else if (r.status === "absent") row.absent++;
+      }
+      for (const r of lv.data ?? []) {
+        const row = map.get(r.start_date.slice(0, 7));
+        if (row) row.leaves++;
+      }
+      for (const r of pay.data ?? []) {
+        const row = map.get(r.month.slice(0, 7));
+        if (row) row.net += Number(r.net_salary);
+      }
+      if (active) setRows([...map.values()]);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [year, isAdmin]);
+
+  const hasData = rows?.some((r) => r.present + r.late + r.absent + r.leaves + r.net > 0);
+  const total = rows?.reduce((a, r) => ({ ...a, present: a.present + r.present, late: a.late + r.late, absent: a.absent + r.absent, leaves: a.leaves + r.leaves, net: a.net + r.net }), { key: "", present: 0, late: 0, absent: 0, leaves: 0, net: 0 });
+
+  return (
+    <section className="mt-5 min-w-0 rounded-2xl border border-border/40 bg-card/75 p-4 shadow-glass backdrop-blur-sm">
+      <h3 className="mb-3 text-sm font-medium text-foreground">{trf("العرض السنوي {0}", String(year))}</h3>
+      {rows === null ? (
+        <p className="py-6 text-center text-sm text-muted-foreground">{tr("جار التحميل...")}</p>
+      ) : !hasData ? (
+        <EmptyState title={tr("لا توجد بيانات لهذه السنة")} detail={tr("ستظهر الأرقام هنا عند تسجيل الحضور والإجازات.")} />
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[520px] text-sm">
+            <thead>
+              <tr className="border-b border-border/60 text-xs text-muted-foreground">
+                <th className="py-2 text-start font-medium">{tr("الشهر")}</th>
+                <th className="py-2 text-start font-medium">{tr("أيام الحضور")}</th>
+                <th className="py-2 text-start font-medium">{tr("أيام التأخير")}</th>
+                <th className="py-2 text-start font-medium">{tr("أيام الغياب")}</th>
+                <th className="py-2 text-start font-medium">{tr("إجازات معتمدة")}</th>
+                {isAdmin ? <th className="py-2 text-start font-medium">{tr("صافي الرواتب")}</th> : null}
+              </tr>
+            </thead>
+            <tbody>
+              {[...rows, { ...total!, key: "total" }].map((r) => (
+                <tr key={r.key} className={cn("border-b border-border/30", r.key === "total" && "font-bold")}>
+                  <td className="py-2">{r.key === "total" ? tr("الإجمالي") : monthLabel(`${r.key}-01`)}</td>
+                  <td className="py-2">{numberFormatter.format(r.present)}</td>
+                  <td className="py-2">{numberFormatter.format(r.late)}</td>
+                  <td className="py-2">{numberFormatter.format(r.absent)}</td>
+                  <td className="py-2">{numberFormatter.format(r.leaves)}</td>
+                  {isAdmin ? <td className="py-2">{money(r.net)}</td> : null}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }
 

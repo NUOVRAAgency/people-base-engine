@@ -1,3 +1,4 @@
+import { currencyLabel, withCurrency } from "@/lib/currency";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   BriefcaseBusiness,
@@ -47,6 +48,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 import { tr, trf, getLocale } from "@/lib/i18n";
+import { ExportMenu } from "@/components/export-menu";
 export const Route = createFileRoute("/_authenticated/employees")({
   head: () => ({
     meta: [
@@ -461,6 +463,17 @@ function EmployeesPage() {
           <p className="text-xs text-muted-foreground">{tr("دليل الفريق")}</p>
           <h2 id="employees-heading" className="truncate text-xl font-semibold leading-relaxed">{tr("إدارة الموظفين")}</h2>
         </div>
+        <div className="flex shrink-0 items-center gap-2">
+        <ExportMenu
+          build={() => ({
+            fileName: tr("الموظفون"),
+            tables: [{
+              title: tr("الموظفون"),
+              columns: [tr("رقم الموظف"), tr("الاسم"), tr("القسم"), tr("المسمى الوظيفي"), tr("تاريخ التعيين"), tr("نوع التوظيف"), tr("الحالة"), tr("الجوال")],
+              rows: filteredEmployees.map((e) => [e.employee_number, e.full_name, e.department, e.position, e.hire_date, EMPLOYMENT_LABELS[e.employment_type] ?? e.employment_type, e.status === "active" ? tr("نشط") : tr("غير نشط"), e.phone]),
+            }],
+          })}
+        />
         {!roleLoading && canWrite ? (
           <Button type="button" onClick={openCreate} className="h-11 shrink-0 rounded-lg bg-primary px-3 text-primary-foreground shadow-nav hover:bg-primary/90 sm:px-4">
             <Plus aria-hidden />
@@ -468,6 +481,7 @@ function EmployeesPage() {
             <span className="sm:hidden">{tr("إضافة موظف")}</span>
           </Button>
         ) : null}
+        </div>
       </div>
 
       {feedback ? (
@@ -862,7 +876,7 @@ function Field({ label, hint, required, error, className, children }: { label: s
 }
 
 function MoneyInput({ value, onChange, invalid }: { value: string; onChange: (value: string) => void; invalid?: boolean }) {
-  return <div className="relative"><Input dir="ltr" type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(event.target.value)} placeholder="" aria-invalid={invalid} className={cn("h-11 text-left", value ? "pe-3" : "pe-14")} />{value ? null : <span className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{tr("ر.ي")}</span>}</div>;
+  return <div className="relative"><Input dir="ltr" type="number" min="0" step="0.01" value={value} onChange={(event) => onChange(event.target.value)} placeholder="" aria-invalid={invalid} className={cn("h-11 text-left", value ? "pe-3" : "pe-14")} />{value ? null : <span className="pointer-events-none absolute end-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{currencyLabel()}</span>}</div>;
 }
 
 function EmployeeDetails({ employee, open, onOpenChange }: { employee: Employee | null; open: boolean; onOpenChange: (open: boolean) => void }) {

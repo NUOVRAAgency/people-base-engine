@@ -1,69 +1,100 @@
-// App Shell caching: الواجهة تعمل بدون إنترنت، أما الحفظ والتعديل فيتطلبان اتصالًا فعليًا.
-const CACHE = "hr-shell-v2";
+// Production-only service worker.
+// - App shell: network first, cached copy when offline.
+// - Read-only offline data: GET responses for an allow-list of tables are cached
+//   for 7 days. Payroll, adjustments, loans and saved reports are NEVER cached.
+// - No queued writes: anything other than GET always goes straight to the network.
+const SHELL_CACHE = "hr-shell-v3";
+const DATA_CACHE = "hr-data-v1";
+const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const SHELL = ["/", "/manifest.json", "/favicon.ico"];
+const ALLOWED_TABLES = ["employees", "attendance", "leave_requests", "branches", "app_settings", "users", "user_roles", "absence_decision_log"];
+const SUPABASE_ORIGIN = new URL(self.location.href).searchParams.get("sb") || "";
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()),
-  );
+  event.waitUntil(caches.open(SHELL_CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== SHELL_CACHE && k !== DATA_CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data === "clear-data") event.waitUntil(caches.delete(DATA_CACHE));
+});
+
+function dataTable(url) {
+  if (!SUPABASE_ORIGIN || url.origin !== SUPABASE_ORIGIN) return null;
+  const m = url.pathname.match(/^\/rest\/v1\/([a-z_]+)$/);
+  return m && ALLOWED_TABLES.includes(m[1]) ? m[1] : null;
+}
+
+async function networkFirstData(req) {
+  const cache = await caches.open(DATA_CACHE);
+  // Key includes the user token so one account never sees another account's cache.
+  const auth = req.headers.get("authorization") || "";
+  const key = new Request(req.url + (req.url.includes("?") ? "&" : "?") + "__u=" + encodeURIComponent(auth.slice(-24)));
+  try {
+    const res = await fetch(req);
+    if (res.ok) {
+      const body = await res.clone().blob();
+      const headers = new Headers(res.headers);
+      headers.set("x-hr-cached-at", String(Date.now()));
+      await cache.put(key, new Response(body, { status: res.status, headers }));
+    }
+    return res;
+  } catch (err) {
+    const cached = await cache.match(key);
+    if (cached && Date.now() - Number(cached.headers.get("x-hr-cached-at") || 0) < MAX_AGE_MS) return cached;
+    if (cached) await cache.delete(key);
+    throw err;
+  }
+}
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
+  if (req.method !== "GET") return;
   const url = new URL(req.url);
 
-  // شبكة فقط، بدون أي تخزين محلي: كل البيانات والمصادقة.
-  // أي استجابة من Supabase (نطاق خارجي) أو من وظائف الخادم لا تُخزَّن أبداً،
-  // فلا يبقى على جهاز Operator/Viewer أي بيانات رواتب — والتصفية تتم في قاعدة
-  // البيانات عبر RLS قبل أن تصل النتيجة إلى المتصفح أصلاً.
+  if (dataTable(url)) {
+    event.respondWith(networkFirstData(req));
+    return;
+  }
+
   if (
-    req.method !== "GET" ||
     url.origin !== self.location.origin ||
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/_serverFn") ||
     url.pathname.startsWith("/~oauth") ||
-    // ملفات التطوير غير الثابتة: تخزينها يخلط بين نسخ مختلفة ويسبب شاشة بيضاء
-    url.pathname.startsWith("/node_modules/") ||
-    url.pathname.startsWith("/@vite") ||
-    url.pathname.startsWith("/@id/") ||
-    url.pathname.startsWith("/@fs/") ||
-    url.pathname.startsWith("/src/") ||
-    url.search.includes("v=")
+    url.pathname.startsWith("/payroll")
   ) {
     return;
   }
 
-  // التنقل: شبكة أولًا مع رجوع لقشرة التطبيق عند انقطاع الاتصال
   if (req.mode === "navigate") {
     event.respondWith(
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put("/", copy));
+          caches.open(SHELL_CACHE).then((c) => c.put(url.pathname, copy));
           return res;
         })
-        .catch(() => caches.match("/").then((r) => r || Response.error())),
+        .catch(() => caches.match(url.pathname).then((r) => r || caches.match("/")).then((r) => r || Response.error())),
     );
     return;
   }
 
-  // الأصول الثابتة: الكاش أولًا
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
       return fetch(req).then((res) => {
         if (res.ok && res.type === "basic") {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
+          caches.open(SHELL_CACHE).then((c) => c.put(req, copy));
         }
         return res;
       });

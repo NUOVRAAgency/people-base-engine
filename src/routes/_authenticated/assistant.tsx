@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { chatWithAssistant } from "@/lib/ai-reports.functions";
 import { cn } from "@/lib/utils";
 
-import { tr, trf, getLocale } from "@/lib/i18n";
+import { getLanguage, tr, trf, getLocale } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/assistant")({
   validateSearch: (search: Record<string, unknown>) => ({
     month: typeof search["month"] === "string" ? (search["month"] as string) : undefined,
@@ -63,7 +63,7 @@ function AssistantPage() {
     {
       id: "welcome",
       role: "assistant",
-      text: tr("اهلا بك. اسالني عن رواتب هذا الشهر او الحضور او الاجازات وسالخص لك الصورة كاملة."),
+      text: tr("اهلا بك. اسالني عن الحضور او الاجازات او الموظفين خلال اخر 12 شهرا وسالخص لك الصورة."),
       at: new Date().toISOString(),
     },
   ]);
@@ -71,64 +71,9 @@ function AssistantPage() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [listening, setListening] = useState(false);
-  const [contextText, setContextText] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<{ stop: () => void } | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    async function summarize(key: string) {
-      const bounds = monthBounds(key);
-      const [employeesResult, payrollResult, attendanceResult, leavesResult] = await Promise.all([
-        supabase.from("employees").select("id,department").eq("status", "active"),
-        supabase.from("payroll").select("net_salary,deductions").eq("month", key),
-        supabase.from("attendance").select("status,late_minutes").gte("date", bounds.from).lte("date", bounds.to),
-        supabase.from("leave_requests").select("status").lte("start_date", bounds.to).gte("end_date", bounds.from),
-      ]);
-      const employees = employeesResult.data ?? [];
-      const payroll = payrollResult.data ?? [];
-      const attendance = attendanceResult.data ?? [];
-      const leaves = leavesResult.data ?? [];
-      const net = payroll.reduce((sum, row) => sum + Number(row.net_salary), 0);
-      const deductions = payroll.reduce((sum, row) => sum + Number(row.deductions), 0);
-      const late = attendance.filter((row) => row.status === "late").length;
-      const absent = attendance.filter((row) => row.status === "absent").length;
-      const lateMinutes = attendance.reduce((sum, row) => sum + Number(row.late_minutes ?? 0), 0);
-      return [
-        trf("الشهر: {0}", monthFormatter.format(new Date(`${key}T00:00:00`))),
-        trf("عدد الموظفين النشطين: {0}", employees.length),
-        trf("اجمالي الرواتب: {0} ريال يمني", Math.round(net)),
-        trf("اجمالي الخصومات: {0} ريال يمني", Math.round(deductions)),
-        trf("ايام التاخير: {0}, دقائق التاخير: {1}, ايام الغياب: {2}", late, lateMinutes, absent),
-        trf("طلبات الاجازات في الشهر: {0}, المعتمدة: {1}", leaves.length, leaves.filter((row) => row.status === "approved").length),
-        trf("الاقسام: {0}", [...new Set(employees.map((row) => row.department ?? "بدون قسم"))].join(", ") || "لا يوجد"),
-      ].join("\n");
-    }
-    async function loadContext() {
-      const current = new Date(`${month}T00:00:00`);
-      const previousDate = new Date(current.getFullYear(), current.getMonth() - 1, 1);
-      const previous = monthKey(previousDate);
-      const [currentText, previousText] = await Promise.all([summarize(month), summarize(previous)]);
-      if (!active) return;
-      setContextText(
-        [
-          tr("بيانات الشهر المختار حاليا:"),
-          currentText,
-          "",
-          tr("بيانات الشهر السابق للمقارنة:"),
-          previousText,
-          "",
-          tr("اذا سال المستخدم عن الشهر الحالي استخدم بيانات الشهر المختار، واذا سال عن الشهر السابق او طلب مقارنة استخدم بيانات الشهر السابق."),
-        ].join("\n"),
-      );
-    }
-    void loadContext();
-    return () => {
-      active = false;
-    };
-  }, [month]);
-
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -151,7 +96,8 @@ function AssistantPage() {
       try {
         const result = await runChat({
           data: {
-            context: contextText,
+            month,
+            language: getLanguage(),
             messages: history.slice(-20).map((item) => ({ role: item.role, text: item.text })),
           },
         });
@@ -174,7 +120,7 @@ function AssistantPage() {
         inputRef.current?.focus();
       }
     },
-    [busy, messages, contextText, runChat],
+    [busy, messages, month, runChat],
   );
 
   const speechSupported = useMemo(() => {
@@ -256,11 +202,8 @@ function AssistantPage() {
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-2.5">
 
-          {!roleLoading && !isAdmin ? (
-            <p className="rounded-2xl border border-border bg-card p-6 text-center text-sm leading-[1.8] text-muted-foreground shadow-glass">
-              {tr("المساعد الذكي متاح لمدير النظام فقط.")}
-            </p>
-          ) : (
+          {(
+
             <>
               <p className="text-center text-[12px] text-muted-foreground">
                 {timeFormatter.format(new Date(messages[0]?.at ?? Date.now()))}
@@ -326,7 +269,6 @@ function AssistantPage() {
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             placeholder={tr("اكتب رسالتك")}
-            disabled={!isAdmin && !roleLoading}
             className="h-12 min-w-0 flex-1 rounded-2xl bg-muted/50 px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/30"
           />
           {speechSupported ? (
