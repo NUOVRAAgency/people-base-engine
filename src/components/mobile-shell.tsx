@@ -5,6 +5,7 @@ import {
   CalendarCheck,
   FileText,
   Home,
+  LogOut,
   Plane,
   Search,
   Settings,
@@ -12,11 +13,12 @@ import {
   Wallet,
 } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { ROLE_LABELS, useCurrentUser } from "@/hooks/use-current-user";
 import { useHeaderData } from "@/hooks/use-header-data";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 
 import { tr, trf } from "@/lib/i18n";
@@ -54,7 +56,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const title = TITLES[pathname] ?? tr("نظام الموارد البشرية");
-  const { isAdmin } = useCurrentUser();
+  const { isAdmin, role } = useCurrentUser();
   const { companyName, notifications } = useHeaderData();
   const companyNameIsArabic = /[\u0600-\u06ff]/.test(companyName);
   const listRef = useRef<HTMLUListElement>(null);
@@ -70,7 +72,43 @@ export function MobileShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-background font-kufi">
-      <header className="fixed inset-x-0 top-0 z-30 overflow-hidden rounded-b-2xl shadow-nav backdrop-blur-md">
+      <aside className="fixed inset-y-0 start-0 z-40 hidden w-60 flex-col text-primary-foreground shadow-nav [background:var(--header-gradient)] md:flex">
+        <div className="flex items-center gap-2.5 border-b border-white/15 px-4 py-5">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-primary">
+            <Users className="h-5 w-5" aria-hidden />
+          </span>
+          <span dir="auto" className="min-w-0 truncate text-sm font-bold">{companyName || tr("نظام الموارد البشرية")}</span>
+        </div>
+        <nav className="flex-1 overflow-y-auto p-3">
+          <ul className="space-y-1">
+            {visibleItems.map((item) => {
+              const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
+              const Icon = item.icon;
+              return (
+                <li key={item.to}>
+                  <Link to={item.to} className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors", active ? "bg-white font-bold text-primary" : "text-white/85 hover:bg-white/15")}>
+                    <Icon className="h-5 w-5 shrink-0" aria-hidden />
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+        <div className="border-t border-white/15 p-3">
+          <p className="px-3 pb-2 text-xs text-white/75">{role ? ROLE_LABELS[role] : ""}</p>
+          <button
+            type="button"
+            onClick={async () => { await supabase.auth.signOut(); navigate({ to: "/auth", replace: true }); }}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-white/90 transition-colors hover:bg-white/15"
+          >
+            <LogOut className="h-5 w-5" aria-hidden />
+            {tr("تسجيل الخروج")}
+          </button>
+        </div>
+      </aside>
+
+      <header className="fixed end-0 start-0 top-0 md:start-60 z-30 overflow-hidden rounded-b-2xl shadow-nav backdrop-blur-md">
         <div className="w-full bg-white pt-[max(7px,env(safe-area-inset-top))]" />
         <div className="relative flex h-[52px] items-center gap-3 px-3 text-primary-foreground [background:var(--header-gradient)] md:h-[56px] md:px-6">
         <div className="flex min-w-0 items-center gap-2.5">
@@ -156,9 +194,9 @@ export function MobileShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="min-h-dvh bg-background px-4 pb-[96px] pt-[calc(max(7px,env(safe-area-inset-top))+64px)] md:px-6 md:pt-[calc(max(7px,env(safe-area-inset-top))+68px)]">{children}</main>
+      <main className="min-h-dvh bg-background px-4 pb-[96px] md:pb-8 md:ps-[calc(15rem+1.5rem)] pt-[calc(max(7px,env(safe-area-inset-top))+64px)] md:px-6 md:pt-[calc(max(7px,env(safe-area-inset-top))+68px)]">{children}</main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 backdrop-blur-md">
+      <nav className="fixed inset-x-0 bottom-0 z-30 md:hidden border-t border-border bg-card/95 backdrop-blur-md">
         <ul ref={listRef} className="scrollbar-hide mx-auto flex max-w-[480px] items-stretch gap-1 overflow-x-auto px-3 pb-[env(safe-area-inset-bottom)]">
           {visibleItems.map((item) => {
             const active = pathname === item.to;
