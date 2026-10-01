@@ -118,9 +118,9 @@ export function AbsenceDecisions({ isAdmin }: { isAdmin: boolean }) {
         </div>
         {view === "list" ? (
           <div className="flex items-center gap-1 rounded-full border border-border/40 bg-card/75 p-1 shadow-glass">
-            <Button type="button" variant="ghost" size="icon" className="size-8 rounded-full rtl:rotate-0 ltr:rotate-180" aria-label={tr("الشهر السابق")} onClick={() => shift(-1)}><ChevronRight className="h-4 w-4" aria-hidden /></Button>
+            <Button type="button" variant="ghost" size="icon" className="size-8 rounded-full" aria-label={tr("الشهر السابق")} onClick={() => shift(-1)}><ChevronRight className="h-4 w-4" aria-hidden /></Button>
             <span className="min-w-[110px] text-center text-xs font-medium">{monthFmt.format(new Date(`${month}T00:00:00`))}</span>
-            <Button type="button" variant="ghost" size="icon" className="size-8 rounded-full rtl:rotate-0 ltr:rotate-180" aria-label={tr("الشهر التالي")} onClick={() => shift(1)}><ChevronLeft className="h-4 w-4" aria-hidden /></Button>
+            <Button type="button" variant="ghost" size="icon" className="size-8 rounded-full" aria-label={tr("الشهر التالي")} onClick={() => shift(1)}><ChevronLeft className="h-4 w-4" aria-hidden /></Button>
           </div>
         ) : null}
       </div>
