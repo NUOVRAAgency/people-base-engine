@@ -3,6 +3,7 @@ import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { allowedFormats, runExport, type ExportFormat, type ExportPayload } from "@/lib/export";
 import { tr } from "@/lib/i18n";
@@ -22,7 +23,7 @@ export function ExportMenu({
   className,
   label,
 }: {
-  build: () => ExportPayload | Promise<ExportPayload>;
+  build: () => (Omit<ExportPayload, "orgName"> & { orgName?: string }) | Promise<Omit<ExportPayload, "orgName"> & { orgName?: string }>;
   payroll?: boolean;
   className?: string;
   label?: string;
@@ -36,7 +37,12 @@ export function ExportMenu({
     if (busy) return;
     setBusy(true);
     try {
-      await runExport(format, await build());
+      const payload = { orgName: "", ...(await build()) } as ExportPayload;
+      if (!payload.orgName) {
+        const { data } = await supabase.from("app_settings").select("company_name").eq("id", "organization").maybeSingle();
+        payload.orgName = data?.company_name?.trim() ?? "";
+      }
+      await runExport(format, payload);
     } catch {
       toast.error(tr("تعذر إنشاء الملف. حاول مرة أخرى."));
     } finally {
