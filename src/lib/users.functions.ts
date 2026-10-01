@@ -7,6 +7,9 @@ type Ctx = { supabase: any; userId: string };
 async function assertAdmin(ctx: Ctx) {
   const { data, error } = await ctx.supabase.from("user_roles").select("role").eq("user_id", ctx.userId).eq("role", "admin");
   if (error || !data?.length) throw new Error("forbidden");
+  // A disabled admin whose old session is still alive must not manage users.
+  const { data: me } = await ctx.supabase.from("users").select("is_active").eq("id", ctx.userId).maybeSingle();
+  if (!me?.is_active) throw new Error("forbidden");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   return supabaseAdmin;
 }
