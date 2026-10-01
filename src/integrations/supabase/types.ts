@@ -546,6 +546,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean
+          must_change_password: boolean
         }
         Insert: {
           avatar_path?: string | null
@@ -555,6 +556,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_active?: boolean
+          must_change_password?: boolean
         }
         Update: {
           avatar_path?: string | null
@@ -564,6 +566,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
+          must_change_password?: boolean
         }
         Relationships: [
           {
