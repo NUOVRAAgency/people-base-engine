@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      absence_decision_log: {
+        Row: {
+          absence_date: string
+          attendance_id: string
+          created_at: string
+          decided_by: string | null
+          employee_id: string
+          from_decision: string
+          id: string
+          to_decision: string
+        }
+        Insert: {
+          absence_date: string
+          attendance_id: string
+          created_at?: string
+          decided_by?: string | null
+          employee_id: string
+          from_decision: string
+          id?: string
+          to_decision: string
+        }
+        Update: {
+          absence_date?: string
+          attendance_id?: string
+          created_at?: string
+          decided_by?: string | null
+          employee_id?: string
+          from_decision?: string
+          id?: string
+          to_decision?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "absence_decision_log_attendance_id_fkey"
+            columns: ["attendance_id"]
+            isOneToOne: false
+            referencedRelation: "attendance"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "absence_decision_log_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_settings: {
         Row: {
           company_name: string | null
@@ -49,10 +97,13 @@ export type Database = {
       }
       attendance: {
         Row: {
+          absence_decision: string
           check_in: string | null
           check_out: string | null
           created_at: string
           date: string
+          decided_at: string | null
+          decided_by: string | null
           employee_id: string
           id: string
           late_minutes: number
@@ -60,10 +111,13 @@ export type Database = {
           status: string
         }
         Insert: {
+          absence_decision?: string
           check_in?: string | null
           check_out?: string | null
           created_at?: string
           date: string
+          decided_at?: string | null
+          decided_by?: string | null
           employee_id: string
           id?: string
           late_minutes?: number
@@ -71,10 +125,13 @@ export type Database = {
           status: string
         }
         Update: {
+          absence_decision?: string
           check_in?: string | null
           check_out?: string | null
           created_at?: string
           date?: string
+          decided_at?: string | null
+          decided_by?: string | null
           employee_id?: string
           id?: string
           late_minutes?: number
@@ -361,6 +418,7 @@ export type Database = {
       payroll_adjustments: {
         Row: {
           amount: number
+          attendance_id: string | null
           created_at: string
           employee_id: string
           id: string
@@ -372,6 +430,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          attendance_id?: string | null
           created_at?: string
           employee_id: string
           id?: string
@@ -383,6 +442,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          attendance_id?: string | null
           created_at?: string
           employee_id?: string
           id?: string
@@ -393,6 +453,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "payroll_adjustments_attendance_id_fkey"
+            columns: ["attendance_id"]
+            isOneToOne: true
+            referencedRelation: "attendance"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payroll_adjustments_employee_id_fkey"
             columns: ["employee_id"]
@@ -515,6 +582,10 @@ export type Database = {
       monthly_attendance_rate: {
         Args: { _employee_id: string; _month: string }
         Returns: number
+      }
+      set_absence_decision: {
+        Args: { _attendance_id: string; _decision: string }
+        Returns: string
       }
       unjustified_absent_days: {
         Args: { _employee_id: string; _month: string }
