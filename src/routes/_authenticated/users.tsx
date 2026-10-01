@@ -137,7 +137,7 @@ function UserDialog({ target, branches, selfId, onClose, onSaved }: { target: Ro
 
   async function save() {
     setError("");
-    if (role !== "admin" && !branchId) return setError(tr(ERRORS.branch_required));
+    if (role !== "admin" && !branchId) return setError(tr("الفرع إلزامي للمشغّل والمشاهد"));
     setSaving(true);
     try {
       const res = isNew
