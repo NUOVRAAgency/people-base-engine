@@ -73,7 +73,7 @@ export const createUser = createServerFn({ method: "POST" })
       email_confirm: true,
       user_metadata: data.fullName ? { full_name: data.fullName } : {},
     });
-    if (error || !created.user) return { ok: false as const, error: "create_failed" };
+    if (error || !created.user) { console.error("createUser", error?.message); return { ok: false as const, error: "create_failed" }; }
     const id = created.user.id;
     await admin.from("users").upsert({ id, email: data.email, full_name: data.fullName || null, branch_id: data.role === "admin" ? null : data.branchId, must_change_password: true });
     await admin.from("user_roles").delete().eq("user_id", id);
