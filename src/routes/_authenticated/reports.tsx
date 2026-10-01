@@ -26,6 +26,7 @@ import { generateSmartReport } from "@/lib/ai-reports.functions";
 import { cn } from "@/lib/utils";
 
 import { tr, trf, getLocale } from "@/lib/i18n";
+import { ExportMenu } from "@/components/export-menu";
 export const Route = createFileRoute("/_authenticated/reports")({
   head: () => ({
     meta: [
@@ -287,32 +288,18 @@ function ReportsPage() {
     setMonth(monthKey(current));
   }
 
-  function exportReport() {
-    const rows: string[][] = [
-      [tr("التقرير"), monthLabel(month)],
-      [],
-      [tr("إجمالي الرواتب المصروفة"), String(Math.round(finance.net))],
-      [tr("إجمالي الخصومات"), String(Math.round(finance.deductions))],
-      [tr("السلف القائمة"), String(Math.round(finance.outstanding))],
-      [],
-      [tr("القسم"), tr("إجمالي المصروف")],
-      ...finance.departments.map((item) => [item.name, String(Math.round(item.total))]),
-      [],
-      [tr("أيام الحضور"), String(attendanceStats.present)],
-      [tr("أيام التأخير"), String(attendanceStats.late)],
-      [tr("دقائق التأخير"), String(attendanceStats.lateMinutes)],
-      [tr("أيام الغياب"), String(attendanceStats.absent)],
-      [],
-      [tr("نوع الإجازة"), tr("الأيام")],
-      ...leaveStats.types.map((item) => [item.label, String(item.days)]),
+  function exportPayload() {
+    const tables = [
+      ...(isAdmin
+        ? [
+            { title: tr("الملخص المالي"), columns: [tr("البند"), tr("القيمة")], rows: [[tr("إجمالي الرواتب المصروفة"), Math.round(finance.net)], [tr("إجمالي الخصومات"), Math.round(finance.deductions)], [tr("السلف القائمة"), Math.round(finance.outstanding)]] },
+            { title: tr("المصروف حسب القسم"), columns: [tr("القسم"), tr("إجمالي المصروف")], rows: finance.departments.map((item) => [item.name, Math.round(item.total)]) },
+          ]
+        : []),
+      { title: tr("الحضور"), columns: [tr("البند"), tr("القيمة")], rows: [[tr("أيام الحضور"), attendanceStats.present], [tr("أيام التأخير"), attendanceStats.late], [tr("دقائق التأخير"), attendanceStats.lateMinutes], [tr("أيام الغياب"), attendanceStats.absent]] },
+      { title: tr("الإجازات"), columns: [tr("نوع الإجازة"), tr("الأيام")], rows: leaveStats.types.map((item) => [item.label, item.days]) },
     ];
-    const csv = "\uFEFF" + rows.map((row) => row.join(",")).join("\n");
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `report-${month}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    return { fileName: `${tr("التقرير")} ${monthLabel(month)}`, tables };
   }
 
   const summaryForAi = useMemo(
@@ -360,10 +347,7 @@ function ReportsPage() {
             <CalendarDays className="h-4 w-4" aria-hidden />
             {tr("السجل")}
           </Button>
-          <Button type="button" className="hidden h-10 rounded-xl px-4 text-sm font-medium sm:flex" onClick={exportReport}>
-            <Download className="h-4 w-4" aria-hidden />
-            {tr("تصدير التقرير")}
-          </Button>
+<ExportMenu build={exportPayload} label={tr("تصدير التقرير")} />
         </div>
       </header>
 
