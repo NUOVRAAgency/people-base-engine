@@ -431,7 +431,7 @@ function ManualDialog({
     );
     setSaving(false);
     if (error) {
-      onError(tr("تعذر حفظ سجل الحضور. تحقق من صلاحيتك على هذا الفرع."));
+      onError(error.message.includes("weekend_absence") ? tr("هذا اليوم عطلة أسبوعية ولا يُسجّل غياباً") : tr("تعذر حفظ سجل الحضور. تحقق من صلاحيتك على هذا الفرع."));
       return;
     }
     await onSaved(tr("تم حفظ سجل الحضور"));
