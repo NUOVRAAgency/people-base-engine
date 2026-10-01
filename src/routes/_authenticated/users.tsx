@@ -50,7 +50,8 @@ function UsersPage() {
       setRows(res.users as Row[]);
       setBranches(res.branches);
       setSelfId(res.selfId);
-    } catch {
+    } catch (e) {
+      console.error('listUsers', e);
       setRows([]);
     }
     setLoading(false);
