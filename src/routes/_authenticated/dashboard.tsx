@@ -1,3 +1,4 @@
+import { currencyLabel, withCurrency } from "@/lib/currency";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Check,
@@ -359,7 +360,7 @@ function DashboardPage() {
           )}
         </Panel>
 
-        <Panel title={tr("اتجاه صرف الرواتب خلال السنة")} action={tr("ر.ي")}>
+        <Panel title={tr("اتجاه صرف الرواتب خلال السنة")} action={currencyLabel()}>
           {!hasYearPayroll ? (
             <Empty text={tr("لا توجد مسيرات رواتب مسجلة لهذا العام بعد")} />
           ) : (
@@ -391,7 +392,7 @@ function DashboardPage() {
                 />
                 <Tooltip
                   cursor={{ stroke: "rgba(0,184,169,0.35)", strokeWidth: 1 }}
-                  formatter={(value: number) => [trf("{0} ر.ي", numberFormatter.format(value)), tr("الرواتب")]}
+                  formatter={(value: number) => [withCurrency(numberFormatter.format(value)), tr("الرواتب")]}
                   contentStyle={{
                     borderRadius: 14,
                     border: "1px solid rgba(0,0,0,0.06)",
@@ -443,7 +444,7 @@ function DashboardPage() {
 
         <Panel title={tr("صرف الرواتب")} action={monthFormatter.format(new Date(`${month}T00:00:00`))}>
           <div className="relative mx-auto flex h-[150px] w-full max-w-[260px] flex-col items-center justify-center" dir="ltr">
-            <span className="text-xl font-medium text-foreground">{numberFormatter.format(totalNet)} {tr("ر.ي")}</span>
+            <span className="text-xl font-medium text-foreground">{withCurrency(numberFormatter.format(totalNet))}</span>
             <span className="mt-0.5 text-[11px] text-muted-foreground">{tr("إجمالي المبلغ")}</span>
             {totalNet === 0 ? (
               <span className="mt-2 text-[11px] text-muted-foreground">{tr("لا يوجد مسير رواتب لهذا الشهر بعد")}</span>
@@ -453,7 +454,7 @@ function DashboardPage() {
 
             <div className="flex items-center justify-between text-[12px]">
               <span className="text-muted-foreground">{tr("المصروف فعليا")}</span>
-              <span className="font-medium text-foreground">{numberFormatter.format(approvedNet)} {tr("ر.ي")}</span>
+              <span className="font-medium text-foreground">{withCurrency(numberFormatter.format(approvedNet))}</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
               <div className="h-full rounded-full bg-primary" style={{ width: `${disbursedRatio}%` }} />

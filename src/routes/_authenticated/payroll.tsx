@@ -1,3 +1,4 @@
+import { currencyLabel, withCurrency } from "@/lib/currency";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   BadgeCheck,
@@ -94,7 +95,7 @@ const numberFormatter = new Intl.NumberFormat(getLocale(), { maximumFractionDigi
 const monthFormatter = new Intl.DateTimeFormat(getLocale(), { month: "long", year: "numeric" });
 
 function money(value: number) {
-  return trf("{0} ر.ي", numberFormatter.format(Math.round(value)));
+  return withCurrency(numberFormatter.format(Math.round(value)));
 }
 
 function monthKey(date: Date) {

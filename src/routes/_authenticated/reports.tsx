@@ -1,3 +1,4 @@
+import { currencyLabel, withCurrency } from "@/lib/currency";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -94,7 +95,7 @@ const LEAVE_LABELS: Record<string, string> = {
 };
 
 function money(value: number) {
-  return trf("{0} ر.ي", numberFormatter.format(Math.round(value)));
+  return withCurrency(numberFormatter.format(Math.round(value)));
 }
 
 function monthKey(date: Date) {
