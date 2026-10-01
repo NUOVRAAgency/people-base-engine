@@ -1,3 +1,4 @@
+import { currencyLabel } from "@/lib/currency";
 import { createFileRoute } from "@tanstack/react-router";
 import { Building2, CalendarOff, Clock3, LoaderCircle, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -258,9 +259,9 @@ function SystemSettingsPage() {
         <label className="mt-4 block space-y-1.5 text-sm">
           <span className="block font-medium text-foreground">{tr("العملة")}</span>
           <select value={currency} onChange={(e) => setCurrency(e.target.value as "YER" | "SAR" | "USD")} className="h-11 w-full rounded-xl border border-input bg-background px-3 text-sm">
-            <option value="YER">{tr("ر.ي")}</option>
-            <option value="SAR">SAR</option>
-            <option value="USD">USD</option>
+            <option value="YER">{currencyLabel("YER")}</option>
+            <option value="SAR">{currencyLabel("SAR")}</option>
+            <option value="USD">{currencyLabel("USD")}</option>
           </select>
         </label>
 
