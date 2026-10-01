@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { AbsenceDecisions, DECISION_META, type AbsenceDecision } from "@/components/absence-decisions";
 
 import { tr, trf, getLocale } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/attendance")({
@@ -56,6 +57,7 @@ type AttendanceRow = {
   check_out: string | null;
   late_minutes: number;
   note: string | null;
+  absence_decision?: AbsenceDecision;
 };
 
 type LeaveRow = {
@@ -71,7 +73,7 @@ type WorkSettings = {
   grace_minutes: number;
 };
 
-type TabKey = "today" | "monthly" | "settings";
+type TabKey = "today" | "monthly" | "absences" | "settings";
 
 const numberFormatter = new Intl.NumberFormat(getLocale(), { maximumFractionDigits: 0 });
 const monthFormatter = new Intl.DateTimeFormat(getLocale(), { month: "long", year: "numeric" });
@@ -135,7 +137,7 @@ function AttendancePage() {
     setLoading(true);
     const [employeesResult, rowsResult, leavesResult, settingsResult] = await Promise.all([
       supabase.from("employees").select("id,full_name,employee_number,department,position").eq("status", "active").order("full_name"),
-      supabase.from("attendance").select("id,employee_id,date,status,check_in,check_out,late_minutes,note").eq("date", today),
+      supabase.from("attendance").select("id,employee_id,date,status,check_in,check_out,late_minutes,note,absence_decision").eq("date", today),
       supabase.from("leave_requests").select("id,employee_id,start_date,end_date").eq("status", "approved").lte("start_date", today).gte("end_date", today),
       supabase.from("app_settings").select("work_start,work_end,grace_minutes").eq("id", "organization").maybeSingle(),
     ]);
@@ -249,6 +251,7 @@ function AttendancePage() {
           {([
             { key: "today", label: tr("سجل اليوم") },
             { key: "monthly", label: tr("الملخص الشهري") },
+            { key: "absences", label: tr("الغياب") },
             { key: "settings", label: tr("اعدادات الدوام") },
           ] as { key: TabKey; label: string }[]).map((item) => (
             <button
@@ -324,6 +327,11 @@ function AttendancePage() {
                           <LogOut className="h-3.5 w-3.5 text-primary" aria-hidden />
                           <span dir="ltr">{shortTime(card.row?.check_out ?? null)}</span>
                         </span>
+                        {card.status === "absent" && card.row?.absence_decision ? (
+                          <span className={cn("ms-auto rounded-full px-2 py-0.5 text-[11px]", DECISION_META[card.row.absence_decision].badge)}>
+                            {DECISION_META[card.row.absence_decision].label}
+                          </span>
+                        ) : null}
                         {card.row && card.row.late_minutes > 0 ? (
                           <span className="ms-auto flex items-center gap-1.5 text-warning-foreground">
                             <Clock className="h-3.5 w-3.5" aria-hidden />
@@ -339,6 +347,8 @@ function AttendancePage() {
           </section>
         ) : tab === "monthly" ? (
           <MonthlyTab employees={employees} />
+        ) : tab === "absences" ? (
+          <AbsenceDecisions isAdmin={isAdmin} />
         ) : (
           <SettingsTab settings={settings} isAdmin={isAdmin} roleLoading={roleLoading} onSubmit={saveSettings} />
         )}
@@ -421,7 +431,7 @@ function ManualDialog({
     );
     setSaving(false);
     if (error) {
-      onError(tr("تعذر حفظ سجل الحضور. تحقق من صلاحيتك على هذا الفرع."));
+      onError(error.message.includes("weekend_absence") ? tr("هذا اليوم عطلة أسبوعية ولا يُسجّل غياباً") : tr("تعذر حفظ سجل الحضور. تحقق من صلاحيتك على هذا الفرع."));
       return;
     }
     await onSaved(tr("تم حفظ سجل الحضور"));
