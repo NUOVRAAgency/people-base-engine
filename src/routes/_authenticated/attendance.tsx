@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { AbsenceDecisions, DECISION_META, type AbsenceDecision } from "@/components/absence-decisions";
 
 import { tr, trf, getLocale } from "@/lib/i18n";
+import { ExportMenu } from "@/components/export-menu";
 export const Route = createFileRoute("/_authenticated/attendance")({
   head: () => ({
     meta: [
@@ -227,6 +228,18 @@ function AttendancePage() {
             <h2 className="hidden text-xl font-medium leading-[1.6] text-foreground md:block md:text-2xl">{tr("الحضور")}</h2>
             <p className="truncate text-[13px] leading-[1.7] text-muted-foreground">{dayFormatter.format(new Date(`${today}T00:00:00`))}</p>
           </div>
+          <div className="flex items-center gap-2">
+          <ExportMenu
+            className="h-10"
+            build={() => ({
+              fileName: `${tr("الحضور")} ${today}`,
+              tables: [{
+                title: `${tr("سجل الحضور")} — ${today}`,
+                columns: [tr("الموظف"), tr("الحالة"), tr("الدخول"), tr("الخروج"), tr("دقائق التأخير")],
+                rows: cards.map((c) => [c.employee.full_name, STATUS_META[c.status]?.label ?? c.status, c.row?.check_in?.slice(0, 5) ?? "", c.row?.check_out?.slice(0, 5) ?? "", c.row?.late_minutes ?? 0]),
+              }],
+            })}
+          />
           <div className="flex items-center gap-1 rounded-full border border-border/40 bg-card/75 p-1 shadow-glass backdrop-blur-sm">
             <Button type="button" variant="ghost" size="icon" className="size-8 rounded-full" aria-label={tr("اليوم السابق")} onClick={() => shiftDay(-1)}>
               <ChevronRight className="h-4 w-4" aria-hidden />
@@ -237,6 +250,7 @@ function AttendancePage() {
             <Button type="button" variant="ghost" size="icon" className="size-8 rounded-full" aria-label={tr("اليوم التالي")} onClick={() => shiftDay(1)}>
               <ChevronLeft className="h-4 w-4" aria-hidden />
             </Button>
+          </div>
           </div>
         </div>
 
