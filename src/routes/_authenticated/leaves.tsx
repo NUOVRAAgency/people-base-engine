@@ -151,6 +151,7 @@ function LeavesPage() {
             }],
           })}
         />
+        {canCreate ? (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button aria-label={tr("إضافة طلب إجازة")} size="icon" className="min-h-11 min-w-11 rounded-full bg-primary text-primary-foreground shadow-nav hover:bg-primary/90">
