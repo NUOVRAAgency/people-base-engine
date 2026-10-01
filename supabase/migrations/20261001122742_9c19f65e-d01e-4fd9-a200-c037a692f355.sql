@@ -1,0 +1,1 @@
+GRANT ALL ON public.users, public.user_roles, public.branches TO service_role;
