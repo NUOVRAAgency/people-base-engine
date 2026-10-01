@@ -50,7 +50,7 @@ function AuthPage() {
     <main className="relative grid min-h-dvh place-items-center overflow-hidden bg-page px-4 py-8 sm:px-6">
       <div className="pointer-events-none absolute inset-0 bg-login-pattern opacity-70" aria-hidden />
       <div className="relative w-full max-w-[360px] overflow-hidden rounded-2xl border border-primary/10 bg-card shadow-login sm:max-w-[390px]">
-        <div className="h-1.5 bg-primary" aria-hidden />
+        <div className="h-2 [background:var(--header-gradient)]" aria-hidden />
         <div className="p-6 sm:p-8">
           <header className="mb-6 text-center">
             <span className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -79,7 +79,7 @@ function AuthPage() {
             {message ? <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-center text-xs text-destructive">{message}</p> : null}
 
             <div className="flex justify-center pt-2">
-              <Button type="submit" className="h-10 min-w-32 rounded-xl px-8 font-semibold shadow-sm" disabled={busy}>
+              <Button type="submit" className="h-10 min-w-32 rounded-xl px-8 font-semibold text-primary-foreground shadow-sm [background:var(--header-gradient)] hover:opacity-95" disabled={busy}>
                 {busy ? <LoaderCircle className="animate-spin" aria-hidden /> : null}
                 {busy ? tr("جارٍ الدخول...") : tr("دخول")}
               </Button>
