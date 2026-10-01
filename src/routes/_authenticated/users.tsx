@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { LoaderCircle, Pencil, Plus } from "lucide-react";
+import { KeyRound, LoaderCircle, Pencil, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ROLE_LABELS, useCurrentUser, type AppRole } from "@/hooks/use-current-user";
-import { createUser, listUsers, updateUser } from "@/lib/users.functions";
+import { createUser, listUsers, resetUserPassword, updateUser } from "@/lib/users.functions";
 import { getLocale, tr } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +32,8 @@ const ERRORS: Record<string, string> = {
   self_change: "لا يمكنك تعديل دورك أو تعطيل حسابك",
   branch_required: "الفرع إلزامي للمشغّل والمشاهد",
   create_failed: "تعذر إنشاء المستخدم، قد يكون البريد مستخدماً",
+  self_reset: "لا يمكنك إعادة تعيين كلمة مرورك من هنا",
+  reset_failed: "تعذر إعادة تعيين كلمة المرور",
 };
 
 function UsersPage() {
@@ -42,6 +44,21 @@ function UsersPage() {
   const [selfId, setSelfId] = useState("");
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Row | "new" | null>(null);
+  const reset = useServerFn(resetUserPassword);
+  const [resetTarget, setResetTarget] = useState<Row | null>(null);
+  const [tempPw, setTempPw] = useState("");
+  const [resetErr, setResetErr] = useState("");
+  const [resetting, setResetting] = useState(false);
+
+  async function doReset() {
+    if (!resetTarget) return;
+    setResetting(true); setResetErr("");
+    try {
+      const res = await reset({ data: { userId: resetTarget.id } });
+      if (res.ok) setTempPw(res.password); else setResetErr(tr(ERRORS[res.error] ?? "تعذر إعادة تعيين كلمة المرور"));
+    } catch { setResetErr(tr("تعذر إعادة تعيين كلمة المرور")); }
+    setResetting(false);
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -92,6 +109,11 @@ function UsersPage() {
               <span className="text-xs text-muted-foreground">{branchName(u.branchId)}</span>
               <span className={cn("rounded-full px-2.5 py-1 text-[11px]", u.isActive ? "bg-success/12 text-success" : "bg-muted text-muted-foreground")}>{u.isActive ? tr("نشط") : tr("معطّل")}</span>
               <span className="text-xs text-muted-foreground">{dateFmt.format(new Date(u.createdAt))}</span>
+              {u.id !== selfId ? (
+                <Button variant="ghost" size="icon" aria-label={tr("إعادة تعيين كلمة المرور")} title={tr("إعادة تعيين كلمة المرور")} className="size-9 rounded-full" onClick={() => { setResetTarget(u); setTempPw(""); setResetErr(""); }}>
+                  <KeyRound className="h-4 w-4" aria-hidden />
+                </Button>
+              ) : null}
               <Button variant="ghost" size="icon" aria-label={tr("تعديل")} className="size-9 rounded-full" onClick={() => setEditing(u)}>
                 <Pencil className="h-4 w-4" aria-hidden />
               </Button>
@@ -99,6 +121,30 @@ function UsersPage() {
           ))}
         </ul>
       )}
+
+      <Dialog open={resetTarget !== null} onOpenChange={(o) => { if (!o) { setResetTarget(null); setTempPw(""); } }}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader className="text-start">
+            <DialogTitle className="text-base font-semibold">{tr("إعادة تعيين كلمة المرور")}</DialogTitle>
+            <DialogDescription className="text-xs" dir="ltr">{resetTarget?.email}</DialogDescription>
+          </DialogHeader>
+          {tempPw ? (
+            <div className="space-y-2.5">
+              <p className="text-xs text-muted-foreground">{tr("كلمة المرور المؤقتة (تظهر مرة واحدة فقط). سيُطلب من المستخدم تغييرها عند الدخول.")}</p>
+              <p dir="ltr" className="select-all rounded-xl border border-border bg-muted/40 p-3 text-center font-mono text-base">{tempPw}</p>
+              <Button className="h-11 w-full rounded-xl" onClick={() => void navigator.clipboard?.writeText(tempPw)}>{tr("نسخ")}</Button>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              <p className="text-sm">{tr("سيتم توليد كلمة مرور مؤقتة جديدة وإلغاء الكلمة الحالية لهذا المستخدم.")}</p>
+              {resetErr ? <p className="rounded-xl border border-destructive/25 bg-destructive/5 p-2.5 text-center text-xs text-destructive">{resetErr}</p> : null}
+              <Button className="h-11 w-full rounded-xl" disabled={resetting} onClick={() => void doReset()}>
+                {resetting ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : null}{tr("تأكيد")}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <UserDialog
         target={editing}
@@ -130,7 +176,7 @@ function UserDialog({ target, branches, selfId, onClose, onSaved }: { target: Ro
     if (target === "new") {
       setEmail(""); setPassword(""); setFullName(""); setRole("viewer"); setBranchId(""); setIsActive(true);
     } else {
-      setRole(target.role); setBranchId(target.branchId ?? ""); setIsActive(target.isActive);
+      setFullName(target.fullName); setRole(target.role); setBranchId(target.branchId ?? ""); setIsActive(target.isActive);
     }
   }, [target]);
 
@@ -143,7 +189,7 @@ function UserDialog({ target, branches, selfId, onClose, onSaved }: { target: Ro
     try {
       const res = isNew
         ? await create({ data: { email, password, fullName: fullName || undefined, role, branchId: branchId || null } })
-        : await update({ data: { userId: (target as Row).id, role, branchId: branchId || null, isActive } });
+        : await update({ data: { userId: (target as Row).id, role, branchId: branchId || null, isActive, fullName } });
       if (!res.ok) setError(tr(ERRORS[res.error] ?? "تعذر حفظ التغييرات"));
       else onSaved();
     } catch {
@@ -168,7 +214,11 @@ function UserDialog({ target, branches, selfId, onClose, onSaved }: { target: Ro
               <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={tr("الاسم (اختياري)")} className="h-11 rounded-xl" />
               <Input dir="ltr" type="text" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={tr("كلمة مرور مؤقتة")} className="h-11 rounded-xl" />
             </>
-          ) : null}
+          ) : (
+            <label className="block text-xs text-muted-foreground">{tr("الاسم المعروض")}
+              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={100} className="mt-1 h-11 rounded-xl" />
+            </label>
+          )}
           <label className="block text-xs text-muted-foreground">{tr("الدور")}
             <select disabled={isSelf} value={role} onChange={(e) => setRole(e.target.value as AppRole)} className={cn(selectCls, "mt-1")}>
               {(["admin", "operator", "viewer"] as const).map((r) => <option key={r} value={r}>{ROLE_LABELS[r]}</option>)}
