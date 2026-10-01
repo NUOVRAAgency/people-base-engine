@@ -452,6 +452,7 @@ export type Database = {
           email: string
           full_name: string | null
           id: string
+          is_active: boolean
         }
         Insert: {
           avatar_path?: string | null
@@ -460,6 +461,7 @@ export type Database = {
           email: string
           full_name?: string | null
           id: string
+          is_active?: boolean
         }
         Update: {
           avatar_path?: string | null
@@ -468,6 +470,7 @@ export type Database = {
           email?: string
           full_name?: string | null
           id?: string
+          is_active?: boolean
         }
         Relationships: [
           {
