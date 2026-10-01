@@ -435,8 +435,8 @@ function DashboardPage() {
                   tick={{ fontSize: 10, fill: "#9aa4b4" }}
                 />
                 <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid rgba(0,0,0,0.06)", fontSize: 12 }} />
-                <Line type="monotone" dataKey={tr("حضور")} stroke="#1f6bff" strokeWidth={2.5} dot={false} />
-                <Line type="monotone" dataKey={tr("إجازات")} stroke="#9dc0ff" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey="حضور" name={tr("حضور")} stroke="#1f6bff" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey="إجازات" name={tr("إجازات")} stroke="#9dc0ff" strokeWidth={2.5} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>

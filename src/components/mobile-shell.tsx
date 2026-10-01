@@ -155,7 +155,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label={trf("التنبيهات{0}", notifications.length ? `، ${notifications.length} جديدة` : "")}
+                aria-label={trf("التنبيهات{0}", notifications.length ? trf("، {0} جديدة", notifications.length) : "")}
                 className="relative text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
               >
                 <Bell className="h-5 w-5" aria-hidden />
