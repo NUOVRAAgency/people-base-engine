@@ -69,7 +69,7 @@ export function buildDocumentHtml(payload: ExportPayload, forWord = false) {
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 <style>
 @page{size:A4;margin:14mm}
-body{font-family:'Cairo','Droid Arabic Kufi','Segoe UI',Tahoma,Arial,sans-serif;direction:${dir};text-align:${align};color:#111;margin:0}
+body{-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:'Cairo','Droid Arabic Kufi','Segoe UI',Tahoma,Arial,sans-serif;direction:${dir};text-align:${align};color:#111;margin:0}
 .head{border-bottom:3px solid #1E52E6;padding-bottom:8px;margin-bottom:14px}
 .head h1{margin:0;font-size:20px;color:#1E52E6}.head p{margin:2px 0 0;font-size:12px;color:#555}
 h2{font-size:15px;margin:16px 0 6px}
