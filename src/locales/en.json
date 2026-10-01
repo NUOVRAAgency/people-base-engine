@@ -290,6 +290,7 @@
   "اليوم": "Today",
   "اليوم التالي": "Next Day",
   "اليوم السابق": "Previous Day",
+  "اهلا بك. اسالني عن الحضور او الاجازات او الموظفين خلال اخر 12 شهرا وسالخص لك الصورة.": "Welcome. Ask me about attendance, leave or employees over the last 12 months and I'll summarize it.",
   "اهلا بك. اسالني عن رواتب هذا الشهر او الحضور او الاجازات وسالخص لك الصورة كاملة.": "Welcome. Ask me about this month's payroll, attendance, or leaves for a full summary.",
   "ايام الاجازات المعتمدة: {0}, طلبات معلقة: {1}": "Approved Leaves: {0}, Pending Requests: {1}",
   "ايام التاخير: {0}, دقائق التاخير: {1}, ايام الغياب: {2}": "Late Days: {0}, Late Minutes: {1}, Absent Days: {2}",
