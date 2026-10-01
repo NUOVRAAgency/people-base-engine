@@ -1,5 +1,5 @@
 import { loadCurrency } from "@/lib/currency";
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/mobile-shell";
@@ -11,6 +11,8 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthenticatedLayout() {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [mustChange, setMustChange] = useState(false);
+  const pathname = useLocation({ select: (l) => l.pathname });
 
   useEffect(() => {
     let isMounted = true;
@@ -24,6 +26,13 @@ function AuthenticatedLayout() {
         navigate({ to: "/auth", replace: true });
         return;
       }
+      if (navigator.onLine) {
+        const { data: u } = await supabase.auth.getUser();
+        const { data: profile } = u.user
+          ? await supabase.from("users").select("must_change_password").eq("id", u.user.id).maybeSingle()
+          : { data: null };
+        if (isMounted) setMustChange(!!profile?.must_change_password);
+      }
       await loadCurrency().catch(() => {});
       if (!isMounted) return;
       setIsAuthenticated(true);
@@ -34,7 +43,12 @@ function AuthenticatedLayout() {
     };
   }, [navigate]);
 
-  if (!isAuthenticated) {
+  // Forced first-login password change: no section is reachable until it is done.
+  useEffect(() => {
+    if (isAuthenticated && mustChange && pathname !== "/account") navigate({ to: "/account", replace: true });
+  }, [isAuthenticated, mustChange, pathname, navigate]);
+
+  if (!isAuthenticated || (mustChange && pathname !== "/account")) {
     return <div className="min-h-screen bg-background" aria-busy="true" />;
   }
 
