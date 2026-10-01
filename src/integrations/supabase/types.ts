@@ -65,31 +65,43 @@ export type Database = {
       app_settings: {
         Row: {
           company_name: string | null
+          currency: string
           grace_minutes: number
           id: string
+          late_rule_fraction: number
+          late_rule_minutes: number
           logo_path: string | null
           updated_at: string
           updated_by: string | null
+          weekend_days: number[]
           work_end: string
           work_start: string
         }
         Insert: {
           company_name?: string | null
+          currency?: string
           grace_minutes?: number
           id?: string
+          late_rule_fraction?: number
+          late_rule_minutes?: number
           logo_path?: string | null
           updated_at?: string
           updated_by?: string | null
+          weekend_days?: number[]
           work_end?: string
           work_start?: string
         }
         Update: {
           company_name?: string | null
+          currency?: string
           grace_minutes?: number
           id?: string
+          late_rule_fraction?: number
+          late_rule_minutes?: number
           logo_path?: string | null
           updated_at?: string
           updated_by?: string | null
+          weekend_days?: number[]
           work_end?: string
           work_start?: string
         }
@@ -150,30 +162,44 @@ export type Database = {
       }
       branches: {
         Row: {
+          address: string | null
           created_at: string
           id: string
           location: string | null
+          manager_employee_id: string | null
           name: string
           status: string
           updated_at: string
         }
         Insert: {
+          address?: string | null
           created_at?: string
           id?: string
           location?: string | null
+          manager_employee_id?: string | null
           name: string
           status?: string
           updated_at?: string
         }
         Update: {
+          address?: string | null
           created_at?: string
           id?: string
           location?: string | null
+          manager_employee_id?: string | null
           name?: string
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "branches_manager_employee_id_fkey"
+            columns: ["manager_employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employee_loans: {
         Row: {
