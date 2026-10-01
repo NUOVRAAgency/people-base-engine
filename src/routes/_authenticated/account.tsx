@@ -74,7 +74,7 @@ function AccountPage() {
     try {
       const res = await changePw({ data: { currentPassword: current, newPassword: next1 } });
       if (!res.ok) {
-        const map: Record<string, string> = { wrong_current: "كلمة المرور الحالية غير صحيحة", same_password: "اختر كلمة مرور مختلفة عن الحالية" };
+        const map: Record<string, string> = { wrong_current: "كلمة المرور الحالية غير صحيحة", same_password: "اختر كلمة مرور مختلفة عن الحالية", weak_password: "كلمة المرور ضعيفة ومعروفة، اختر كلمة أقوى" };
         setPwMsg({ ok: false, text: tr(map[res.error] ?? "تعذر تغيير كلمة المرور") });
       } else {
         setCurrent(""); setNext1(""); setNext2("");

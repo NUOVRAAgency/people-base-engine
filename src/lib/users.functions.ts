@@ -73,7 +73,7 @@ export const createUser = createServerFn({ method: "POST" })
       email_confirm: true,
       user_metadata: data.fullName ? { full_name: data.fullName } : {},
     });
-    if (error || !created.user) { console.error("createUser", error?.message); return { ok: false as const, error: "create_failed" }; }
+    if (error || !created.user) return { ok: false as const, error: /weak/i.test(error?.message ?? "") ? "weak_password" : "create_failed" };
     const id = created.user.id;
     await admin.from("users").upsert({ id, email: data.email, full_name: data.fullName || null, branch_id: data.role === "admin" ? null : data.branchId, must_change_password: true });
     await admin.from("user_roles").delete().eq("user_id", id);
@@ -160,7 +160,7 @@ export const changeMyPassword = createServerFn({ method: "POST" })
     if (data.currentPassword === data.newPassword) return { ok: false as const, error: "same_password" };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.admin.updateUserById(context.userId, { password: data.newPassword });
-    if (error) return { ok: false as const, error: "change_failed" };
+    if (error) return { ok: false as const, error: /weak/i.test(error.message) ? "weak_password" : "change_failed" };
     await supabaseAdmin.from("users").update({ must_change_password: false }).eq("id", context.userId);
     return { ok: true as const };
   });
