@@ -75,7 +75,7 @@ export const createUser = createServerFn({ method: "POST" })
     });
     if (error || !created.user) return { ok: false as const, error: "create_failed" };
     const id = created.user.id;
-    await admin.from("users").upsert({ id, email: data.email, full_name: data.fullName || null, branch_id: data.role === "admin" ? null : data.branchId });
+    await admin.from("users").upsert({ id, email: data.email, full_name: data.fullName || null, branch_id: data.role === "admin" ? null : data.branchId, must_change_password: true });
     await admin.from("user_roles").delete().eq("user_id", id);
     await admin.from("user_roles").insert({ user_id: id, role: data.role });
     return { ok: true as const };
@@ -86,6 +86,7 @@ const updateInput = z.object({
   role: roleEnum,
   branchId: z.string().uuid().nullable(),
   isActive: z.boolean(),
+  fullName: z.string().trim().max(100).optional(),
 });
 
 export const updateUser = createServerFn({ method: "POST" })
@@ -113,8 +114,53 @@ export const updateUser = createServerFn({ method: "POST" })
     }
     await admin
       .from("users")
-      .update({ branch_id: data.role === "admin" ? null : data.branchId, is_active: data.isActive })
+      .update({ branch_id: data.role === "admin" ? null : data.branchId, is_active: data.isActive, ...(data.fullName !== undefined ? { full_name: data.fullName || null } : {}) })
       .eq("id", data.userId);
     await admin.auth.admin.updateUserById(data.userId, { ban_duration: data.isActive ? "none" : "876000h" });
+    return { ok: true as const };
+  });
+
+function tempPassword() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  const bytes = crypto.getRandomValues(new Uint8Array(12));
+  return Array.from(bytes, (b) => chars[b % chars.length]).join("");
+}
+
+export const resetUserPassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context as Ctx);
+    if (data.userId === context.userId) return { ok: false as const, error: "self_reset" };
+    const password = tempPassword();
+    const { error } = await admin.auth.admin.updateUserById(data.userId, { password });
+    if (error) return { ok: false as const, error: "reset_failed" };
+    await admin.from("users").update({ must_change_password: true }).eq("id", data.userId);
+    return { ok: true as const, password };
+  });
+
+export const changeMyPassword = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ currentPassword: z.string().min(1).max(72), newPassword: z.string().min(8).max(72) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: me } = await context.supabase.auth.getUser();
+    const email = me?.user?.email;
+    if (!email) return { ok: false as const, error: "no_user" };
+    // Verify the current password with a real sign-in on an isolated, non-persisted client.
+    const { createClient } = await import("@supabase/supabase-js");
+    const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
+    const probe = createClient(process.env["SUPABASE_URL"]!, key, {
+      auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
+    });
+    const { data: signIn, error: signErr } = await probe.auth.signInWithPassword({ email, password: data.currentPassword });
+    if (signErr || signIn.user?.id !== context.userId) return { ok: false as const, error: "wrong_current" };
+    await probe.auth.signOut().catch(() => {});
+    if (data.currentPassword === data.newPassword) return { ok: false as const, error: "same_password" };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(context.userId, { password: data.newPassword });
+    if (error) return { ok: false as const, error: "change_failed" };
+    await supabaseAdmin.from("users").update({ must_change_password: false }).eq("id", context.userId);
     return { ok: true as const };
   });
