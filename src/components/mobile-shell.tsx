@@ -3,6 +3,7 @@ import { getLocale } from "@/lib/i18n";
 import { WifiOff } from "lucide-react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
+  ArrowLeft,
   BarChart3,
   Bell,
   CalendarCheck,
@@ -148,7 +149,21 @@ export function MobileShell({ children }: { children: ReactNode }) {
 
 
 
-
+          {pathname !== "/dashboard" ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={getLocale().startsWith("en") ? "Back" : "رجوع"}
+              className="text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
+              onClick={() => {
+                if (window.history.length > 1) window.history.back();
+                else navigate({ to: "/dashboard" });
+              }}
+            >
+              <ArrowLeft className="h-5 w-5 rtl:rotate-180" aria-hidden />
+            </Button>
+          ) : (
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -195,6 +210,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
               </div>
             </PopoverContent>
           </Popover>
+          )}
         </div>
         </div>
       </header>
