@@ -1,6 +1,5 @@
 import { currencyLabel, withCurrency } from "@/lib/currency";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import {
   Building2,
   CalendarDays,
@@ -23,7 +22,6 @@ import { Button } from "@/components/ui/button";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
-import { generateSmartReport } from "@/lib/ai-reports.functions";
 import { cn } from "@/lib/utils";
 
 import { tr, trf, getLocale } from "@/lib/i18n";

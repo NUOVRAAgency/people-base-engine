@@ -13,7 +13,7 @@ export const Route = createFileRoute("/api/smart-report")({
         const token = auth.replace(/^Bearer\s+/i, "");
         if (!token) return new Response("Unauthorized", { status: 401 });
 
-        const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+        const supabase = createClient(process.env["SUPABASE_URL"]!, process.env["SUPABASE_PUBLISHABLE_KEY"]!, {
           global: { headers: { Authorization: `Bearer ${token}` } },
           auth: { persistSession: false, autoRefreshToken: false },
         });
@@ -37,7 +37,7 @@ export const Route = createFileRoute("/api/smart-report")({
         const prompt = typeof body.prompt === "string" ? body.prompt.slice(0, 8000) : "";
         if (!month || !prompt) return new Response("Bad request", { status: 400 });
 
-        const apiKey = process.env.GEMINI_API_KEY;
+        const apiKey = process.env["GEMINI_API_KEY"];
         if (!apiKey) return new Response("Not configured", { status: 503 });
 
         let upstream: Response | null = null;
