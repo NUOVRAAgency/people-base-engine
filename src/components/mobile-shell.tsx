@@ -36,7 +36,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { to: "/dashboard", label: tr("الرئيسية"), icon: Home },
   { to: "/employees", label: tr("الموظفون"), icon: Users },
-  { to: "/attendance", label: tr("الحضور"), icon: CalendarCheck },
+  { to: "/attendance", label: tr("الحضور والانصراف"), icon: CalendarCheck },
   { to: "/leaves", label: tr("الإجازات"), icon: Plane },
   { to: "/payroll", label: tr("الرواتب"), icon: Wallet, adminOnly: true },
   { to: "/reports", label: tr("التقارير"), icon: BarChart3 },
@@ -46,7 +46,7 @@ const NAV_ITEMS: NavItem[] = [
 const TITLES: Record<string, string> = {
   "/dashboard": tr("الرئيسية"),
   "/employees": tr("الموظفون"),
-  "/attendance": tr("الحضور"),
+  "/attendance": tr("الحضور والانصراف"),
   "/leaves": tr("الإجازات"),
   "/payroll": tr("الرواتب"),
   "/reports": tr("التقارير"),

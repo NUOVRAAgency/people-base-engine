@@ -29,7 +29,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-import { tr, trf, getLocale } from "@/lib/i18n";
+import { tr, trf, getLocale, getLanguage } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
@@ -228,7 +228,7 @@ function DashboardPage() {
   const approvedNet = payroll
     .filter((row) => row.status === "approved")
     .reduce((sum, row) => sum + Number(row.net_salary ?? 0), 0);
-  const payrollStatus = payroll[0]?.status ? (PAYROLL_STATUS[payroll[0].status] ?? tr("مسودة")) : tr("لم يولد بعد");
+  const payrollStatus = payroll[0]?.status ? (PAYROLL_STATUS[payroll[0].status] ?? tr("مسودة")) : (getLanguage() === "en" ? "Payroll Not Generated" : `مسيرات رواتب ${new Date().toLocaleDateString("ar-u-nu-latn", { month: "long", year: "numeric" })}`);
   const disbursedRatio = totalNet > 0 ? Math.round((approvedNet / totalNet) * 100) : 0;
 
   const decideLeave = useCallback(
@@ -300,7 +300,7 @@ function DashboardPage() {
       <div className="grid gap-3 lg:grid-cols-2">
         <Panel title={tr("توزيع الموظفين حسب الأقسام")} action={tr("الاقسام")}>
           {donutData.length === 0 ? (
-            <Empty text={tr("لا توجد بيانات موظفين أو أقسام بعد")} />
+            <Empty text={tr("لا توجد بيانات موظفين مسجلة حالياً")} />
           ) : (
           <>
 
