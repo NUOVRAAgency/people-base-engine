@@ -327,14 +327,8 @@ function ReportsPage() {
           <p className="text-sm leading-[1.7] text-muted-foreground">{tr("ملخص مالي وحضور واجازات مع تحليل ذكي")}</p>
         </div>
         <div className="flex w-full min-w-0 items-center gap-2 md:w-auto">
-          <div className="flex min-w-0 flex-1 items-center gap-1 rounded-full border border-border/60 bg-card/75 p-1 shadow-glass backdrop-blur-sm md:flex-none">
-            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر السابق")} onClick={() => shiftMonth(-1)}>
-              <ChevronRight className="h-4 w-4" aria-hidden />
-            </Button>
-            <span className="min-w-0 flex-1 truncate text-center text-sm font-medium text-foreground md:min-w-[120px]">{monthLabel(month)}</span>
-            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر التالي")} onClick={() => shiftMonth(1)}>
-              <ChevronLeft className="h-4 w-4" aria-hidden />
-            </Button>
+          <div className="flex h-10 min-w-0 flex-1 items-center justify-center rounded-full border border-border/60 bg-card/75 px-4 shadow-glass backdrop-blur-sm md:flex-none">
+            <span className="min-w-0 truncate text-center text-sm font-medium text-foreground md:min-w-[120px]">{monthLabel(month)}</span>
           </div>
           <Button
             type="button"
@@ -366,18 +360,8 @@ function ReportsPage() {
 
       {archiveOpen ? (
         <section className="mt-5 min-w-0 rounded-2xl border border-border/40 bg-card/75 p-4 shadow-glass backdrop-blur-sm">
-          <div className="mb-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <div className="relative mb-2 flex items-center justify-center">
             <h3 className="text-sm font-medium text-foreground">{tr("سجل السنوات والأشهر")}</h3>
-            <Button
-              type="button"
-              variant="ghost"
-              className="h-9 rounded-lg px-3 text-base font-medium"
-              onClick={() => setYearPickerOpen((value) => !value)}
-              aria-expanded={yearPickerOpen}
-            >
-              {String(archiveYear)}
-              <ChevronLeft className={cn("size-4 transition-transform", yearPickerOpen && "rotate-90")} aria-hidden />
-            </Button>
             <Button
               type="button"
               variant="ghost"
@@ -386,11 +370,35 @@ function ReportsPage() {
                 setArchiveOpen(false);
                 setYearPickerOpen(false);
               }}
-              className="ms-auto size-9 rounded-full text-muted-foreground"
+              className="absolute end-0 size-9 rounded-full text-muted-foreground"
               aria-label={tr("إغلاق")}
             >
               <X className="size-4" aria-hidden />
             </Button>
+          </div>
+          <div className="mx-auto flex w-full max-w-xs flex-col items-center gap-2 py-2">
+            <div className="flex w-full items-center justify-between gap-2 rounded-full border border-border/60 bg-background/60 p-1">
+              <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("السنة السابقة")} disabled={archiveYear <= startYear} onClick={() => setArchiveYear((y) => y - 1)}>
+                <ChevronRight className="h-4 w-4 ltr:rotate-180" aria-hidden />
+              </Button>
+              <button type="button" className="flex-1 text-center text-base font-bold text-foreground" onClick={() => setYearPickerOpen((v) => !v)} aria-expanded={yearPickerOpen}>
+                {String(archiveYear)}
+              </button>
+              <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("السنة التالية")} disabled={archiveYear >= new Date().getFullYear()} onClick={() => setArchiveYear((y) => y + 1)}>
+                <ChevronLeft className="h-4 w-4 ltr:rotate-180" aria-hidden />
+              </Button>
+            </div>
+            <div className="flex w-full items-center justify-between gap-2 rounded-full border border-border/60 bg-background/60 p-1">
+              <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر السابق")} onClick={() => { shiftMonth(-1); }}>
+                <ChevronRight className="h-4 w-4 ltr:rotate-180" aria-hidden />
+              </Button>
+              <span className="flex-1 text-center text-sm font-medium text-foreground">
+                {new Intl.DateTimeFormat(getLocale(), { month: "long" }).format(new Date(`${month}T00:00:00`))}
+              </span>
+              <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر التالي")} onClick={() => { shiftMonth(1); }}>
+                <ChevronLeft className="h-4 w-4 ltr:rotate-180" aria-hidden />
+              </Button>
+            </div>
           </div>
           {yearPickerOpen ? (
             <div className="mb-3 grid grid-cols-3 gap-2 rounded-xl border border-border/40 bg-background/60 p-2 sm:grid-cols-4">

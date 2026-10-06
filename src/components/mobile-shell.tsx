@@ -78,21 +78,21 @@ export function MobileShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-background font-kufi">
-      <aside className="fixed inset-y-0 start-0 z-40 hidden w-60 flex-col text-primary-foreground shadow-nav [background:var(--header-gradient)] md:flex">
-        <div className="flex items-center gap-2.5 border-b border-white/15 px-4 py-5">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white text-primary">
+      <aside className="fixed inset-y-0 start-0 z-40 hidden w-60 flex-col border-e border-border bg-card text-foreground shadow-nav md:flex">
+        <div className="flex items-center gap-2.5 border-b border-border px-4 py-5">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Users className="h-5 w-5" aria-hidden />
           </span>
-          <span dir="auto" className="min-w-0 truncate text-sm font-bold">{companyName || tr("نظام الموارد البشرية")}</span>
+          <span dir="auto" className="min-w-0 truncate text-sm font-bold text-foreground">{companyName || tr("نظام الموارد البشرية")}</span>
         </div>
         <nav className="flex-1 overflow-y-auto p-3">
-          <ul className="space-y-1">
+          <ul className="space-y-2.5">
             {visibleItems.map((item) => {
               const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
               const Icon = item.icon;
               return (
                 <li key={item.to}>
-                  <Link to={item.to} className={cn("flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-colors", active ? "bg-white font-bold text-primary" : "text-white/85 hover:bg-white/15")}>
+                  <Link to={item.to} className={cn("flex items-center gap-3 rounded-xl bg-primary px-3 py-3 text-sm text-primary-foreground transition-all hover:brightness-110", active ? "font-bold shadow-card ring-2 ring-primary/30 ring-offset-2 ring-offset-card" : "opacity-90")}>
                     <Icon className="h-5 w-5 shrink-0" aria-hidden />
                     <span>{item.label}</span>
                   </Link>
@@ -101,12 +101,12 @@ export function MobileShell({ children }: { children: ReactNode }) {
             })}
           </ul>
         </nav>
-        <div className="border-t border-white/15 p-3">
-          <p className="px-3 pb-2 text-xs text-white/75">{role ? ROLE_LABELS[role] : ""}</p>
+        <div className="border-t border-border p-3">
+          <p className="px-3 pb-2 text-xs text-muted-foreground">{role ? ROLE_LABELS[role] : ""}</p>
           <button
             type="button"
             onClick={async () => { await signOutAndClear(); navigate({ to: "/auth", replace: true }); }}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-white/90 transition-colors hover:bg-white/15"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
           >
             <LogOut className="h-5 w-5" aria-hidden />
             {tr("تسجيل الخروج")}
