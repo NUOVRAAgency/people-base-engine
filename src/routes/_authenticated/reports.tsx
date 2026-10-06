@@ -324,14 +324,11 @@ function ReportsPage() {
           <h2 className="hidden text-xl font-medium leading-[1.6] text-foreground md:block md:text-2xl">{tr("التقارير")}</h2>
           <p className="text-sm leading-[1.7] text-muted-foreground">{tr("ملخص مالي وحضور واجازات مع تحليل ذكي")}</p>
         </div>
-        <div className="flex w-full min-w-0 items-center gap-2 md:w-auto">
-          <div className="flex h-10 min-w-0 flex-1 items-center justify-center rounded-full border border-border/60 bg-card/75 px-4 shadow-glass backdrop-blur-sm md:flex-none">
-            <span className="min-w-0 truncate text-center text-sm font-medium text-foreground md:min-w-[120px]">{monthLabel(month)}</span>
-          </div>
+        <div className="grid w-full min-w-0 touch-pan-y grid-cols-3 items-center gap-2 overflow-hidden select-none md:flex md:w-auto">
           <Button
             type="button"
             variant={archiveOpen ? "default" : "outline"}
-            className="h-10 rounded-xl px-4 text-sm font-medium"
+            className="h-10 min-w-0 gap-1 rounded-xl px-2 text-xs font-medium sm:text-sm md:px-4"
             onClick={() => {
               setArchiveYear(Number(month.slice(0, 4)));
               setYearPickerOpen(false);
@@ -344,13 +341,13 @@ function ReportsPage() {
           <Button
             type="button"
             variant={yearlyOpen ? "default" : "outline"}
-            className="h-10 rounded-xl px-4 text-sm font-medium"
+            className="h-10 min-w-0 rounded-xl px-2 text-xs font-medium sm:text-sm md:px-4"
             aria-pressed={yearlyOpen}
             onClick={() => setYearlyOpen((value) => !value)}
           >
             {tr("العرض السنوي")}
           </Button>
-          <ExportMenu build={exportPayload} label={tr("تصدير التقرير")} />
+          <ExportMenu build={exportPayload} label={tr("تصدير التقرير")} className="w-full min-w-0 gap-1 px-2 text-xs sm:text-sm md:w-auto md:px-3" />
         </div>
       </header>
 

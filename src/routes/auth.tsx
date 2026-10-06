@@ -74,8 +74,8 @@ function AuthPage() {
             <label className="block space-y-1.5">
               <span className="block text-xs font-semibold text-primary">{tr("كلمة المرور")}</span>
               <span className="relative block">
-                <Input type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" dir="ltr" className="h-11 rounded-xl border-primary/25 bg-primary/5 pe-12 text-start text-sm text-foreground placeholder:text-primary/45 focus-visible:border-primary focus-visible:ring-primary/20 md:h-10" placeholder="••••••••" />
-                <Button type="button" variant="ghost" size="icon" className="absolute end-1 top-1 size-9 rounded-lg text-primary hover:bg-primary/10 hover:text-primary md:top-0.5" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? tr("إخفاء كلمة المرور") : tr("إظهار كلمة المرور")}>
+                <Input type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" dir="ltr" className="h-11 rounded-xl border-primary/25 bg-primary/5 pr-16 pl-4 text-left text-sm text-foreground placeholder:text-primary/45 focus-visible:border-primary focus-visible:ring-primary/20 md:h-10" placeholder="••••••••" />
+                <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1 size-9 rounded-lg text-primary hover:bg-primary/10 hover:text-primary md:top-0.5" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? tr("إخفاء كلمة المرور") : tr("إظهار كلمة المرور")}>
                   {showPassword ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
                 </Button>
               </span>
