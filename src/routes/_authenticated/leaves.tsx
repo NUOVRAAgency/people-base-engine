@@ -18,7 +18,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 import { tr, trf, getLocale } from "@/lib/i18n";
-import { ExportMenu } from "@/components/export-menu";
 export const Route = createFileRoute("/_authenticated/leaves")({
   head: () => ({
     meta: [
@@ -137,20 +136,6 @@ function LeavesPage() {
           <h2 id="leaves-heading" className="truncate text-xl font-semibold leading-relaxed">{tr("إجازات الفريق")}</h2>
         </div>
         <div className="flex items-center gap-2">
-        <ExportMenu
-          build={() => ({
-            fileName: tr("الإجازات"),
-            tables: [{
-              title: tr("طلبات الإجازات"),
-              columns: [tr("الموظف"), tr("نوع الإجازة"), tr("من"), tr("إلى"), tr("الحالة")],
-              rows: requests.map((r) => {
-                const emp = Array.isArray(r.employees) ? r.employees[0] : r.employees;
-                const st = r.status === "approved" ? STATUS.approved : r.status === "rejected" ? STATUS.rejected : STATUS.pending;
-                return [emp?.full_name ?? "", r.leave_type === "other" && r.leave_type_other ? r.leave_type_other : (LEAVE_TYPES[r.leave_type] ?? r.leave_type), r.start_date, r.end_date, st.label];
-              }),
-            }],
-          })}
-        />
         {canCreate ? (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>

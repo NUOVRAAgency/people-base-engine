@@ -48,7 +48,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 import { tr, trf, getLocale } from "@/lib/i18n";
-import { ExportMenu } from "@/components/export-menu";
 export const Route = createFileRoute("/_authenticated/employees")({
   head: () => ({
     meta: [
@@ -464,16 +463,6 @@ function EmployeesPage() {
           <h2 id="employees-heading" className="truncate text-xl font-semibold leading-relaxed">{tr("إدارة الموظفين")}</h2>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-        <ExportMenu
-          build={() => ({
-            fileName: tr("الموظفون"),
-            tables: [{
-              title: tr("الموظفون"),
-              columns: [tr("رقم الموظف"), tr("الاسم"), tr("القسم"), tr("المسمى الوظيفي"), tr("تاريخ التعيين"), tr("نوع التوظيف"), tr("الحالة"), tr("الجوال")],
-              rows: filteredEmployees.map((e) => [e.employee_number, e.full_name, e.department, e.position, e.hire_date, EMPLOYMENT_LABELS[e.employment_type] ?? e.employment_type, e.status === "active" ? tr("نشط") : tr("غير نشط"), e.phone]),
-            }],
-          })}
-        />
         {!roleLoading && canWrite ? (
           <Button type="button" onClick={openCreate} className="h-11 shrink-0 rounded-lg bg-primary px-3 text-primary-foreground shadow-nav hover:bg-primary/90 sm:px-4">
             <Plus aria-hidden />
