@@ -700,30 +700,44 @@ function YearlyView({ year, isAdmin }: { year: number; isAdmin: boolean }) {
 }
 
 function InsightsTab({ month, summary }: { month: string; summary: string }) {
-  const runReport = useServerFn(generateSmartReport);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [points, setPoints] = useState<string[]>([]);
 
+  function toPoints(text: string) {
+    const parsed = text
+      .split("\n")
+      .map((line) => line.replace(/^[\s*\-•\d.]+/, "").trim())
+      .filter((line) => line.length > 0);
+    return parsed.length ? parsed : [text.trim()].filter(Boolean);
+  }
+
   async function ask(prompt: string) {
     setBusy(true);
     setError("");
+    setPoints([]);
     try {
-      const result = await runReport({ data: { month, prompt } });
-      if (!result.ready) {
-        setError(result.message);
-        return;
-      }
-      if ("error" in result && result.error) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      const res = await fetch("/api/smart-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token ?? ""}` },
+        body: JSON.stringify({ month, prompt }),
+      });
+      if (!res.ok || !res.body) {
         setError(tr("تعذر توليد التحليل حاليا. حاول مرة اخرى."));
         return;
       }
-      const text = ("content" in result ? result.content : "") ?? "";
-      const parsed = text
-        .split("\n")
-        .map((line) => line.replace(/^[\s*\-•\d.]+/, "").trim())
-        .filter((line) => line.length > 2);
-      setPoints(parsed.length ? parsed : [text.trim()].filter(Boolean));
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let text = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        text += decoder.decode(value, { stream: true });
+        setPoints(toPoints(text));
+      }
+      if (!text.trim()) setError(tr("تعذر توليد التحليل حاليا. حاول مرة اخرى."));
     } catch {
       setError(tr("تعذر الاتصال بخدمة التحليل."));
     } finally {

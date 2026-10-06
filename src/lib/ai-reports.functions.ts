@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 // النموذج المعتمد في استدعاءات Gemini (يُحدّث من مكان واحد فقط).
-const GEMINI_MODELS = ["gemini-3.8-flash", "gemini-3.7-flash"];
+const GEMINI_MODELS = ["gemini-2.5-flash"];
 
 async function callGemini(apiKey: string, body: unknown): Promise<Response> {
   let last: Response | null = null;
