@@ -49,9 +49,9 @@ function AuthPage() {
   return (
     <main className="relative grid min-h-dvh place-items-center overflow-hidden bg-page px-4 py-8 sm:px-6">
       <div className="pointer-events-none absolute inset-0 bg-login-pattern opacity-70" aria-hidden />
-      <div className="relative w-full max-w-[360px] overflow-hidden rounded-2xl border border-primary/15 bg-card shadow-login sm:max-w-[390px] md:max-w-[820px]">
+      <div className="relative w-full max-w-[360px] overflow-hidden rounded-2xl border border-primary/15 bg-card shadow-login sm:max-w-[390px] md:max-w-[760px]">
         <div className="h-2 [background:var(--header-gradient)]" aria-hidden />
-        <div className="p-6 sm:p-8 md:grid md:grid-cols-2 md:items-center md:gap-10 md:px-10 md:py-7">
+        <div className="p-6 sm:p-8 md:grid md:grid-cols-2 md:items-center md:gap-10 md:self-center md:px-10 md:py-7">
           <header className="mb-6 text-center md:mb-0 md:border-e md:border-primary/15 md:pe-10">
             <span className="mx-auto mb-3 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <UsersRound className="size-6" aria-hidden />
@@ -74,12 +74,18 @@ function AuthPage() {
             <label className="block space-y-1.5">
               <span className="block text-xs font-semibold text-primary">{tr("كلمة المرور")}</span>
               <span className="relative block">
-                <Input type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" dir="ltr" className="h-11 rounded-xl border-primary/25 bg-primary/5 pe-11 text-start text-sm text-foreground placeholder:text-primary/45 focus-visible:border-primary focus-visible:ring-primary/20 md:h-10" placeholder="••••••••" />
+                <Input type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" dir="ltr" className="h-11 rounded-xl border-primary/25 bg-primary/5 pe-12 text-start text-sm text-foreground placeholder:text-primary/45 focus-visible:border-primary focus-visible:ring-primary/20 md:h-10" placeholder="••••••••" />
                 <Button type="button" variant="ghost" size="icon" className="absolute end-1 top-1 size-9 rounded-lg text-primary hover:bg-primary/10 hover:text-primary md:top-0.5" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? tr("إخفاء كلمة المرور") : tr("إظهار كلمة المرور")}>
                   {showPassword ? <EyeOff aria-hidden /> : <Eye aria-hidden />}
                 </Button>
               </span>
             </label>
+
+            <div className="flex justify-end">
+              <button type="button" className="text-xs font-semibold text-primary underline-offset-4 hover:underline" onClick={() => setMessage(tr("تواصل مع مدير النظام لإعادة تعيين كلمة المرور"))}>
+                {tr("نسيت كلمة المرور؟")}
+              </button>
+            </div>
 
             {message ? <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-center text-xs text-destructive">{message}</p> : null}
 
