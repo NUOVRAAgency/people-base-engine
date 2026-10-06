@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getLanguage } from "@/lib/i18n";
 
 export type CurrencyCode = "YER" | "SAR" | "USD";
-const AR_LABEL: Record<CurrencyCode, string> = { YER: "ر.ي", SAR: "ر.س", USD: "دولار" };
+const AR_LABEL: Record<CurrencyCode, string> = { YER: "ريال يمني", SAR: "ر.س", USD: "دولار" };
 const KEY = "hr-currency";
 
 let current: CurrencyCode = "YER";
