@@ -22,6 +22,7 @@ import { Route as AuthenticatedPayrollRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
+import { Route as ApiSmartReportRouteImport } from './routes/api/smart-report'
 import { Route as AuthenticatedSettingsSystemRouteImport } from './routes/_authenticated/settings.system'
 
 const IndexRoute = IndexRouteImport.update({
@@ -88,6 +89,11 @@ const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiSmartReportRoute = ApiSmartReportRouteImport.update({
+  id: '/api/smart-report',
+  path: '/api/smart-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedSettingsSystemRoute =
   AuthenticatedSettingsSystemRouteImport.update({
     id: '/system',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/users': typeof AuthenticatedUsersRoute
+  '/api/smart-report': typeof ApiSmartReportRoute
   '/settings/system': typeof AuthenticatedSettingsSystemRoute
 }
 export interface FileRoutesByTo {
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/users': typeof AuthenticatedUsersRoute
+  '/api/smart-report': typeof ApiSmartReportRoute
   '/settings/system': typeof AuthenticatedSettingsSystemRoute
 }
 export interface FileRoutesById {
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/api/smart-report': typeof ApiSmartReportRoute
   '/_authenticated/settings/system': typeof AuthenticatedSettingsSystemRoute
 }
 export interface FileRouteTypes {
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/users'
+    | '/api/smart-report'
     | '/settings/system'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/users'
+    | '/api/smart-report'
     | '/settings/system'
   id:
     | '__root__'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports'
     | '/_authenticated/settings'
     | '/_authenticated/users'
+    | '/api/smart-report'
     | '/_authenticated/settings/system'
   fileRoutesById: FileRoutesById
 }
@@ -195,6 +207,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiSmartReportRoute: typeof ApiSmartReportRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -290,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/smart-report': {
+      id: '/api/smart-report'
+      path: '/api/smart-report'
+      fullPath: '/api/smart-report'
+      preLoaderRoute: typeof ApiSmartReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/settings/system': {
       id: '/_authenticated/settings/system'
       path: '/system'
@@ -346,6 +366,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiSmartReportRoute: ApiSmartReportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,6 +1,5 @@
 import { currencyLabel, withCurrency } from "@/lib/currency";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import {
   Building2,
   CalendarDays,
@@ -23,7 +22,6 @@ import { Button } from "@/components/ui/button";
 
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
-import { generateSmartReport } from "@/lib/ai-reports.functions";
 import { cn } from "@/lib/utils";
 
 import { tr, trf, getLocale } from "@/lib/i18n";
@@ -327,14 +325,8 @@ function ReportsPage() {
           <p className="text-sm leading-[1.7] text-muted-foreground">{tr("ملخص مالي وحضور واجازات مع تحليل ذكي")}</p>
         </div>
         <div className="flex w-full min-w-0 items-center gap-2 md:w-auto">
-          <div className="flex min-w-0 flex-1 items-center gap-1 rounded-full border border-border/60 bg-card/75 p-1 shadow-glass backdrop-blur-sm md:flex-none">
-            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر السابق")} onClick={() => shiftMonth(-1)}>
-              <ChevronRight className="h-4 w-4" aria-hidden />
-            </Button>
-            <span className="min-w-0 flex-1 truncate text-center text-sm font-medium text-foreground md:min-w-[120px]">{monthLabel(month)}</span>
-            <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر التالي")} onClick={() => shiftMonth(1)}>
-              <ChevronLeft className="h-4 w-4" aria-hidden />
-            </Button>
+          <div className="flex h-10 min-w-0 flex-1 items-center justify-center rounded-full border border-border/60 bg-card/75 px-4 shadow-glass backdrop-blur-sm md:flex-none">
+            <span className="min-w-0 truncate text-center text-sm font-medium text-foreground md:min-w-[120px]">{monthLabel(month)}</span>
           </div>
           <Button
             type="button"
@@ -366,18 +358,8 @@ function ReportsPage() {
 
       {archiveOpen ? (
         <section className="mt-5 min-w-0 rounded-2xl border border-border/40 bg-card/75 p-4 shadow-glass backdrop-blur-sm">
-          <div className="mb-3 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          <div className="relative mb-2 flex items-center justify-center">
             <h3 className="text-sm font-medium text-foreground">{tr("سجل السنوات والأشهر")}</h3>
-            <Button
-              type="button"
-              variant="ghost"
-              className="h-9 rounded-lg px-3 text-base font-medium"
-              onClick={() => setYearPickerOpen((value) => !value)}
-              aria-expanded={yearPickerOpen}
-            >
-              {String(archiveYear)}
-              <ChevronLeft className={cn("size-4 transition-transform", yearPickerOpen && "rotate-90")} aria-hidden />
-            </Button>
             <Button
               type="button"
               variant="ghost"
@@ -386,11 +368,35 @@ function ReportsPage() {
                 setArchiveOpen(false);
                 setYearPickerOpen(false);
               }}
-              className="ms-auto size-9 rounded-full text-muted-foreground"
+              className="absolute end-0 size-9 rounded-full text-muted-foreground"
               aria-label={tr("إغلاق")}
             >
               <X className="size-4" aria-hidden />
             </Button>
+          </div>
+          <div className="mx-auto flex w-full max-w-xs flex-col items-center gap-2 py-2">
+            <div className="flex w-full items-center justify-between gap-2 rounded-full border border-border/60 bg-background/60 p-1">
+              <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("السنة السابقة")} disabled={archiveYear <= startYear} onClick={() => setArchiveYear((y) => y - 1)}>
+                <ChevronRight className="h-4 w-4 ltr:rotate-180" aria-hidden />
+              </Button>
+              <button type="button" className="flex-1 text-center text-base font-bold text-foreground" onClick={() => setYearPickerOpen((v) => !v)} aria-expanded={yearPickerOpen}>
+                {String(archiveYear)}
+              </button>
+              <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("السنة التالية")} disabled={archiveYear >= new Date().getFullYear()} onClick={() => setArchiveYear((y) => y + 1)}>
+                <ChevronLeft className="h-4 w-4 ltr:rotate-180" aria-hidden />
+              </Button>
+            </div>
+            <div className="flex w-full items-center justify-between gap-2 rounded-full border border-border/60 bg-background/60 p-1">
+              <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر السابق")} onClick={() => { shiftMonth(-1); }}>
+                <ChevronRight className="h-4 w-4 ltr:rotate-180" aria-hidden />
+              </Button>
+              <span className="flex-1 text-center text-sm font-medium text-foreground">
+                {new Intl.DateTimeFormat(getLocale(), { month: "long" }).format(new Date(`${month}T00:00:00`))}
+              </span>
+              <Button type="button" variant="ghost" size="icon" className="size-9 rounded-full" aria-label={tr("الشهر التالي")} onClick={() => { shiftMonth(1); }}>
+                <ChevronLeft className="h-4 w-4 ltr:rotate-180" aria-hidden />
+              </Button>
+            </div>
           </div>
           {yearPickerOpen ? (
             <div className="mb-3 grid grid-cols-3 gap-2 rounded-xl border border-border/40 bg-background/60 p-2 sm:grid-cols-4">
@@ -700,30 +706,44 @@ function YearlyView({ year, isAdmin }: { year: number; isAdmin: boolean }) {
 }
 
 function InsightsTab({ month, summary }: { month: string; summary: string }) {
-  const runReport = useServerFn(generateSmartReport);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [points, setPoints] = useState<string[]>([]);
 
+  function toPoints(text: string) {
+    const parsed = text
+      .split("\n")
+      .map((line) => line.replace(/^[\s*\-•\d.]+/, "").trim())
+      .filter((line) => line.length > 0);
+    return parsed.length ? parsed : [text.trim()].filter(Boolean);
+  }
+
   async function ask(prompt: string) {
     setBusy(true);
     setError("");
+    setPoints([]);
     try {
-      const result = await runReport({ data: { month, prompt } });
-      if (!result.ready) {
-        setError(result.message);
-        return;
-      }
-      if ("error" in result && result.error) {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      const res = await fetch("/api/smart-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token ?? ""}` },
+        body: JSON.stringify({ month, prompt }),
+      });
+      if (!res.ok || !res.body) {
         setError(tr("تعذر توليد التحليل حاليا. حاول مرة اخرى."));
         return;
       }
-      const text = ("content" in result ? result.content : "") ?? "";
-      const parsed = text
-        .split("\n")
-        .map((line) => line.replace(/^[\s*\-•\d.]+/, "").trim())
-        .filter((line) => line.length > 2);
-      setPoints(parsed.length ? parsed : [text.trim()].filter(Boolean));
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let text = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        text += decoder.decode(value, { stream: true });
+        setPoints(toPoints(text));
+      }
+      if (!text.trim()) setError(tr("تعذر توليد التحليل حاليا. حاول مرة اخرى."));
     } catch {
       setError(tr("تعذر الاتصال بخدمة التحليل."));
     } finally {

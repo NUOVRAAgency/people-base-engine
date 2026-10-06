@@ -557,8 +557,8 @@ function KpiCard({
       <div className="flex items-center gap-1.5">
         <span
           className={cn(
-            "flex size-6 shrink-0 items-center justify-center [&_svg]:size-3",
-            pressed ? "bg-primary/10 text-primary" : "bg-white/15 text-white",
+            "flex shrink-0 items-center justify-center [&_svg]:size-4",
+            pressed ? "text-primary" : "text-white",
           )}
         >
           {icon}
