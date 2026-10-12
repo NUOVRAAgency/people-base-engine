@@ -129,7 +129,7 @@ function LeavesPage() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-xl space-y-4 font-sans text-foreground" aria-labelledby="leaves-heading">
+    <section className="mx-auto w-full max-w-xl space-y-4 text-foreground" aria-labelledby="leaves-heading">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <div className="min-w-0">
           <p className="text-xs font-normal text-muted-foreground">{tr("إدارة الطلبات")}</p>
@@ -143,7 +143,7 @@ function LeavesPage() {
                 <Plus className="size-5" aria-hidden />
               </Button>
             </DialogTrigger>
-            <DialogContent className="inset-x-3 bottom-3 top-auto w-auto max-w-none translate-x-0 translate-y-0 rounded-lg border-border bg-card p-5 font-sans text-foreground shadow-card sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(430px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
+            <DialogContent className="inset-x-3 bottom-3 top-auto w-auto max-w-none translate-x-0 translate-y-0 rounded-lg border-border bg-card p-5 text-foreground shadow-card sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-[min(430px,calc(100vw-32px))] sm:-translate-x-1/2 sm:-translate-y-1/2">
               <DialogHeader className="text-start sm:text-start">
                 <DialogTitle className="text-lg leading-relaxed">{tr("طلب إجازة جديد")}</DialogTitle>
                 <DialogDescription className="text-muted-foreground">{tr("يُرسل الطلب بحالة معلّق للمراجعة.")}</DialogDescription>

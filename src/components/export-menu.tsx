@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { allowedFormats, runExport, type ExportFormat, type ExportPayload } from "@/lib/export";
@@ -16,14 +16,18 @@ const LABELS: Record<ExportFormat, string> = {
   csv: "CSV",
 };
 
-/** Role-aware export button. `build` must only use rows already returned by the backend under the user's access rules. */
+type Build = () => (Omit<ExportPayload, "orgName"> & { orgName?: string }) | Promise<Omit<ExportPayload, "orgName"> & { orgName?: string }>;
+
+/** Role-aware export button. Builders must only use rows already returned by the backend under the user's access rules. */
 export function ExportMenu({
   build,
+  detailedBuild,
   payroll = false,
   className,
   label,
 }: {
-  build: () => (Omit<ExportPayload, "orgName"> & { orgName?: string }) | Promise<Omit<ExportPayload, "orgName"> & { orgName?: string }>;
+  build: Build;
+  detailedBuild?: Build;
   payroll?: boolean;
   className?: string;
   label?: string;
@@ -33,11 +37,11 @@ export function ExportMenu({
   const formats = allowedFormats(role, { payroll });
   if (loading || formats.length === 0) return null;
 
-  async function go(format: ExportFormat) {
+  async function go(format: ExportFormat, builder: Build) {
     if (busy) return;
     setBusy(true);
     try {
-      const payload = { orgName: "", ...(await build()) } as ExportPayload;
+      const payload = { orgName: "", ...(await builder()) } as ExportPayload;
       if (!payload.orgName) {
         const { data } = await supabase.from("app_settings").select("company_name").eq("id", "organization").maybeSingle();
         payload.orgName = data?.company_name?.trim() ?? "";
@@ -50,6 +54,13 @@ export function ExportMenu({
     }
   }
 
+  const groups: { title: string; builder: Build }[] = detailedBuild
+    ? [
+        { title: tr("تقرير تنفيذي شامل"), builder: build },
+        { title: tr("كشف تفصيلي بالموظفين"), builder: detailedBuild },
+      ]
+    : [{ title: "", builder: build }];
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -58,11 +69,17 @@ export function ExportMenu({
           {label ?? tr("تصدير")}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-36">
-        {formats.map((f) => (
-          <DropdownMenuItem key={f} onSelect={() => void go(f)}>
-            {LABELS[f]}
-          </DropdownMenuItem>
+      <DropdownMenuContent align="end" className="min-w-44">
+        {groups.map((g, i) => (
+          <div key={g.title || i}>
+            {i > 0 ? <DropdownMenuSeparator /> : null}
+            {g.title ? <DropdownMenuLabel className="text-xs text-primary">{g.title}</DropdownMenuLabel> : null}
+            {formats.map((f) => (
+              <DropdownMenuItem key={f} className="cursor-pointer" onSelect={() => void go(f, g.builder)}>
+                {LABELS[f]}
+              </DropdownMenuItem>
+            ))}
+          </div>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>

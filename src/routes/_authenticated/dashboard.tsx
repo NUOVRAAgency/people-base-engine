@@ -580,7 +580,7 @@ function KpiCard({
   );
 
   const classes = cn(
-    "rounded-2xl border p-2.5 text-start shadow-glass backdrop-blur-sm transition-colors duration-150",
+    "cursor-pointer select-none caret-transparent rounded-2xl border p-2.5 text-start shadow-glass backdrop-blur-sm transition-colors duration-150 focus:outline-none",
     pressed ? "border-border/40 bg-card/75" : "border-primary bg-primary",
   );
 

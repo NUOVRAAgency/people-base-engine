@@ -67,7 +67,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
         side="bottom"
         sideOffset={12}
         collisionPadding={12}
-        className="z-[120] w-[calc(100vw-1.5rem)] max-w-xs overflow-hidden rounded-xl border border-primary/15 bg-card p-3 font-sans text-foreground shadow-card"
+        className="z-[120] w-[calc(100vw-1.5rem)] max-w-xs overflow-hidden rounded-xl border border-primary/15 bg-card p-3 text-foreground shadow-card"
       >
         <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-primary/25" aria-hidden />
         <div className="mb-2 border-b border-border/60 px-2 pb-2 pt-1 text-start">
@@ -163,7 +163,7 @@ export function GlassDatePicker({ value, onChange, minDate, placeholder = tr("ا
               : <ChevronLeft className={cn("size-4", className)} {...props} />,
             Weekday: ({ className, children, ...props }) => (
               <th {...props} className={cn("p-0 text-center", className)}>
-                <span className="mx-auto grid size-7 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] font-sans text-[11px] font-medium text-header-deep shadow-sm backdrop-blur-md">
+                <span className="mx-auto grid size-7 place-items-center rounded-full border border-header-deep/15 bg-header-deep/[0.05] text-[11px] font-medium text-header-deep shadow-sm backdrop-blur-md">
                   {children}
                 </span>
               </th>
