@@ -456,7 +456,7 @@ function EmployeesPage() {
 
 
   return (
-    <section className="mx-auto w-full max-w-6xl space-y-4 font-sans text-foreground" aria-labelledby="employees-heading">
+    <section className="mx-auto w-full max-w-6xl space-y-4 text-foreground" aria-labelledby="employees-heading">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs text-muted-foreground">{tr("دليل الفريق")}</p>
@@ -580,7 +580,7 @@ function EmployeesPage() {
       <EmployeeDetails employee={selected} open={detailsOpen} onOpenChange={setDetailsOpen} />
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-sm rounded-xl font-sans">
+        <AlertDialogContent className="w-[calc(100vw-2rem)] max-w-sm rounded-xl">
           <AlertDialogHeader className="text-start sm:text-start">
             <AlertDialogTitle>{tr("حذف الموظف")}</AlertDialogTitle>
             <AlertDialogDescription>{tr("سيُحذف سجل")} {selected?.full_name} {tr("نهائياً. لا يمكن التراجع عن هذه الخطوة.")}</AlertDialogDescription>
@@ -651,7 +651,7 @@ function EmployeeWizard({ open, onOpenChange, step, setStep, form, setField, bra
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="z-[100] flex max-h-[88dvh] w-[calc(100vw-1.25rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl border-primary/15 bg-card p-0 font-sans shadow-card">
+      <DialogContent className="z-[100] flex max-h-[88dvh] w-[calc(100vw-1.25rem)] max-w-2xl flex-col gap-0 overflow-hidden rounded-xl border-primary/15 bg-card p-0 shadow-card">
         <DialogHeader className="border-b border-border bg-muted/25 px-5 py-4 pe-12 text-start sm:text-start">
           <DialogTitle className="font-kufi text-base font-normal leading-7">{editing ? tr("تعديل بيانات الموظف") : tr("إضافة موظف جديد")}</DialogTitle>
           <DialogDescription className="text-xs leading-6">{tr("أدخل بيانات الموظف على ثلاث خطوات متتالية")}</DialogDescription>
@@ -802,7 +802,7 @@ function EmploymentFields({ form, setField, branches, managers, departments, isA
       <Field label={tr("نوع الدوام")} required><Select value={form.employmentType} onValueChange={(value) => setField("employmentType", value)}><SelectTrigger className="h-11"><SelectValue /></SelectTrigger><SelectContent position="popper" className="z-[200] max-h-64">{Object.entries(EMPLOYMENT_LABELS).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select></Field>
 
       <Dialog open={quickAdd !== null} onOpenChange={(open) => { if (!open) setQuickAdd(null); }}>
-        <DialogContent className="z-[300] w-[calc(100vw-2.5rem)] max-w-sm rounded-xl font-sans">
+        <DialogContent className="z-[300] w-[calc(100vw-2.5rem)] max-w-sm rounded-xl">
           <DialogHeader className="text-start sm:text-start">
             <DialogTitle className="font-kufi text-base font-normal leading-7">{quickAdd ? QUICK_ADD_LABELS[quickAdd].title : ""}</DialogTitle>
             <DialogDescription className="text-xs">{tr("سيُضاف مباشرة إلى خيارات النظام ويُحدد في النموذج")}</DialogDescription>
@@ -871,7 +871,7 @@ function MoneyInput({ value, onChange, invalid }: { value: string; onChange: (va
 function EmployeeDetails({ employee, open, onOpenChange }: { employee: Employee | null; open: boolean; onOpenChange: (open: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md rounded-xl font-sans">
+      <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md rounded-xl">
         <DialogHeader className="text-start sm:text-start"><DialogTitle className="font-kufi text-base font-normal leading-7">{tr("ملف الموظف")}</DialogTitle><DialogDescription>{tr("بيانات الموظف الوظيفية والشخصية")}</DialogDescription></DialogHeader>
         {employee ? <div className="space-y-4"><div className="flex items-center gap-3 rounded-lg border bg-muted/25 p-3"><EmployeeAvatar name={employee.full_name} /><div><p className="font-medium">{employee.full_name}</p><p dir="ltr" className="text-left text-xs text-muted-foreground">{employee.employee_number}</p></div></div><dl className="grid grid-cols-2 gap-3 text-sm"><Detail label={tr("القسم")} value={employee.department} /><Detail label={tr("المسمى")} value={employee.position} /><Detail label={tr("نوع الدوام")} value={EMPLOYMENT_LABELS[employee.employment_type]} /><Detail label={tr("تاريخ التعيين")} value={formatArabicDate(employee.hire_date)} /><Detail label={tr("البريد العملي")} value={employee.work_email} /><Detail label={tr("الهاتف")} value={employee.phone} /></dl></div> : null}
       </DialogContent>
