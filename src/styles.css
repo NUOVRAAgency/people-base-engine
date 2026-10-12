@@ -240,7 +240,22 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: var(--font-sans);
+    font-family: var(--font-kufi);
+  }
+
+  :lang(ar) body,
+  [dir="rtl"] body,
+  body[dir="rtl"],
+  [dir="rtl"] .font-sans {
+    font-family: var(--font-kufi);
+  }
+
+  button,
+  [role="button"],
+  a {
+    -webkit-user-select: none;
+    user-select: none;
+    caret-color: transparent;
   }
 }
 

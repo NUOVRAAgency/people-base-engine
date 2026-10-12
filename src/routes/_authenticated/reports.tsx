@@ -302,6 +302,37 @@ function ReportsPage() {
     return { fileName: `${tr("التقرير")} ${monthLabel(month)}`, tables };
   }
 
+  function detailedPayload() {
+    const bounds = monthBounds(month);
+    const columns = [tr("الرقم الوظيفي"), tr("الاسم"), tr("القسم"), tr("حضور"), tr("تأخير"), tr("غياب"), tr("أيام الإجازة")];
+    if (isAdmin) columns.push(tr("الراتب الأساسي"), tr("الخصومات"), tr("صافي الراتب"));
+    const rows = employees.map((emp) => {
+      const att = attendance.filter((a) => a.employee_id === emp.id);
+      let leaveDays = 0;
+      for (const l of leaves) {
+        if (l.employee_id !== emp.id || l.status !== "approved") continue;
+        const s = new Date(`${(l.start_date > bounds.from ? l.start_date : bounds.from)}T00:00:00`);
+        const e = new Date(`${(l.end_date < bounds.to ? l.end_date : bounds.to)}T00:00:00`);
+        leaveDays += Math.max(0, Math.round((e.getTime() - s.getTime()) / 86400000) + 1);
+      }
+      const row: (string | number)[] = [
+        emp.employee_number ?? "",
+        emp.full_name,
+        emp.department ?? "",
+        att.filter((a) => a.status === "present").length,
+        att.filter((a) => a.status === "late").length,
+        att.filter((a) => a.status === "absent").length,
+        leaveDays,
+      ];
+      if (isAdmin) {
+        const p = payroll.find((r) => r.employee_id === emp.id);
+        row.push(Math.round(Number(p?.base_salary ?? 0)), Math.round(Number(p?.deductions ?? 0)), Math.round(Number(p?.net_salary ?? 0)));
+      }
+      return row;
+    });
+    return { fileName: `${tr("كشف تفصيلي")} ${monthLabel(month)}`, tables: [{ title: tr("كشف تفصيلي بالموظفين"), columns, rows }] };
+  }
+
   const summaryForAi = useMemo(
     () =>
       [
@@ -347,7 +378,7 @@ function ReportsPage() {
           >
             {tr("العرض السنوي")}
           </Button>
-          <ExportMenu build={exportPayload} label={tr("تصدير التقرير")} className="w-full min-w-0 gap-1 px-2 text-xs sm:text-sm md:w-auto md:px-3" />
+          <ExportMenu build={exportPayload} detailedBuild={detailedPayload} label={tr("تصدير التقرير")} className="w-full min-w-0 gap-1 px-2 text-xs sm:text-sm md:w-auto md:px-3" />
         </div>
       </header>
 

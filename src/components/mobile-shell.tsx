@@ -92,7 +92,7 @@ export function MobileShell({ children }: { children: ReactNode }) {
               const Icon = item.icon;
               return (
                 <li key={item.to}>
-                  <Link to={item.to} className={cn("flex items-center gap-3 rounded-xl bg-primary px-3 py-3 text-sm text-primary-foreground transition-all hover:brightness-110", active ? "font-bold shadow-card ring-2 ring-primary/30 ring-offset-2 ring-offset-card" : "opacity-90")}>
+                  <Link to={item.to} className={cn("flex items-center gap-3 rounded-xl border-2 px-3 py-3 text-sm font-normal text-primary-foreground transition-all [background:var(--header-gradient)] hover:brightness-110", active ? "border-primary-foreground shadow-card" : "border-transparent")}>
                     <Icon className="h-5 w-5 shrink-0" aria-hidden />
                     <span>{item.label}</span>
                   </Link>
@@ -133,15 +133,17 @@ export function MobileShell({ children }: { children: ReactNode }) {
         </div>
 
         <div className="hidden min-w-0 flex-1 justify-center md:flex">
-          <div className="relative w-full max-w-sm">
-            <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/70" aria-hidden />
+          <form className="relative w-full max-w-sm" role="search" onSubmit={(e) => e.preventDefault()}>
             <input
               type="search"
               aria-label={tr("بحث سريع")}
               placeholder={tr("بحث سريع…")}
-              className="h-9 w-full rounded-full border border-white/25 bg-white/15 pe-9 ps-4 text-sm text-white outline-none transition-colors placeholder:text-white/65 focus:bg-white/25"
+              className="h-9 w-full rounded-full border border-white/25 bg-white/15 pe-10 ps-4 text-sm text-white outline-none transition-colors placeholder:text-white/65 focus:bg-white/25"
             />
-          </div>
+            <button type="submit" aria-label={tr("بحث سريع")} className="absolute end-1 top-1/2 flex size-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/20 hover:text-white">
+              <Search className="h-4 w-4" aria-hidden />
+            </button>
+          </form>
         </div>
 
         <div className="ms-auto flex shrink-0 items-center gap-1 md:ms-0">
