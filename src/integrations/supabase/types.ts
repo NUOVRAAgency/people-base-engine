@@ -201,6 +201,139 @@ export type Database = {
           },
         ]
       }
+      cash_and_banks: {
+        Row: {
+          account_id: string
+          bank_account_number: string | null
+          branch_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: string
+          name: string
+        }
+        Insert: {
+          account_id: string
+          bank_account_number?: string | null
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind: string
+          name: string
+        }
+        Update: {
+          account_id?: string
+          bank_account_number?: string | null
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cash_and_banks_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cash_and_banks_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chart_of_accounts: {
+        Row: {
+          account_type: string
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_parent: boolean
+          name_ar: string
+          name_en: string | null
+          normal_side: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_type: string
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_parent?: boolean
+          name_ar: string
+          name_en?: string | null
+          normal_side: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_type?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_parent?: boolean
+          name_ar?: string
+          name_en?: string | null
+          normal_side?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chart_of_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cost_centers: {
+        Row: {
+          branch_id: string | null
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          branch_id?: string | null
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          branch_id?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_centers_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_loans: {
         Row: {
           created_at: string
@@ -329,6 +462,124 @@ export type Database = {
           },
         ]
       }
+      journal_entries: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          entry_date: string
+          entry_number: string
+          id: string
+          posted_at: string | null
+          posted_by: string | null
+          reverses_entry_id: string | null
+          source: string
+          status: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_date?: string
+          entry_number?: string
+          id?: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reverses_entry_id?: string | null
+          source?: string
+          status?: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entry_date?: string
+          entry_number?: string
+          id?: string
+          posted_at?: string | null
+          posted_by?: string | null
+          reverses_entry_id?: string | null
+          source?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entries_reverses_entry_id_fkey"
+            columns: ["reverses_entry_id"]
+            isOneToOne: true
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journal_entry_lines: {
+        Row: {
+          account_id: string
+          cost_center_id: string | null
+          created_at: string
+          credit: number
+          debit: number
+          id: string
+          journal_entry_id: string
+          memo: string | null
+          rule_key: string | null
+        }
+        Insert: {
+          account_id: string
+          cost_center_id?: string | null
+          created_at?: string
+          credit?: number
+          debit?: number
+          id?: string
+          journal_entry_id: string
+          memo?: string | null
+          rule_key?: string | null
+        }
+        Update: {
+          account_id?: string
+          cost_center_id?: string | null
+          created_at?: string
+          credit?: number
+          debit?: number
+          id?: string
+          journal_entry_id?: string
+          memo?: string | null
+          rule_key?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_entry_lines_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_lines_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entry_lines_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_requests: {
         Row: {
           approved_by: string | null
@@ -378,6 +629,80 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_vouchers: {
+        Row: {
+          amount: number
+          branch_id: string | null
+          cash_bank_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          journal_entry_id: string | null
+          payroll_month: string | null
+          source_journal_entry_id: string | null
+          voucher_date: string
+          voucher_number: string
+        }
+        Insert: {
+          amount: number
+          branch_id?: string | null
+          cash_bank_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          payroll_month?: string | null
+          source_journal_entry_id?: string | null
+          voucher_date?: string
+          voucher_number?: string
+        }
+        Update: {
+          amount?: number
+          branch_id?: string | null
+          cash_bank_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          journal_entry_id?: string | null
+          payroll_month?: string | null
+          source_journal_entry_id?: string | null
+          voucher_date?: string
+          voucher_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_vouchers_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_vouchers_cash_bank_id_fkey"
+            columns: ["cash_bank_id"]
+            isOneToOne: false
+            referencedRelation: "cash_and_banks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_vouchers_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: true
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_vouchers_source_journal_entry_id_fkey"
+            columns: ["source_journal_entry_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
         ]
@@ -441,6 +766,44 @@ export type Database = {
           },
         ]
       }
+      payroll_accounting_rules: {
+        Row: {
+          account_id: string
+          description: string | null
+          entry_side: string
+          id: string
+          is_active: boolean
+          rule_key: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          description?: string | null
+          entry_side: string
+          id?: string
+          is_active?: boolean
+          rule_key: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          description?: string | null
+          entry_side?: string
+          id?: string
+          is_active?: boolean
+          rule_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_accounting_rules_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payroll_adjustments: {
         Row: {
           amount: number
@@ -491,6 +854,54 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_journal_links: {
+        Row: {
+          branch_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_reversed: boolean
+          journal_entry_id: string
+          payroll_month: string
+          reversed_at: string | null
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_reversed?: boolean
+          journal_entry_id: string
+          payroll_month: string
+          reversed_at?: string | null
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_reversed?: boolean
+          journal_entry_id?: string
+          payroll_month?: string
+          reversed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_journal_links_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_journal_links_journal_entry_id_fkey"
+            columns: ["journal_entry_id"]
+            isOneToOne: true
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
         ]
