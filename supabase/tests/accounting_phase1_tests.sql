@@ -11,13 +11,13 @@ INSERT INTO public.branches (id, name) VALUES ('00000000-0000-0000-0000-00000000
 INSERT INTO public.employees (id, full_name, branch_id) VALUES
   ('00000000-0000-0000-0000-0000000000e1', 'TEST EMP', '00000000-0000-0000-0000-0000000000b1');
 INSERT INTO public.payroll (id, employee_id, month, base_salary, status) VALUES
-  ('00000000-0000-0000-0000-0000000000p1'::text::uuid, '00000000-0000-0000-0000-0000000000e1', '2026-10-01', 3000, 'draft');
+  ('00000000-0000-0000-0000-0000000000c1', '00000000-0000-0000-0000-0000000000e1', '2026-10-01', 3000, 'draft');
 INSERT INTO public.employee_loans (id, employee_id, total_amount, monthly_installment, start_month) VALUES
   ('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-0000000000e1', 6000, 1000, '2026-10-01');
 
 CREATE TEMP TABLE t_ctx ON COMMIT DROP AS
 SELECT
-  (SELECT net_salary FROM public.payroll WHERE id = '00000000-0000-0000-0000-0000000000p1'::text::uuid) AS net_before,
+  (SELECT net_salary FROM public.payroll WHERE id = '00000000-0000-0000-0000-0000000000c1') AS net_before,
   (SELECT id FROM public.chart_of_accounts WHERE code = '5101') AS acc_exp,
   (SELECT id FROM public.chart_of_accounts WHERE code = '2101') AS acc_liab,
   (SELECT id FROM public.chart_of_accounts WHERE code = '51')   AS acc_parent;
@@ -77,11 +77,11 @@ BEGIN
 
   -- (و) locked month
   BEGIN
-    UPDATE public.payroll SET base_salary = 5000 WHERE id = '00000000-0000-0000-0000-0000000000p1'::text::uuid;
+    UPDATE public.payroll SET base_salary = 5000 WHERE id = '00000000-0000-0000-0000-0000000000c1';
     INSERT INTO t_results (test, passed, detail) VALUES ('F1 financial update in locked month rejected', false, 'updated!');
   EXCEPTION WHEN others THEN INSERT INTO t_results (test, passed, detail) VALUES ('F1 financial update in locked month rejected', true, SQLERRM); END;
   BEGIN
-    UPDATE public.payroll SET status = 'approved' WHERE id = '00000000-0000-0000-0000-0000000000p1'::text::uuid;
+    UPDATE public.payroll SET status = 'approved' WHERE id = '00000000-0000-0000-0000-0000000000c1';
     INSERT INTO t_results (test, passed, detail) VALUES ('F2 status-only update allowed', true, 'ok');
   EXCEPTION WHEN others THEN INSERT INTO t_results (test, passed, detail) VALUES ('F2 status-only update allowed', false, SQLERRM); END;
   BEGIN
@@ -141,7 +141,7 @@ INSERT INTO t_results (test, passed, detail)
 SELECT 'G net_salary unchanged',
        p.net_salary = x.net_before AND p.net_salary = 3000,
        'before=' || x.net_before || ' after=' || p.net_salary
-FROM public.payroll p, t_ctx x WHERE p.id = '00000000-0000-0000-0000-0000000000p1'::text::uuid;
+FROM public.payroll p, t_ctx x WHERE p.id = '00000000-0000-0000-0000-0000000000c1';
 
 -- (هـ) operator and viewer blocked by RLS
 INSERT INTO auth.users (id, email, instance_id, aud, role) VALUES
