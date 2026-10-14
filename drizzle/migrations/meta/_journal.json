@@ -8,6 +8,13 @@
       "when": 1791939367603,
       "tag": "0000_accounting_phase1",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791941304656,
+      "tag": "0001_accounting_phase1_complete",
+      "breakpoints": true
     }
   ]
 }

@@ -169,6 +169,75 @@ BEGIN
   END LOOP;
 END $$;
 
+-- (ح) employees.branch_id is required
+DO $$ BEGIN
+  BEGIN
+    INSERT INTO public.employees (full_name) VALUES ('NO BRANCH');
+    INSERT INTO t_results (test, passed, detail) VALUES ('H1 employee without branch rejected', false, 'inserted!');
+  EXCEPTION WHEN others THEN INSERT INTO t_results (test, passed, detail) VALUES ('H1 employee without branch rejected', true, SQLERRM); END;
+END $$;
+
+-- (ط) branch change blocked while employee has payroll in a locked month (2026-10 locked by C3 link)
+INSERT INTO public.branches (id, name) VALUES ('00000000-0000-0000-0000-0000000000b2', 'TEST-BRANCH-2');
+INSERT INTO public.employees (id, full_name, branch_id) VALUES
+  ('00000000-0000-0000-0000-0000000000e2', 'TEST EMP 2', '00000000-0000-0000-0000-0000000000b2');
+DO $$ BEGIN
+  BEGIN
+    UPDATE public.employees SET branch_id = '00000000-0000-0000-0000-0000000000b2' WHERE id = '00000000-0000-0000-0000-0000000000e1';
+    INSERT INTO t_results (test, passed, detail) VALUES ('I1 branch change in locked month rejected', false, 'updated!');
+  EXCEPTION WHEN others THEN INSERT INTO t_results (test, passed, detail) VALUES ('I1 branch change in locked month rejected', true, SQLERRM); END;
+  BEGIN
+    UPDATE public.employees SET branch_id = '00000000-0000-0000-0000-0000000000b1' WHERE id = '00000000-0000-0000-0000-0000000000e2';
+    UPDATE public.employees SET branch_id = '00000000-0000-0000-0000-0000000000b2' WHERE id = '00000000-0000-0000-0000-0000000000e2';
+    INSERT INTO t_results (test, passed, detail) VALUES ('I2 branch change without locked records allowed', true, 'ok');
+  EXCEPTION WHEN others THEN INSERT INTO t_results (test, passed, detail) VALUES ('I2 branch change without locked records allowed', false, SQLERRM); END;
+END $$;
+
+-- (ي) trigger-only private functions not executable by anon/authenticated
+INSERT INTO t_results (test, passed, detail)
+SELECT 'J1 no direct EXECUTE on guard functions',
+       bool_and(NOT has_function_privilege('authenticated', p.oid, 'EXECUTE') AND NOT has_function_privilege('anon', p.oid, 'EXECUTE')),
+       string_agg(p.proname, ',')
+FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'private' AND p.proname IN ('check_payroll_period_lock','coa_guard','je_guard','jel_guard','pjl_guard','employee_branch_lock_guard');
+INSERT INTO t_results (test, passed, detail)
+SELECT 'J2 RLS helpers still executable by authenticated', bool_and(has_function_privilege('authenticated', p.oid, 'EXECUTE')), string_agg(p.proname, ',')
+FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'private' AND p.proname IN ('is_admin','is_operator','is_viewer','get_user_branch_id','get_employee_branch_id');
+
+-- (ك) set_absence_decision via direct call; (ل) admin works through RLS as authenticated, not owner
+INSERT INTO auth.users (id, email, instance_id, aud, role) VALUES
+  ('00000000-0000-0000-0000-00000000aa03', 'ad_test@example.invalid', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated');
+UPDATE public.user_roles SET role = 'admin' WHERE user_id = '00000000-0000-0000-0000-00000000aa03';
+INSERT INTO public.attendance (id, employee_id, date, status) VALUES
+  ('00000000-0000-0000-0000-0000000000d1', '00000000-0000-0000-0000-0000000000e2', '2026-11-03', 'absent');
+
+DO $$
+DECLARE _u text; _label text; _cnt int;
+BEGIN
+  FOREACH _u IN ARRAY ARRAY['00000000-0000-0000-0000-00000000aa01','00000000-0000-0000-0000-00000000aa02','00000000-0000-0000-0000-00000000aa03'] LOOP
+    _label := CASE WHEN _u LIKE '%aa01' THEN 'operator' WHEN _u LIKE '%aa02' THEN 'viewer' ELSE 'admin' END;
+    PERFORM set_config('request.jwt.claims', json_build_object('sub', _u, 'role', 'authenticated')::text, true);
+    SET LOCAL ROLE authenticated;
+    BEGIN
+      PERFORM public.set_absence_decision('00000000-0000-0000-0000-0000000000d1', 'deducted');
+      INSERT INTO t_results (test, passed, detail) VALUES ('K ' || _label || ' set_absence_decision', _label = 'admin', 'succeeded as ' || current_user);
+    EXCEPTION WHEN others THEN
+      INSERT INTO t_results (test, passed, detail) VALUES ('K ' || _label || ' set_absence_decision', _label <> 'admin', SQLERRM);
+    END;
+    IF _label = 'admin' THEN
+      SELECT count(*) INTO _cnt FROM public.chart_of_accounts;
+      INSERT INTO t_results (test, passed, detail) VALUES ('L1 admin reads accounts as authenticated', _cnt > 0 AND current_user = 'authenticated', 'role=' || current_user || ' rows=' || _cnt);
+      BEGIN
+        INSERT INTO public.journal_entries (description) VALUES ('admin rls write');
+        UPDATE public.payroll_accounting_rules SET description = description WHERE rule_key = 'base_salary';
+        INSERT INTO t_results (test, passed, detail) VALUES ('L2 admin writes accounting as authenticated', true, 'role=' || current_user);
+      EXCEPTION WHEN others THEN INSERT INTO t_results (test, passed, detail) VALUES ('L2 admin writes accounting as authenticated', false, SQLERRM); END;
+    END IF;
+    RESET ROLE;
+  END LOOP;
+END $$;
+
 SELECT n, test, passed, detail FROM t_results ORDER BY n;
 
 ROLLBACK;
