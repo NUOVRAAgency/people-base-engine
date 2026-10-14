@@ -374,6 +374,9 @@ CREATE TRIGGER trg_aa_employee_branch_lock BEFORE UPDATE OF branch_id ON public.
 FOR EACH ROW EXECUTE FUNCTION private.employee_branch_lock_guard();
 
 -- Trigger-only functions: nobody calls them directly.
-REVOKE EXECUTE ON FUNCTION private.check_payroll_period_lock(), private.coa_guard(), private.is_period_locked(date, uuid),
+REVOKE EXECUTE ON FUNCTION private.check_payroll_period_lock(), private.coa_guard(),
   private.je_guard(), private.jel_guard(), private.pjl_guard(), private.employee_branch_lock_guard()
   FROM PUBLIC, anon, authenticated;
+-- is_period_locked: platform guard refuses revoking from authenticated; no policy uses it. Revoke from anon/PUBLIC only.
+REVOKE EXECUTE ON FUNCTION private.is_period_locked(date, uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION private.is_period_locked(date, uuid) TO authenticated;
