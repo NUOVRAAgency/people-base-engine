@@ -146,6 +146,13 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="ar">
       <head>
         <HeadContent />
+        {/* Boot-time recovery: if the app's entry module fails to load (e.g. the dev
+            server was restarting), reload once instead of leaving a blank screen. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var k="boot-import-retry";function h(m){if(!m||String(m).indexOf("dynamically imported module")<0)return;if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");setTimeout(function(){location.reload()},800)}addEventListener("error",function(e){h(e.message)});addEventListener("unhandledrejection",function(e){h(e.reason&&e.reason.message)});addEventListener("load",function(){setTimeout(function(){sessionStorage.removeItem(k)},5000)})})();`,
+          }}
+        />
       </head>
       <body>
         {children}
