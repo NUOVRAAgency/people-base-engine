@@ -28,6 +28,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
+import { generatePayrollEntry } from "@/lib/accounting.functions";
+import { BookOpen } from "lucide-react";
 import { getLocale, tr, trf } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -275,6 +277,31 @@ function PayrollPage() {
     await load();
   }
 
+  async function generateEntry() {
+    setFeedback(null);
+    setBusy("entry");
+    try {
+      const { data: branches } = await supabase.from("branches").select("id,name");
+      const done: string[] = [];
+      const skipped: string[] = [];
+      for (const b of branches ?? []) {
+        const res = await generatePayrollEntry({ data: { month, branchId: b.id } });
+        if (res.ok) done.push(`${b.name} (${res.entryNumber})`);
+        else if (res.reason === "exists") skipped.push(b.name);
+        else if (res.reason === "missing_rule" || res.reason === "unbalanced") throw new Error(res.reason);
+      }
+      if (done.length) setFeedback({ kind: "success", message: `${tr("تم ترحيل قيد الرواتب للفروع:")} ${done.join("، ")}` });
+      else if (skipped.length) setFeedback({ kind: "error", message: tr("قيد هذا الشهر مرحّل مسبقاً") });
+      else setFeedback({ kind: "error", message: tr("لا يوجد مسير معتمد لهذا الشهر") });
+    } catch {
+      setFeedback({ kind: "error", message: tr("تعذر توليد القيد. تحقق من إعدادات ربط الحسابات.") });
+    } finally {
+      setBusy("");
+    }
+  }
+
+
+
   async function saveRow(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!editRow) return;
@@ -356,6 +383,16 @@ function PayrollPage() {
             >
               {busy === "approve" ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <BadgeCheck className="h-4 w-4" aria-hidden />}
               {tr("اعتماد وصرف الرواتب")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 flex-1 rounded-xl text-sm font-bold text-primary"
+              onClick={() => void generateEntry()}
+              disabled={busy === "entry" || sheetStatus.key !== "approved"}
+            >
+              {busy === "entry" ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <BookOpen className="h-4 w-4" aria-hidden />}
+              {tr("توليد وترحيل قيد الرواتب")}
             </Button>
           </section>
 

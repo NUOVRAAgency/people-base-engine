@@ -54,6 +54,7 @@ const TITLES: Record<string, string> = {
   "/settings/system": tr("إعدادات النظام"),
   "/account": tr("الحساب"),
   "/users": tr("المستخدمون"),
+  "/journal": tr("القيود اليومية"),
 };
 
 export function MobileShell({ children }: { children: ReactNode }) {

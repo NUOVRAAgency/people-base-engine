@@ -60,6 +60,13 @@ function SettingsPage() {
 
   const adminItems = [
     {
+      key: "journal",
+      label: tr("القيود اليومية"),
+      description: tr("قيود الرواتب المرحّلة وتصديرها"),
+      icon: ShieldCheck,
+      action: () => navigate({ to: "/journal" }),
+    },
+    {
       key: "users",
       label: tr("إدارة المستخدمين والصلاحيات"),
       description: tr("المستخدمون والأدوار"),
