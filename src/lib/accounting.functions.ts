@@ -49,11 +49,11 @@ export const generatePayrollEntry = createServerFn({ method: "POST" })
       penalty_deduction: s("deductions"),
       net_payable: s("net_salary"),
     };
-    const gross = amounts.base_salary + amounts.housing_allowance + amounts.transport_allowance + amounts.overtime + amounts.bonuses;
+    const gross = s("base_salary") + s("housing_allowance") + s("transport_allowance") + s("overtime_amount") + s("bonuses");
     // Whatever separates gross from net besides manual deductions is the absence deduction (computed by the payroll engine).
-    const gap = r2(gross - amounts.net_payable - amounts.penalty_deduction);
-    if (gap > 0) amounts.absence_deduction = gap;
-    else if (gap < 0) amounts.other_additions = -gap;
+    const gap = r2(gross - s("net_salary") - s("deductions"));
+    if (gap > 0) amounts["absence_deduction"] = gap;
+    else if (gap < 0) amounts["other_additions"] = -gap;
 
     const { data: rules } = await sb.from("payroll_accounting_rules").select("rule_key,entry_side,account_id").eq("is_active", true);
     const ruleOf = new Map<string, { entry_side: string; account_id: string }>((rules ?? []).map((r: any) => [r.rule_key, r]));
