@@ -55,6 +55,7 @@ const TITLES: Record<string, string> = {
   "/account": tr("الحساب"),
   "/users": tr("المستخدمون"),
   "/journal": tr("القيود اليومية"),
+  "/financials": tr("القوائم المالية"),
 };
 
 export function MobileShell({ children }: { children: ReactNode }) {
