@@ -67,6 +67,13 @@ function SettingsPage() {
       action: () => navigate({ to: "/journal" }),
     },
     {
+      key: "fingerprint",
+      label: tr("استيراد البصمة"),
+      description: tr("ملفات ZKTeco وتصحيح الحركات"),
+      icon: ShieldCheck,
+      action: () => navigate({ to: "/fingerprint-import" }),
+    },
+    {
       key: "financials",
       label: tr("القوائم المالية"),
       description: tr("ميزان المراجعة وقائمة الدخل والميزانية"),

@@ -18,6 +18,7 @@ import { Route as AuthenticatedAttendanceRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEmployeesRouteImport } from './routes/_authenticated/employees'
 import { Route as AuthenticatedFinancialsRouteImport } from './routes/_authenticated/financials'
+import { Route as AuthenticatedFingerprintImportRouteImport } from './routes/_authenticated/fingerprint-import'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedLeavesRouteImport } from './routes/_authenticated/leaves'
 import { Route as AuthenticatedPayrollRouteImport } from './routes/_authenticated/payroll'
@@ -71,6 +72,12 @@ const AuthenticatedFinancialsRoute = AuthenticatedFinancialsRouteImport.update({
   path: '/financials',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFingerprintImportRoute =
+  AuthenticatedFingerprintImportRouteImport.update({
+    id: '/fingerprint-import',
+    path: '/fingerprint-import',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
   id: '/journal',
   path: '/journal',
@@ -122,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employees': typeof AuthenticatedEmployeesRoute
   '/financials': typeof AuthenticatedFinancialsRoute
+  '/fingerprint-import': typeof AuthenticatedFingerprintImportRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/leaves': typeof AuthenticatedLeavesRoute
   '/payroll': typeof AuthenticatedPayrollRoute
@@ -140,6 +148,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/employees': typeof AuthenticatedEmployeesRoute
   '/financials': typeof AuthenticatedFinancialsRoute
+  '/fingerprint-import': typeof AuthenticatedFingerprintImportRoute
   '/journal': typeof AuthenticatedJournalRoute
   '/leaves': typeof AuthenticatedLeavesRoute
   '/payroll': typeof AuthenticatedPayrollRoute
@@ -160,6 +169,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/employees': typeof AuthenticatedEmployeesRoute
   '/_authenticated/financials': typeof AuthenticatedFinancialsRoute
+  '/_authenticated/fingerprint-import': typeof AuthenticatedFingerprintImportRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRoute
   '/_authenticated/leaves': typeof AuthenticatedLeavesRoute
   '/_authenticated/payroll': typeof AuthenticatedPayrollRoute
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/employees'
     | '/financials'
+    | '/fingerprint-import'
     | '/journal'
     | '/leaves'
     | '/payroll'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/employees'
     | '/financials'
+    | '/fingerprint-import'
     | '/journal'
     | '/leaves'
     | '/payroll'
@@ -217,6 +229,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/employees'
     | '/_authenticated/financials'
+    | '/_authenticated/fingerprint-import'
     | '/_authenticated/journal'
     | '/_authenticated/leaves'
     | '/_authenticated/payroll'
@@ -299,6 +312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFinancialsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/fingerprint-import': {
+      id: '/_authenticated/fingerprint-import'
+      path: '/fingerprint-import'
+      fullPath: '/fingerprint-import'
+      preLoaderRoute: typeof AuthenticatedFingerprintImportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/journal': {
       id: '/_authenticated/journal'
       path: '/journal'
@@ -378,6 +398,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEmployeesRoute: typeof AuthenticatedEmployeesRoute
   AuthenticatedFinancialsRoute: typeof AuthenticatedFinancialsRoute
+  AuthenticatedFingerprintImportRoute: typeof AuthenticatedFingerprintImportRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
   AuthenticatedLeavesRoute: typeof AuthenticatedLeavesRoute
   AuthenticatedPayrollRoute: typeof AuthenticatedPayrollRoute
@@ -393,6 +414,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEmployeesRoute: AuthenticatedEmployeesRoute,
   AuthenticatedFinancialsRoute: AuthenticatedFinancialsRoute,
+  AuthenticatedFingerprintImportRoute: AuthenticatedFingerprintImportRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRoute,
   AuthenticatedLeavesRoute: AuthenticatedLeavesRoute,
   AuthenticatedPayrollRoute: AuthenticatedPayrollRoute,
