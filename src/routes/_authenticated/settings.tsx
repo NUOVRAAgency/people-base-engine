@@ -67,6 +67,13 @@ function SettingsPage() {
       action: () => navigate({ to: "/journal" }),
     },
     {
+      key: "financials",
+      label: tr("القوائم المالية"),
+      description: tr("ميزان المراجعة وقائمة الدخل والميزانية"),
+      icon: ShieldCheck,
+      action: () => navigate({ to: "/financials" }),
+    },
+    {
       key: "users",
       label: tr("إدارة المستخدمين والصلاحيات"),
       description: tr("المستخدمون والأدوار"),
