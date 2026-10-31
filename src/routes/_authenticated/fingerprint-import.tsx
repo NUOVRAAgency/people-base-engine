@@ -35,8 +35,8 @@ export function parseAttlog(text: string): Map<string, string[]> {
   for (const raw of text.split(/\r?\n/)) {
     const m = raw.match(/^\s*"?(\w+)"?\s*[\t,;]\s*"?(\d{4}-\d{2}-\d{2})[ T](\d{1,2}:\d{2})/);
     if (!m) continue;
-    const key = `${m[1]}|${m[2]}`;
-    const time = m[3].padStart(5, "0");
+    const key = `${m[1] ?? ""}|${m[2] ?? ""}`;
+    const time = (m[3] ?? "").padStart(5, "0");
     const list = out.get(key) ?? [];
     list.push(time);
     out.set(key, list);
@@ -77,13 +77,13 @@ function FingerprintImportPage() {
     const groups = parseAttlog(await file.text());
     const list: Row[] = [];
     groups.forEach((times, key) => {
-      const [pin, date] = key.split("|");
+      const [pin = "", date = ""] = key.split("|");
       times.sort();
       const emp = byPin.get(pin) ?? null;
       list.push({
         key, pin, date,
-        check_in: times[0],
-        check_out: times.length > 1 ? times[times.length - 1] : "",
+        check_in: times[0] ?? "",
+        check_out: times.length > 1 ? (times[times.length - 1] ?? "") : "",
         employee_id: emp?.id ?? null,
         name: emp?.full_name ?? "",
         punches: times.length,
