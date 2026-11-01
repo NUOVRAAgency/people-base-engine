@@ -381,6 +381,52 @@ export type Database = {
           },
         ]
       }
+      employee_shifts: {
+        Row: {
+          cost_center_id: string | null
+          created_at: string
+          employee_id: string
+          id: string
+          shift_id: string
+        }
+        Insert: {
+          cost_center_id?: string | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          shift_id: string
+        }
+        Update: {
+          cost_center_id?: string | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          shift_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_shifts_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_shifts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: true
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_shifts_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "work_shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           birth_date: string | null
@@ -988,6 +1034,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      work_shifts: {
+        Row: {
+          created_at: string
+          early_leave_minutes: number
+          end_time: string
+          grace_minutes: number
+          id: string
+          is_active: boolean
+          missing_checkout_rule: string
+          name: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          early_leave_minutes?: number
+          end_time: string
+          grace_minutes?: number
+          id?: string
+          is_active?: boolean
+          missing_checkout_rule?: string
+          name: string
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          early_leave_minutes?: number
+          end_time?: string
+          grace_minutes?: number
+          id?: string
+          is_active?: boolean
+          missing_checkout_rule?: string
+          name?: string
+          start_time?: string
+        }
+        Relationships: []
       }
     }
     Views: {
