@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
+import { Route as AuthenticatedAccountsRouteImport } from './routes/_authenticated/accounts'
 import { Route as AuthenticatedAssistantRouteImport } from './routes/_authenticated/assistant'
 import { Route as AuthenticatedAttendanceRouteImport } from './routes/_authenticated/attendance'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -24,7 +25,9 @@ import { Route as AuthenticatedLeavesRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedPayrollRouteImport } from './routes/_authenticated/payroll'
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedShiftsRouteImport } from './routes/_authenticated/shifts'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
+import { Route as AuthenticatedVouchersRouteImport } from './routes/_authenticated/vouchers'
 import { Route as ApiSmartReportRouteImport } from './routes/api/smart-report'
 import { Route as AuthenticatedSettingsSystemRouteImport } from './routes/_authenticated/settings.system'
 
@@ -45,6 +48,11 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAccountsRoute = AuthenticatedAccountsRouteImport.update({
+  id: '/accounts',
+  path: '/accounts',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAssistantRoute = AuthenticatedAssistantRouteImport.update({
@@ -103,9 +111,19 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedShiftsRoute = AuthenticatedShiftsRouteImport.update({
+  id: '/shifts',
+  path: '/shifts',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedVouchersRoute = AuthenticatedVouchersRouteImport.update({
+  id: '/vouchers',
+  path: '/vouchers',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiSmartReportRoute = ApiSmartReportRouteImport.update({
@@ -124,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/account': typeof AuthenticatedAccountRoute
+  '/accounts': typeof AuthenticatedAccountsRoute
   '/assistant': typeof AuthenticatedAssistantRoute
   '/attendance': typeof AuthenticatedAttendanceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -135,7 +154,9 @@ export interface FileRoutesByFullPath {
   '/payroll': typeof AuthenticatedPayrollRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/shifts': typeof AuthenticatedShiftsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/vouchers': typeof AuthenticatedVouchersRoute
   '/api/smart-report': typeof ApiSmartReportRoute
   '/settings/system': typeof AuthenticatedSettingsSystemRoute
 }
@@ -143,6 +164,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/account': typeof AuthenticatedAccountRoute
+  '/accounts': typeof AuthenticatedAccountsRoute
   '/assistant': typeof AuthenticatedAssistantRoute
   '/attendance': typeof AuthenticatedAttendanceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -154,7 +176,9 @@ export interface FileRoutesByTo {
   '/payroll': typeof AuthenticatedPayrollRoute
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/shifts': typeof AuthenticatedShiftsRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/vouchers': typeof AuthenticatedVouchersRoute
   '/api/smart-report': typeof ApiSmartReportRoute
   '/settings/system': typeof AuthenticatedSettingsSystemRoute
 }
@@ -164,6 +188,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
+  '/_authenticated/accounts': typeof AuthenticatedAccountsRoute
   '/_authenticated/assistant': typeof AuthenticatedAssistantRoute
   '/_authenticated/attendance': typeof AuthenticatedAttendanceRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -175,7 +200,9 @@ export interface FileRoutesById {
   '/_authenticated/payroll': typeof AuthenticatedPayrollRoute
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
+  '/_authenticated/shifts': typeof AuthenticatedShiftsRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/_authenticated/vouchers': typeof AuthenticatedVouchersRoute
   '/api/smart-report': typeof ApiSmartReportRoute
   '/_authenticated/settings/system': typeof AuthenticatedSettingsSystemRoute
 }
@@ -185,6 +212,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/account'
+    | '/accounts'
     | '/assistant'
     | '/attendance'
     | '/dashboard'
@@ -196,7 +224,9 @@ export interface FileRouteTypes {
     | '/payroll'
     | '/reports'
     | '/settings'
+    | '/shifts'
     | '/users'
+    | '/vouchers'
     | '/api/smart-report'
     | '/settings/system'
   fileRoutesByTo: FileRoutesByTo
@@ -204,6 +234,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/account'
+    | '/accounts'
     | '/assistant'
     | '/attendance'
     | '/dashboard'
@@ -215,7 +246,9 @@ export interface FileRouteTypes {
     | '/payroll'
     | '/reports'
     | '/settings'
+    | '/shifts'
     | '/users'
+    | '/vouchers'
     | '/api/smart-report'
     | '/settings/system'
   id:
@@ -224,6 +257,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/account'
+    | '/_authenticated/accounts'
     | '/_authenticated/assistant'
     | '/_authenticated/attendance'
     | '/_authenticated/dashboard'
@@ -235,7 +269,9 @@ export interface FileRouteTypes {
     | '/_authenticated/payroll'
     | '/_authenticated/reports'
     | '/_authenticated/settings'
+    | '/_authenticated/shifts'
     | '/_authenticated/users'
+    | '/_authenticated/vouchers'
     | '/api/smart-report'
     | '/_authenticated/settings/system'
   fileRoutesById: FileRoutesById
@@ -275,6 +311,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof AuthenticatedAccountRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/accounts': {
+      id: '/_authenticated/accounts'
+      path: '/accounts'
+      fullPath: '/accounts'
+      preLoaderRoute: typeof AuthenticatedAccountsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/assistant': {
@@ -354,11 +397,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/shifts': {
+      id: '/_authenticated/shifts'
+      path: '/shifts'
+      fullPath: '/shifts'
+      preLoaderRoute: typeof AuthenticatedShiftsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/users': {
       id: '/_authenticated/users'
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof AuthenticatedUsersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/vouchers': {
+      id: '/_authenticated/vouchers'
+      path: '/vouchers'
+      fullPath: '/vouchers'
+      preLoaderRoute: typeof AuthenticatedVouchersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/smart-report': {
@@ -393,6 +450,7 @@ const AuthenticatedSettingsRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
+  AuthenticatedAccountsRoute: typeof AuthenticatedAccountsRoute
   AuthenticatedAssistantRoute: typeof AuthenticatedAssistantRoute
   AuthenticatedAttendanceRoute: typeof AuthenticatedAttendanceRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -404,11 +462,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPayrollRoute: typeof AuthenticatedPayrollRoute
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
+  AuthenticatedShiftsRoute: typeof AuthenticatedShiftsRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
+  AuthenticatedVouchersRoute: typeof AuthenticatedVouchersRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
+  AuthenticatedAccountsRoute: AuthenticatedAccountsRoute,
   AuthenticatedAssistantRoute: AuthenticatedAssistantRoute,
   AuthenticatedAttendanceRoute: AuthenticatedAttendanceRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
@@ -420,7 +481,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPayrollRoute: AuthenticatedPayrollRoute,
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
+  AuthenticatedShiftsRoute: AuthenticatedShiftsRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
+  AuthenticatedVouchersRoute: AuthenticatedVouchersRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
