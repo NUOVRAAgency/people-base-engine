@@ -103,3 +103,50 @@ export const generatePayrollEntry = createServerFn({ method: "POST" })
     if (lk) throw new Error(lk.message);
     return { ok: true as const, entryNumber, total: td };
   });
+
+/**
+ * Creates a payment voucher and its posted, balanced journal entry:
+ * debit the chosen account (e.g. net salaries payable, loans, expenses), credit the cash/bank account.
+ */
+export const createPaymentVoucher = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      cashBankId: z.string().uuid(),
+      debitAccountId: z.string().uuid(),
+      costCenterId: z.string().uuid().nullable(),
+      branchId: z.string().uuid().nullable(),
+      amount: z.number().positive().max(1e12),
+      description: z.string().trim().min(1).max(300),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const ctx = context as Ctx;
+    await assertAdmin(ctx);
+    const sb = ctx.supabase;
+    const amount = r2(data.amount);
+    const { data: cash } = await sb.from("cash_and_banks").select("account_id,is_active").eq("id", data.cashBankId).maybeSingle();
+    if (!cash?.is_active) return { ok: false as const, reason: "cash_inactive" };
+    if (cash.account_id === data.debitAccountId) return { ok: false as const, reason: "same_account" };
+
+    const entryNumber = `PV-${data.date.replace(/-/g, "")}-${Date.now().toString(36).toUpperCase()}`;
+    const { data: entry, error: ee } = await sb.from("journal_entries").insert({
+      entry_number: entryNumber, entry_date: data.date, branch_id: data.branchId,
+      description: data.description, source: "payment_voucher", status: "draft", created_by: ctx.userId,
+    }).select("id").single();
+    if (ee) throw new Error(ee.message);
+    const { error: le } = await sb.from("journal_entry_lines").insert([
+      { journal_entry_id: entry.id, account_id: data.debitAccountId, cost_center_id: data.costCenterId, debit: amount, credit: 0, memo: data.description },
+      { journal_entry_id: entry.id, account_id: cash.account_id, debit: 0, credit: amount, memo: data.description },
+    ]);
+    if (le) { await sb.from("journal_entries").delete().eq("id", entry.id); throw new Error(le.message); }
+    const { error: post } = await sb.from("journal_entries").update({ status: "posted" }).eq("id", entry.id);
+    if (post) throw new Error(post.message);
+    const { data: v, error: ve } = await sb.from("payment_vouchers").insert({
+      voucher_date: data.date, branch_id: data.branchId, cash_bank_id: data.cashBankId, amount,
+      journal_entry_id: entry.id, description: data.description, created_by: ctx.userId,
+    }).select("voucher_number").single();
+    if (ve) throw new Error(ve.message);
+    return { ok: true as const, voucherNumber: v.voucher_number as string, entryNumber };
+  });
