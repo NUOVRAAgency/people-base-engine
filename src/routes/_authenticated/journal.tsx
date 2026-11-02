@@ -58,7 +58,7 @@ function JournalPage() {
   }, [entries, q]);
 
   function exportCsv() {
-    const head = ["رقم القيد", "التاريخ", "الفرع", "البيان", "رمز الحساب", "اسم الحساب", "مدين", "دائن"];
+    const head = [tr("رقم القيد"), tr("التاريخ"), tr("الفرع"), tr("البيان"), tr("رمز الحساب"), tr("اسم الحساب"), tr("مدين"), tr("دائن")];
     const rows = filtered.flatMap((e) =>
       e.journal_entry_lines.map((l) => [e.entry_number, e.entry_date, e.branches?.name ?? "", e.description ?? "", l.chart_of_accounts?.code ?? "", l.chart_of_accounts?.name_ar ?? "", l.debit, l.credit]),
     );
