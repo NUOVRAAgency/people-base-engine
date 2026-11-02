@@ -90,11 +90,11 @@ function FinancialsPage() {
   function exportCsv() {
     let data: (string | number)[][] = [];
     if (tab === "trial") {
-      data = [["رمز الحساب", "اسم الحساب", "مدين", "دائن"], ...rows.map((r) => [r.code, r.name_ar, r.debit, r.credit]), ["", "الإجمالي", td, tc]];
+      data = [[tr("رمز الحساب"), tr("اسم الحساب"), tr("مدين"), tr("دائن")], ...rows.map((r) => [r.code, r.name_ar, r.debit, r.credit]), ["", tr("الإجمالي"), td, tc]];
     } else if (tab === "income") {
-      data = [["البند", "المبلغ"], ...income.map((r) => [r.name_ar, r.balance]), ["إجمالي الإيرادات", totalIncome], ...expense.map((r) => [r.name_ar, r.balance]), ["إجمالي المصروفات", totalExpense], ["صافي الدخل", netIncome]];
+      data = [[tr("البند"), tr("المبلغ")], ...income.map((r) => [r.name_ar, r.balance]), [tr("إجمالي الإيرادات"), totalIncome], ...expense.map((r) => [r.name_ar, r.balance]), [tr("إجمالي المصروفات"), totalExpense], [tr("صافي الدخل"), netIncome]];
     } else {
-      data = [["البند", "المبلغ"], ...assets.map((r) => [r.name_ar, r.balance]), ["إجمالي الأصول", sum(assets)], ...liabilities.map((r) => [r.name_ar, r.balance]), ["إجمالي الخصوم", sum(liabilities)], ...equity.map((r) => [r.name_ar, r.balance]), ["صافي دخل الفترة", netIncome], ["إجمالي الخصوم وحقوق الملكية", sum(liabilities) + sum(equity) + netIncome]];
+      data = [[tr("البند"), tr("المبلغ")], ...assets.map((r) => [r.name_ar, r.balance]), [tr("إجمالي الأصول"), sum(assets)], ...liabilities.map((r) => [r.name_ar, r.balance]), [tr("إجمالي الخصوم"), sum(liabilities)], ...equity.map((r) => [r.name_ar, r.balance]), [tr("صافي دخل الفترة"), netIncome], [tr("إجمالي الخصوم وحقوق الملكية"), sum(liabilities) + sum(equity) + netIncome]];
     }
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const csv = "\uFEFF" + data.map((r) => r.map(esc).join(",")).join("\r\n");
