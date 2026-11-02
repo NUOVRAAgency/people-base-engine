@@ -81,6 +81,27 @@ function SettingsPage() {
       action: () => navigate({ to: "/financials" }),
     },
     {
+      key: "vouchers",
+      label: tr("سندات الصرف"),
+      description: tr("صرف الرواتب والسلف والمصروفات بقيودها"),
+      icon: ShieldCheck,
+      action: () => navigate({ to: "/vouchers" }),
+    },
+    {
+      key: "accounts",
+      label: tr("دليل الحسابات"),
+      description: tr("الحسابات ومراكز التكلفة والصناديق والبنوك"),
+      icon: ShieldCheck,
+      action: () => navigate({ to: "/accounts" }),
+    },
+    {
+      key: "shifts",
+      label: tr("الورديات ومواعيد العمل"),
+      description: tr("تعريف الورديات وربط الموظفين بها"),
+      icon: ShieldCheck,
+      action: () => navigate({ to: "/shifts" }),
+    },
+    {
       key: "users",
       label: tr("إدارة المستخدمين والصلاحيات"),
       description: tr("المستخدمون والأدوار"),
