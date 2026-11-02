@@ -52,13 +52,21 @@ function FingerprintImportPage() {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
 
+  const [empShift, setEmpShift] = useState<Map<string, { start: string; grace: number }>>(new Map());
+
   useEffect(() => {
     void Promise.all([
       supabase.from("employees").select("id,employee_number,full_name"),
       supabase.from("app_settings").select("work_start,grace_minutes").limit(1).maybeSingle(),
-    ]).then(([e, s]) => {
+      supabase.from("employee_shifts").select("employee_id,work_shifts(start_time,grace_minutes)"),
+    ]).then(([e, s, es]) => {
       setEmps((e.data ?? []) as Emp[]);
       if (s.data) setSettings({ work_start: String(s.data.work_start).slice(0, 5), grace_minutes: s.data.grace_minutes });
+      const m = new Map<string, { start: string; grace: number }>();
+      for (const r of (es.data ?? []) as unknown as { employee_id: string; work_shifts: { start_time: string; grace_minutes: number } | null }[]) {
+        if (r.work_shifts) m.set(r.employee_id, { start: String(r.work_shifts.start_time).slice(0, 5), grace: r.work_shifts.grace_minutes });
+      }
+      setEmpShift(m);
     });
   }, []);
 
@@ -94,7 +102,13 @@ function FingerprintImportPage() {
     setMsg(`${tr("عدد الأيام المقروءة")}: ${list.length}`);
   }
 
-  const late = (r: Row) => (r.check_in ? Math.max(0, toMin(r.check_in) - toMin(settings.work_start) - settings.grace_minutes) : 0);
+  const late = (r: Row) => {
+    if (!r.check_in) return 0;
+    const sh = r.employee_id ? empShift.get(r.employee_id) : undefined;
+    const start = sh?.start ?? settings.work_start;
+    const grace = sh?.grace ?? settings.grace_minutes;
+    return Math.max(0, toMin(r.check_in) - toMin(start) - grace);
+  };
   const update = (key: string, patch: Partial<Row>) => setRows((p) => p.map((r) => (r.key === key ? { ...r, ...patch } : r)));
   const matched = rows.filter((r) => r.employee_id);
 
