@@ -102,7 +102,13 @@ function FingerprintImportPage() {
     setMsg(`${tr("عدد الأيام المقروءة")}: ${list.length}`);
   }
 
-  const late = (r: Row) => (r.check_in ? Math.max(0, toMin(r.check_in) - toMin(settings.work_start) - settings.grace_minutes) : 0);
+  const late = (r: Row) => {
+    if (!r.check_in) return 0;
+    const sh = r.employee_id ? empShift.get(r.employee_id) : undefined;
+    const start = sh?.start ?? settings.work_start;
+    const grace = sh?.grace ?? settings.grace_minutes;
+    return Math.max(0, toMin(r.check_in) - toMin(start) - grace);
+  };
   const update = (key: string, patch: Partial<Row>) => setRows((p) => p.map((r) => (r.key === key ? { ...r, ...patch } : r)));
   const matched = rows.filter((r) => r.employee_id);
 
