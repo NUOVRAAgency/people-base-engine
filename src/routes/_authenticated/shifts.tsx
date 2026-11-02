@@ -86,7 +86,7 @@ function ShiftsPage() {
         {!shifts.length ? <p className="text-sm text-muted-foreground">{tr("لا توجد ورديات بعد")}</p> : (
           <div className="divide-y divide-border/50 text-sm">{shifts.map((s) => (
             <div key={s.id} className="flex flex-wrap justify-between gap-2 py-2"><span className="font-medium">{s.name}</span>
-              <span className="text-muted-foreground">{s.start_time.slice(0, 5)} – {s.end_time.slice(0, 5)} · {tr("سماح")} {s.grace_minutes} · {tr(RULES[s.missing_checkout_rule])}</span></div>
+              <span className="text-muted-foreground">{s.start_time.slice(0, 5)} – {s.end_time.slice(0, 5)} · {tr("سماح")} {s.grace_minutes} · {tr(RULES[s.missing_checkout_rule] ?? s.missing_checkout_rule)}</span></div>
           ))}</div>
         )}
       </section>
