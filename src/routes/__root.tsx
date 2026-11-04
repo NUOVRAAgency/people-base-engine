@@ -10,6 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 import { DirectionProvider } from "@radix-ui/react-direction";
@@ -198,6 +199,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <DirectionProvider dir={getDirection()}>
         <Outlet />
+        <Toaster position="top-center" richColors dir={getDirection()} />
       </DirectionProvider>
     </QueryClientProvider>
   );
