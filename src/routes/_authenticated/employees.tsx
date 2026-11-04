@@ -49,7 +49,7 @@ import { cn } from "@/lib/utils";
 
 import { tr, trf, getLocale } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/employees")({
-  validateSearch: (s: Record<string, unknown>): { q?: string } => (typeof s.q === "string" && s.q ? { q: s.q } : {}),
+  validateSearch: (s: Record<string, unknown>): { q?: string } => (typeof s["q"] === "string" && s["q"] ? { q: s["q"] } : {}),
   head: () => ({
     meta: [
       { title: tr("إدارة الموظفين | نظام الموارد البشرية") },
