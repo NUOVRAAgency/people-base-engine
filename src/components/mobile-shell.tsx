@@ -136,8 +136,29 @@ export function MobileShell({ children }: { children: ReactNode }) {
         </div>
 
         <div className="hidden min-w-0 flex-1 justify-center md:flex">
-          <form className="relative w-full max-w-sm" role="search" onSubmit={(e) => e.preventDefault()}>
+          <form
+            className="relative w-full max-w-sm"
+            role="search"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const input = e.currentTarget.elements.namedItem("q") as HTMLInputElement;
+              const term = input.value.trim().toLocaleLowerCase();
+              if (!term) return;
+              const pages: Array<[string, string]> = [
+                ["/dashboard", tr("الرئيسية")], ["/employees", tr("الموظفون")], ["/attendance", tr("الحضور")],
+                ["/leaves", tr("الإجازات")], ["/payroll", tr("الرواتب")], ["/reports", tr("التقارير")],
+                ["/settings", tr("الإعدادات")], ["/journal", tr("القيود اليومية")], ["/vouchers", tr("سندات الصرف")],
+                ["/accounts", tr("دليل الحسابات")], ["/shifts", tr("الورديات")], ["/financials", tr("القوائم المالية")],
+                ["/fingerprint-import", tr("استيراد البصمة")], ["/users", tr("مستخدمو النظام")], ["/account", tr("الحساب الشخصي")],
+              ];
+              const page = pages.find(([, label]) => label.toLocaleLowerCase().includes(term));
+              input.value = "";
+              if (page) navigate({ to: page[0] as "/dashboard" });
+              else navigate({ to: "/employees", search: { q: term } });
+            }}
+          >
             <input
+              name="q"
               type="search"
               aria-label={tr("بحث سريع")}
               placeholder={tr("بحث سريع…")}
