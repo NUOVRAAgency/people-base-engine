@@ -49,6 +49,7 @@ import { cn } from "@/lib/utils";
 
 import { tr, trf, getLocale } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/employees")({
+  validateSearch: (s: Record<string, unknown>): { q?: string } => (typeof s.q === "string" && s.q ? { q: s.q } : {}),
   head: () => ({
     meta: [
       { title: tr("إدارة الموظفين | نظام الموارد البشرية") },
@@ -173,7 +174,9 @@ function EmployeesPage() {
   const [myBranchId, setMyBranchId] = useState("");
   const [customDepartments, setCustomDepartments] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const { q: initialQ } = Route.useSearch();
+  const [search, setSearch] = useState(initialQ ?? "");
+  useEffect(() => { if (initialQ !== undefined) setSearch(initialQ); }, [initialQ]);
   const [department, setDepartment] = useState("all");
   const [status, setStatus] = useState("all");
   const [employmentType, setEmploymentType] = useState("all");
