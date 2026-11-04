@@ -55,7 +55,7 @@ function AccountsPage() {
   }, []);
   useEffect(() => { if (isAdmin) void load(); }, [isAdmin, load]);
 
-  const done = (error: { message: string } | null) => { if (error) toast.error(error.message); else { toast.success(tr("تم الحفظ")); void load(); } return !error; };
+  const done = (error: { message: string; code?: string } | null) => { if (error) toast.error(error.code === "23505" ? tr("هذا الرمز أو الاسم مستخدم مسبقاً") : tr("تعذر الحفظ، تحقق من البيانات والصلاحيات")); else { toast.success(tr("تم الحفظ")); void load(); } return !error; };
 
   async function addAccount() {
     const parent = accounts.find((x) => x.id === acc.parent_id);

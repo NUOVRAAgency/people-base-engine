@@ -52,13 +52,13 @@ function ShiftsPage() {
   async function addShift() {
     if (!f.name.trim()) { toast.error(tr("أدخل اسم الوردية")); return; }
     const { error } = await supabase.from("work_shifts").insert({ ...f, name: f.name.trim(), grace_minutes: Number(f.grace_minutes) || 0, early_leave_minutes: Number(f.early_leave_minutes) || 0 });
-    if (error) toast.error(error.message); else { toast.success(tr("تم الحفظ")); setF({ ...f, name: "" }); void load(); }
+    if (error) toast.error(error.code === "23505" ? tr("هذا الرمز أو الاسم مستخدم مسبقاً") : tr("تعذر الحفظ، تحقق من البيانات والصلاحيات")); else { toast.success(tr("تم الحفظ")); setF({ ...f, name: "" }); void load(); }
   }
   async function assign(employee_id: string, shift_id: string, cost_center_id: string | null) {
     const { error } = shift_id
       ? await supabase.from("employee_shifts").upsert({ employee_id, shift_id, cost_center_id }, { onConflict: "employee_id" })
       : await supabase.from("employee_shifts").delete().eq("employee_id", employee_id);
-    if (error) toast.error(error.message); else void load();
+    if (error) toast.error(error.code === "23505" ? tr("هذا الرمز أو الاسم مستخدم مسبقاً") : tr("تعذر الحفظ، تحقق من البيانات والصلاحيات")); else void load();
   }
 
   if (loading) return <LoaderCircle className="mx-auto mt-10 animate-spin text-primary" />;
