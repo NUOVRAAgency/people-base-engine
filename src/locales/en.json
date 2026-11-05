@@ -825,5 +825,7 @@
   "يُنشأ قيد مرحّل تلقائياً: مدين الحساب المختار، دائن الصندوق أو البنك.": "A posted entry is created automatically: debit the selected account, credit the cash box or bank.",
   "هذا الرمز أو الاسم مستخدم مسبقاً": "This code or name is already in use",
   "تعذر الحفظ، تحقق من البيانات والصلاحيات": "Could not save; check the data and permissions",
-  "اسم الحساب بالإنجليزية": "Account name (English)"
+  "اسم الحساب بالإنجليزية": "Account name (English)",
+  "الحساب الشخصي": "My Account",
+  "مستخدمو النظام": "System Users"
 }
