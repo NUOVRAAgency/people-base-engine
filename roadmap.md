@@ -13,3 +13,6 @@
 - [x] English translation of remaining texts; currency per language.
 - [x] AI assistant: 12-month data, all roles, branch-only and no payroll for non-admins; yearly view in reports.
 - [ ] Delete the disabled temporary operator test account (needs a delete tool; currently disabled).
+- [x] AI assistant fixed (old Google model retired; switched to a current model).
+- [x] Account names follow the app language (chart, journal, vouchers, financial statements); English name field when adding an account.
+- [x] Full-system scan for untranslated text.

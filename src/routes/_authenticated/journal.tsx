@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
-import { getLocale, tr } from "@/lib/i18n";
+import { getLocale, tr, accName } from "@/lib/i18n";
 import { withCurrency } from "@/lib/currency";
 
 export const Route = createFileRoute("/_authenticated/journal")({
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_authenticated/journal")({
   component: JournalPage,
 });
 
-type Line = { id: string; debit: number; credit: number; memo: string | null; chart_of_accounts: { code: string; name_ar: string } | null };
+type Line = { id: string; debit: number; credit: number; memo: string | null; chart_of_accounts: { code: string; name_ar: string; name_en?: string | null } | null };
 type Entry = {
   id: string; entry_number: string; entry_date: string; description: string | null; source: string; status: string;
   branches: { name: string } | null; journal_entry_lines: Line[];
@@ -43,7 +43,7 @@ function JournalPage() {
     void (async () => {
       const { data } = await supabase
         .from("journal_entries")
-        .select("id,entry_number,entry_date,description,source,status,branches(name),journal_entry_lines(id,debit,credit,memo,chart_of_accounts(code,name_ar))")
+        .select("id,entry_number,entry_date,description,source,status,branches(name),journal_entry_lines(id,debit,credit,memo,chart_of_accounts(code,name_ar,name_en))")
         .order("entry_date", { ascending: false })
         .order("created_at", { ascending: false });
       setEntries((data ?? []) as unknown as Entry[]);
@@ -60,7 +60,7 @@ function JournalPage() {
   function exportCsv() {
     const head = [tr("رقم القيد"), tr("التاريخ"), tr("الفرع"), tr("البيان"), tr("رمز الحساب"), tr("اسم الحساب"), tr("مدين"), tr("دائن")];
     const rows = filtered.flatMap((e) =>
-      e.journal_entry_lines.map((l) => [e.entry_number, e.entry_date, e.branches?.name ?? "", e.description ?? "", l.chart_of_accounts?.code ?? "", l.chart_of_accounts?.name_ar ?? "", l.debit, l.credit]),
+      e.journal_entry_lines.map((l) => [e.entry_number, e.entry_date, e.branches?.name ?? "", e.description ?? "", l.chart_of_accounts?.code ?? "", accName(l.chart_of_accounts) ?? "", l.debit, l.credit]),
     );
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const csv = "\uFEFF" + [head, ...rows].map((r) => r.map(esc).join(",")).join("\r\n");
@@ -117,7 +117,7 @@ function JournalPage() {
                   <tbody>
                     {e.journal_entry_lines.map((l) => (
                       <tr key={l.id} className="border-t border-border">
-                        <td className="p-2">{l.chart_of_accounts?.code} — {l.chart_of_accounts?.name_ar}</td>
+                        <td className="p-2">{l.chart_of_accounts?.code} — {accName(l.chart_of_accounts)}</td>
                         <td className="p-2 text-end">{Number(l.debit) ? money(l.debit) : ""}</td>
                         <td className="p-2 text-end">{Number(l.credit) ? money(l.credit) : ""}</td>
                       </tr>

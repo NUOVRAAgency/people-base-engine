@@ -9,7 +9,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
 import { createPaymentVoucher } from "@/lib/accounting.functions";
 import { withCurrency } from "@/lib/currency";
-import { getLocale, tr } from "@/lib/i18n";
+import { getLocale, tr, accName } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/vouchers")({
   head: () => ({
@@ -45,13 +45,13 @@ function VouchersPage() {
   const load = useCallback(async () => {
     const [c, a, cc, b, v] = await Promise.all([
       supabase.from("cash_and_banks").select("id,name,kind").eq("is_active", true),
-      supabase.from("chart_of_accounts").select("id,code,name_ar").eq("is_parent", false).eq("is_active", true).order("code"),
+      supabase.from("chart_of_accounts").select("id,code,name_ar,name_en").eq("is_parent", false).eq("is_active", true).order("code"),
       supabase.from("cost_centers").select("id,code,name").eq("is_active", true),
       supabase.from("branches").select("id,name"),
       supabase.from("payment_vouchers").select("id,voucher_number,voucher_date,amount,description,cash_and_banks(name),journal_entries!payment_vouchers_journal_entry_id_fkey(entry_number)").order("created_at", { ascending: false }),
     ]);
     setCash((c.data ?? []).map((x) => ({ id: x.id, label: `${x.name} (${x.kind === "bank" ? tr("بنك") : tr("صندوق")})` })));
-    setAccounts((a.data ?? []).map((x) => ({ id: x.id, label: `${x.code} - ${x.name_ar}` })));
+    setAccounts((a.data ?? []).map((x) => ({ id: x.id, label: `${x.code} - ${accName(x)}` })));
     setCenters((cc.data ?? []).map((x) => ({ id: x.id, label: `${x.code} - ${x.name}` })));
     setBranches((b.data ?? []).map((x) => ({ id: x.id, label: x.name })));
     setList((v.data ?? []) as unknown as Voucher[]);

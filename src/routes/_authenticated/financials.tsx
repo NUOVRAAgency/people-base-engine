@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
-import { getLocale, tr } from "@/lib/i18n";
+import { getLocale, tr, accName } from "@/lib/i18n";
 import { withCurrency } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/financials")({
   component: FinancialsPage,
 });
 
-type Account = { id: string; code: string; name_ar: string; account_type: string; normal_side: string };
+type Account = { id: string; code: string; name_ar: string; name_en?: string | null; account_type: string; normal_side: string };
 type Bal = Account & { debit: number; credit: number; balance: number };
 type Tab = "trial" | "income" | "balance";
 
@@ -48,7 +48,7 @@ function FinancialsPage() {
     setLoading(true);
     void (async () => {
       const [{ data: accs }, { data: lines }] = await Promise.all([
-        supabase.from("chart_of_accounts").select("id,code,name_ar,account_type,normal_side").order("code"),
+        supabase.from("chart_of_accounts").select("id,code,name_ar,name_en,account_type,normal_side").order("code"),
         supabase
           .from("journal_entry_lines")
           .select("account_id,debit,credit,journal_entries!inner(entry_date,status)")
@@ -90,11 +90,11 @@ function FinancialsPage() {
   function exportCsv() {
     let data: (string | number)[][] = [];
     if (tab === "trial") {
-      data = [[tr("رمز الحساب"), tr("اسم الحساب"), tr("مدين"), tr("دائن")], ...rows.map((r) => [r.code, r.name_ar, r.debit, r.credit]), ["", tr("الإجمالي"), td, tc]];
+      data = [[tr("رمز الحساب"), tr("اسم الحساب"), tr("مدين"), tr("دائن")], ...rows.map((r) => [r.code, accName(r), r.debit, r.credit]), ["", tr("الإجمالي"), td, tc]];
     } else if (tab === "income") {
-      data = [[tr("البند"), tr("المبلغ")], ...income.map((r) => [r.name_ar, r.balance]), [tr("إجمالي الإيرادات"), totalIncome], ...expense.map((r) => [r.name_ar, r.balance]), [tr("إجمالي المصروفات"), totalExpense], [tr("صافي الدخل"), netIncome]];
+      data = [[tr("البند"), tr("المبلغ")], ...income.map((r) => [accName(r), r.balance]), [tr("إجمالي الإيرادات"), totalIncome], ...expense.map((r) => [accName(r), r.balance]), [tr("إجمالي المصروفات"), totalExpense], [tr("صافي الدخل"), netIncome]];
     } else {
-      data = [[tr("البند"), tr("المبلغ")], ...assets.map((r) => [r.name_ar, r.balance]), [tr("إجمالي الأصول"), sum(assets)], ...liabilities.map((r) => [r.name_ar, r.balance]), [tr("إجمالي الخصوم"), sum(liabilities)], ...equity.map((r) => [r.name_ar, r.balance]), [tr("صافي دخل الفترة"), netIncome], [tr("إجمالي الخصوم وحقوق الملكية"), sum(liabilities) + sum(equity) + netIncome]];
+      data = [[tr("البند"), tr("المبلغ")], ...assets.map((r) => [accName(r), r.balance]), [tr("إجمالي الأصول"), sum(assets)], ...liabilities.map((r) => [accName(r), r.balance]), [tr("إجمالي الخصوم"), sum(liabilities)], ...equity.map((r) => [accName(r), r.balance]), [tr("صافي دخل الفترة"), netIncome], [tr("إجمالي الخصوم وحقوق الملكية"), sum(liabilities) + sum(equity) + netIncome]];
     }
     const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const csv = "\uFEFF" + data.map((r) => r.map(esc).join(",")).join("\r\n");
@@ -120,7 +120,7 @@ function FinancialsPage() {
     <>
       <tr className="bg-muted/50"><td colSpan={2} className="p-2 font-bold text-foreground">{title}</td></tr>
       {items.map((r) => (
-        <tr key={r.id} className="border-t border-border"><td className="p-2">{r.code} — {r.name_ar}</td><td className="p-2 text-end">{money(r.balance)}</td></tr>
+        <tr key={r.id} className="border-t border-border"><td className="p-2">{r.code} — {accName(r)}</td><td className="p-2 text-end">{money(r.balance)}</td></tr>
       ))}
       <tr className="border-t border-border font-bold"><td className="p-2">{tr("الإجمالي")} {title}</td><td className="p-2 text-end">{money(total)}</td></tr>
     </>
@@ -166,7 +166,7 @@ function FinancialsPage() {
                 </thead>
                 <tbody>
                   {rows.map((r) => (
-                    <tr key={r.id} className="border-t border-border"><td className="p-2">{r.code} — {r.name_ar}</td><td className="p-2 text-end">{money(r.debit)}</td><td className="p-2 text-end">{money(r.credit)}</td></tr>
+                    <tr key={r.id} className="border-t border-border"><td className="p-2">{r.code} — {accName(r)}</td><td className="p-2 text-end">{money(r.debit)}</td><td className="p-2 text-end">{money(r.credit)}</td></tr>
                   ))}
                   <tr className="border-t border-border bg-muted/30 font-bold"><td className="p-2">{tr("الإجمالي")}</td><td className="p-2 text-end">{money(td)}</td><td className="p-2 text-end">{money(tc)}</td></tr>
                   <tr><td colSpan={3} className={cn("p-2 text-center text-xs font-bold", Math.abs(td - tc) < 0.01 ? "text-primary" : "text-destructive")}>
