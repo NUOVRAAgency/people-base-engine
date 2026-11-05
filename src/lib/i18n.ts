@@ -64,3 +64,9 @@ export const LANGUAGE_BOOT_SCRIPT = `try{var l=localStorage.getItem("${LANGUAGE_
 export function trf(template: string, ...values: unknown[]): string {
   return tr(template).replace(/\{(\d+)\}/g, (_, i) => String(values[Number(i)] ?? ""));
 }
+
+/** اسم الحساب المحاسبي حسب لغة الواجهة (يرجع للعربي إن لم يوجد اسم إنجليزي). */
+export function accName(a: { name_ar?: string | null; name_en?: string | null } | null | undefined): string {
+  if (!a) return "";
+  return getLanguage() === "en" && a.name_en ? a.name_en : (a.name_ar ?? "");
+}

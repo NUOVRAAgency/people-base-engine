@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { supabase } from "@/integrations/supabase/client";
-import { tr } from "@/lib/i18n";
+import { tr, accName } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/accounts")({
   head: () => ({
@@ -22,9 +22,9 @@ export const Route = createFileRoute("/_authenticated/accounts")({
   component: AccountsPage,
 });
 
-type Account = { id: string; code: string; name_ar: string; account_type: string; normal_side: string; parent_id: string | null; is_parent: boolean };
+type Account = { id: string; code: string; name_ar: string; name_en?: string | null; account_type: string; normal_side: string; parent_id: string | null; is_parent: boolean };
 type Center = { id: string; code: string; name: string; branches: { name: string } | null };
-type Cash = { id: string; name: string; kind: string; bank_account_number: string | null; chart_of_accounts: { code: string; name_ar: string } | null };
+type Cash = { id: string; name: string; kind: string; bank_account_number: string | null; chart_of_accounts: { code: string; name_ar: string; name_en?: string | null } | null };
 
 const sel = "h-10 w-full rounded-xl border border-input bg-background px-3 text-sm";
 const TYPES: Record<string, string> = { asset: "أصول", liability: "خصوم", equity: "حقوق ملكية", revenue: "إيرادات", expense: "مصروفات" };
@@ -43,9 +43,9 @@ function AccountsPage() {
 
   const load = useCallback(async () => {
     const [a, c, k, b] = await Promise.all([
-      supabase.from("chart_of_accounts").select("id,code,name_ar,account_type,normal_side,parent_id,is_parent").order("code"),
+      supabase.from("chart_of_accounts").select("id,code,name_ar,name_en,account_type,normal_side,parent_id,is_parent").order("code"),
       supabase.from("cost_centers").select("id,code,name,branches(name)").order("code"),
-      supabase.from("cash_and_banks").select("id,name,kind,bank_account_number,chart_of_accounts(code,name_ar)"),
+      supabase.from("cash_and_banks").select("id,name,kind,bank_account_number,chart_of_accounts(code,name_ar,name_en)"),
       supabase.from("branches").select("id,name"),
     ]);
     setAccounts((a.data ?? []) as Account[]);
@@ -93,7 +93,7 @@ function AccountsPage() {
         <section className={card}>
           <h2 className="flex items-center gap-2 font-bold"><Plus className="size-4 text-primary" />{tr("إضافة حساب فرعي")}</h2>
           <div className="grid gap-3 sm:grid-cols-3">
-            <select className={sel} value={acc.parent_id} onChange={(e) => setAcc({ ...acc, parent_id: e.target.value })}><option value="">{tr("الحساب الرئيسي")}</option>{parents.map((p) => <option key={p.id} value={p.id}>{p.code} - {p.name_ar}</option>)}</select>
+            <select className={sel} value={acc.parent_id} onChange={(e) => setAcc({ ...acc, parent_id: e.target.value })}><option value="">{tr("الحساب الرئيسي")}</option>{parents.map((p) => <option key={p.id} value={p.id}>{p.code} - {accName(p)}</option>)}</select>
             <Input placeholder={tr("رقم الحساب")} value={acc.code} onChange={(e) => setAcc({ ...acc, code: e.target.value })} />
             <Input placeholder={tr("اسم الحساب")} value={acc.name_ar} onChange={(e) => setAcc({ ...acc, name_ar: e.target.value })} />
           </div>
@@ -104,7 +104,7 @@ function AccountsPage() {
           <div className="divide-y divide-border/50 text-sm">
             {accounts.map((a) => (
               <div key={a.id} className="flex items-center justify-between py-2" style={{ paddingInlineStart: depth(a) * 18 }}>
-                <span className={a.is_parent ? "font-bold" : ""}>{a.code} — {a.name_ar}</span>
+                <span className={a.is_parent ? "font-bold" : ""}>{a.code} — {accName(a)}</span>
                 <span className="text-xs text-muted-foreground">{tr(TYPES[a.account_type] ?? a.account_type)} · {a.normal_side === "debit" ? tr("مدين") : tr("دائن")}</span>
               </div>
             ))}
@@ -131,11 +131,11 @@ function AccountsPage() {
           <div className="grid gap-3 sm:grid-cols-2">
             <Input placeholder={tr("الاسم")} value={cb.name} onChange={(e) => setCb({ ...cb, name: e.target.value })} />
             <select className={sel} value={cb.kind} onChange={(e) => setCb({ ...cb, kind: e.target.value })}><option value="cash">{tr("صندوق")}</option><option value="bank">{tr("بنك")}</option></select>
-            <select className={sel} value={cb.account_id} onChange={(e) => setCb({ ...cb, account_id: e.target.value })}><option value="">{tr("الحساب المحاسبي (أصول)")}</option>{assetLeaves.map((a) => <option key={a.id} value={a.id}>{a.code} - {a.name_ar}</option>)}</select>
+            <select className={sel} value={cb.account_id} onChange={(e) => setCb({ ...cb, account_id: e.target.value })}><option value="">{tr("الحساب المحاسبي (أصول)")}</option>{assetLeaves.map((a) => <option key={a.id} value={a.id}>{a.code} - {accName(a)}</option>)}</select>
             {cb.kind === "bank" && <Input placeholder={tr("رقم الحساب البنكي")} value={cb.bank_account_number} onChange={(e) => setCb({ ...cb, bank_account_number: e.target.value })} />}
           </div>
           <Button size="sm" onClick={addCash}>{tr("إضافة")}</Button>
-          <div className="divide-y divide-border/50 text-sm">{cash.length ? cash.map((c) => <div key={c.id} className="flex justify-between py-2"><span>{c.name} ({c.kind === "bank" ? tr("بنك") : tr("صندوق")})</span><span className="text-muted-foreground">{c.chart_of_accounts?.code} {c.chart_of_accounts?.name_ar}</span></div>) : <p className="text-muted-foreground">{tr("لا توجد صناديق بعد")}</p>}</div>
+          <div className="divide-y divide-border/50 text-sm">{cash.length ? cash.map((c) => <div key={c.id} className="flex justify-between py-2"><span>{c.name} ({c.kind === "bank" ? tr("بنك") : tr("صندوق")})</span><span className="text-muted-foreground">{c.chart_of_accounts?.code} {accName(c.chart_of_accounts)}</span></div>) : <p className="text-muted-foreground">{tr("لا توجد صناديق بعد")}</p>}</div>
         </section>
       )}
     </div>
