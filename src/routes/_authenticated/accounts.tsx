@@ -37,7 +37,7 @@ function AccountsPage() {
   const [centers, setCenters] = useState<Center[]>([]);
   const [cash, setCash] = useState<Cash[]>([]);
   const [branches, setBranches] = useState<{ id: string; name: string }[]>([]);
-  const [acc, setAcc] = useState({ code: "", name_ar: "", parent_id: "" });
+  const [acc, setAcc] = useState({ code: "", name_ar: "", name_en: "", parent_id: "" });
   const [cc, setCc] = useState({ code: "", name: "", branch_id: "" });
   const [cb, setCb] = useState({ name: "", kind: "cash", account_id: "", bank_account_number: "" });
 
@@ -60,8 +60,8 @@ function AccountsPage() {
   async function addAccount() {
     const parent = accounts.find((x) => x.id === acc.parent_id);
     if (!parent || !acc.code.trim() || !acc.name_ar.trim()) { toast.error(tr("أكمل الحقول المطلوبة")); return; }
-    const { error } = await supabase.from("chart_of_accounts").insert({ code: acc.code.trim(), name_ar: acc.name_ar.trim(), parent_id: parent.id, account_type: parent.account_type, normal_side: parent.normal_side, is_parent: false });
-    if (done(error)) setAcc({ code: "", name_ar: "", parent_id: "" });
+    const { error } = await supabase.from("chart_of_accounts").insert({ code: acc.code.trim(), name_ar: acc.name_ar.trim(), name_en: acc.name_en.trim() || null, parent_id: parent.id, account_type: parent.account_type, normal_side: parent.normal_side, is_parent: false });
+    if (done(error)) setAcc({ code: "", name_ar: "", name_en: "", parent_id: "" });
   }
   async function addCenter() {
     if (!cc.code.trim() || !cc.name.trim()) { toast.error(tr("أكمل الحقول المطلوبة")); return; }
@@ -92,10 +92,11 @@ function AccountsPage() {
       {tab === "coa" && (<>
         <section className={card}>
           <h2 className="flex items-center gap-2 font-bold"><Plus className="size-4 text-primary" />{tr("إضافة حساب فرعي")}</h2>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-4">
             <select className={sel} value={acc.parent_id} onChange={(e) => setAcc({ ...acc, parent_id: e.target.value })}><option value="">{tr("الحساب الرئيسي")}</option>{parents.map((p) => <option key={p.id} value={p.id}>{p.code} - {accName(p)}</option>)}</select>
             <Input placeholder={tr("رقم الحساب")} value={acc.code} onChange={(e) => setAcc({ ...acc, code: e.target.value })} />
             <Input placeholder={tr("اسم الحساب")} value={acc.name_ar} onChange={(e) => setAcc({ ...acc, name_ar: e.target.value })} />
+            <Input dir="ltr" placeholder={tr("اسم الحساب بالإنجليزية")} value={acc.name_en} onChange={(e) => setAcc({ ...acc, name_en: e.target.value })} />
           </div>
           <Button size="sm" onClick={addAccount}>{tr("إضافة")}</Button>
         </section>

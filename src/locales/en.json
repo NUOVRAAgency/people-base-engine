@@ -824,5 +824,6 @@
   "يُعرض أول 500 سجل للتعديل، ويُرحّل الكل.": "The first 500 records are shown for editing; all are posted.",
   "يُنشأ قيد مرحّل تلقائياً: مدين الحساب المختار، دائن الصندوق أو البنك.": "A posted entry is created automatically: debit the selected account, credit the cash box or bank.",
   "هذا الرمز أو الاسم مستخدم مسبقاً": "This code or name is already in use",
-  "تعذر الحفظ، تحقق من البيانات والصلاحيات": "Could not save; check the data and permissions"
+  "تعذر الحفظ، تحقق من البيانات والصلاحيات": "Could not save; check the data and permissions",
+  "اسم الحساب بالإنجليزية": "Account name (English)"
 }
