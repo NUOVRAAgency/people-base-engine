@@ -3,7 +3,7 @@
 // - Read-only offline data: GET responses for an allow-list of tables are cached
 //   for 7 days. Payroll, adjustments, loans and saved reports are NEVER cached.
 // - No queued writes: anything other than GET always goes straight to the network.
-const SHELL_CACHE = "hr-shell-v4";
+const SHELL_CACHE = "hr-shell-v5";
 const DATA_CACHE = "hr-data-v1";
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const SHELL = ["/", "/favicon.png"];
