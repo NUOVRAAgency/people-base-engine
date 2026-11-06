@@ -126,7 +126,7 @@ function SettingsPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-4 pb-6">
-      <section className="rounded-2xl border border-border/50 bg-card/75 p-5 shadow-glass backdrop-blur-sm">
+      <section className="rounded-2xl border border-border/50 bg-card p-5 shadow-glass">
         <div>
           <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
             {loading ? tr("جاري التحميل") : role ? ROLE_LABELS[role] : tr("بدون دور")}
@@ -146,7 +146,7 @@ function SettingsPage() {
       {isAdmin ? (
         <section className="space-y-2.5">
           <p className="px-1 text-xs font-medium text-muted-foreground">{tr("الإدارة والصلاحيات")}</p>
-          <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/75 shadow-glass backdrop-blur-sm">
+          <div className="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-glass">
             {adminItems.map(({ key, ...item }, index) => (
               <SettingsRow key={key} {...item} withBorderTop={index > 0} />
             ))}
@@ -156,7 +156,7 @@ function SettingsPage() {
 
       <section className="space-y-2.5">
         <p className="px-1 text-xs font-medium text-muted-foreground">{tr("تفضيلات عامة")}</p>
-        <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/75 shadow-glass backdrop-blur-sm">
+        <div className="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-glass">
           <div className="flex items-center gap-3 px-4 py-3.5">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Globe className="h-5 w-5" aria-hidden />

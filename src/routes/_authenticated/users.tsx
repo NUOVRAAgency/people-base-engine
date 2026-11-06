@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { KeyRound, LoaderCircle, Pencil, Plus } from "lucide-react";
+import { KeyRound, LoaderCircle, Pencil, Plus, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ROLE_LABELS, useCurrentUser, type AppRole } from "@/hooks/use-current-user";
-import { createUser, listUsers, resetUserPassword, updateUser } from "@/lib/users.functions";
+import { createUser, deleteUser, listUsers, resetUserPassword, updateUser } from "@/lib/users.functions";
 import { getLocale, tr } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,7 @@ const ERRORS: Record<string, string> = {
   weak_password: "كلمة المرور ضعيفة ومعروفة، اختر كلمة أقوى",
   self_reset: "لا يمكنك إعادة تعيين كلمة مرورك من هنا",
   reset_failed: "تعذر إعادة تعيين كلمة المرور",
+  delete_failed: "تعذر حذف المستخدم",
 };
 
 function UsersPage() {
@@ -46,6 +47,7 @@ function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Row | "new" | null>(null);
   const reset = useServerFn(resetUserPassword);
+  const remove = useServerFn(deleteUser);
   const [resetTarget, setResetTarget] = useState<Row | null>(null);
   const [tempPw, setTempPw] = useState("");
   const [resetErr, setResetErr] = useState("");
@@ -59,6 +61,15 @@ function UsersPage() {
       if (res.ok) setTempPw(res.password); else setResetErr(tr(ERRORS[res.error] ?? "تعذر إعادة تعيين كلمة المرور"));
     } catch { setResetErr(tr("تعذر إعادة تعيين كلمة المرور")); }
     setResetting(false);
+  }
+
+  async function doDelete(u: Row) {
+    if (!window.confirm(tr("حذف هذا المستخدم نهائياً؟"))) return;
+    try {
+      const res = await remove({ data: { userId: u.id } });
+      if (!res.ok) { window.alert(tr(ERRORS[res.error] ?? "تعذر حذف المستخدم")); return; }
+      setRows((r) => r.filter((x) => x.id !== u.id));
+    } catch { window.alert(tr("تعذر حذف المستخدم")); }
   }
 
   const load = useCallback(async () => {
@@ -118,6 +129,11 @@ function UsersPage() {
               <Button variant="ghost" size="icon" aria-label={tr("تعديل")} className="size-9 rounded-full" onClick={() => setEditing(u)}>
                 <Pencil className="h-4 w-4" aria-hidden />
               </Button>
+              {u.id !== selfId ? (
+                <Button variant="ghost" size="icon" aria-label={tr("حذف")} title={tr("حذف")} className="size-9 rounded-full text-destructive" onClick={() => void doDelete(u)}>
+                  <Trash2 className="h-4 w-4" aria-hidden />
+                </Button>
+              ) : null}
             </li>
           ))}
         </ul>
