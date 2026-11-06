@@ -15,6 +15,13 @@
       "when": 1793823442690,
       "tag": "0001_fix_shift_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793993811052,
+      "tag": "0002_tighten_shared_read_policies",
+      "breakpoints": true
     }
   ]
 }
