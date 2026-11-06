@@ -827,5 +827,7 @@
   "تعذر الحفظ، تحقق من البيانات والصلاحيات": "Could not save; check the data and permissions",
   "اسم الحساب بالإنجليزية": "Account name (English)",
   "الحساب الشخصي": "My Account",
-  "مستخدمو النظام": "System Users"
+  "مستخدمو النظام": "System Users",
+  "حذف هذا المستخدم نهائياً؟": "Delete this user permanently?",
+  "تعذر حذف المستخدم": "Could not delete user"
 }

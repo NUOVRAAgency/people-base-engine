@@ -126,6 +126,21 @@ function tempPassword() {
   return Array.from(bytes, (b) => chars[b % chars.length]).join("");
 }
 
+export const deleteUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const admin = await assertAdmin(context as Ctx);
+    if (data.userId === context.userId) return { ok: false as const, error: "self_change" };
+    const admins = await activeAdminIds(admin);
+    if (admins.length === 1 && admins[0] === data.userId) return { ok: false as const, error: "last_admin" };
+    await admin.from("user_roles").delete().eq("user_id", data.userId);
+    await admin.from("users").delete().eq("id", data.userId);
+    const { error } = await admin.auth.admin.deleteUser(data.userId);
+    if (error) return { ok: false as const, error: "delete_failed" };
+    return { ok: true as const };
+  });
+
 export const resetUserPassword = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ userId: z.string().uuid() }).parse(input))
