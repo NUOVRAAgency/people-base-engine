@@ -563,13 +563,13 @@ function KpiCard({
         >
           {icon}
         </span>
-        <p className={cn("truncate text-[11px] font-semibold", pressed ? "text-primary" : "text-white")}>
+        <p className={cn("truncate text-[11px] font-normal", pressed ? "text-primary" : "text-white")}>
           {title}
         </p>
       </div>
       <p
         className={cn(
-          "mt-1 truncate font-semibold leading-tight",
+          "mt-1 truncate font-normal leading-tight",
           compact ? "text-sm" : "text-lg",
           pressed ? "text-primary" : "text-white",
         )}
