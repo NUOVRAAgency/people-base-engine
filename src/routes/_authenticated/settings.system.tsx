@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 import { tr, trf } from "@/lib/i18n";
+import { AiKeyCard } from "@/components/ai-key-card";
 export const Route = createFileRoute("/_authenticated/settings/system")({
   head: () => ({
     meta: [
@@ -270,6 +271,7 @@ function SystemSettingsPage() {
           {tr("حفظ القواعد")}
         </Button>
       </section>
+      <AiKeyCard />
     </div>
   );
 }
