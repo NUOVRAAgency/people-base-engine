@@ -53,7 +53,8 @@ export const generateSmartReport = createServerFn({ method: "POST" })
     }
 
     // يُقرأ وقت التنفيذ على الخادم فقط — لا يُسرَّب في أي استجابة.
-    const apiKey = process.env["GEMINI_API_KEY"];
+    const { getGeminiKey } = await import("./ai-key.server");
+    const apiKey = await getGeminiKey();
     if (!apiKey) {
       return {
         ready: false as const,
@@ -190,7 +191,8 @@ export const chatWithAssistant = createServerFn({ method: "POST" })
       return { ready: true as const, error: null, refused: "branch" as const, content: en ? "Sorry, I can only answer about your own branch." : REFUSE_BRANCH };
     }
 
-    const apiKey = process.env["GEMINI_API_KEY"];
+    const { getGeminiKey } = await import("./ai-key.server");
+    const apiKey = await getGeminiKey();
     if (!apiKey) {
       return { ready: false as const, message: "تعذر الحصول على رد الان. حاول مرة اخرى بعد قليل." };
     }
