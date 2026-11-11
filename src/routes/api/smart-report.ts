@@ -37,7 +37,8 @@ export const Route = createFileRoute("/api/smart-report")({
         const prompt = typeof body.prompt === "string" ? body.prompt.slice(0, 8000) : "";
         if (!month || !prompt) return new Response("Bad request", { status: 400 });
 
-        const apiKey = process.env["GEMINI_API_KEY"];
+        const { getGeminiKey } = await import("@/lib/ai-key.server");
+        const apiKey = await getGeminiKey();
         if (!apiKey) return new Response("Not configured", { status: 503 });
 
         let upstream: Response | null = null;
