@@ -311,3 +311,9 @@ html[data-offline] main button.bg-primary {
   pointer-events: none;
   opacity: 0.45;
 }
+
+/* Hide the browser's built-in password reveal eye (Edge); keep the app's own button */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
