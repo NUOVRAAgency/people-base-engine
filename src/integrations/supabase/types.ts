@@ -62,6 +62,27 @@ export type Database = {
           },
         ]
       }
+      app_secrets: {
+        Row: {
+          id: string
+          updated_at: string
+          updated_by: string | null
+          value: string
+        }
+        Insert: {
+          id: string
+          updated_at?: string
+          updated_by?: string | null
+          value: string
+        }
+        Update: {
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           company_name: string | null

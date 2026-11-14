@@ -9,7 +9,7 @@ import { tr } from "@/lib/i18n";
 const REASONS: Record<string, string> = {
   forbidden: "هذا الإعداد لمدير النظام فقط",
   bad_password: "كلمة المرور غير صحيحة",
-  format: "المفتاح ناقص أو بصيغة خاطئة (يبدأ بـ AIza)",
+  format: "المفتاح ناقص أو بصيغة خاطئة (يبدأ بـ AIza أو AQ.)",
   invalid: "المفتاح غير صالح أو مرفوض من Google، لم يُحفظ",
   save: "تعذر حفظ المفتاح، حاول مرة أخرى",
 };
@@ -70,7 +70,7 @@ export function AiKeyCard() {
           <p className="text-sm text-foreground">
             {tr("المفتاح الحالي")}: <span dir="ltr">{hasKey ? "••••••••••••" : tr("غير موجود")}</span>
           </p>
-          <Input type="password" dir="ltr" value={newKey} onChange={(e) => { setNewKey(e.target.value); setMsg(null); }} placeholder="AIza..." className="h-11 rounded-xl" autoComplete="off" />
+          <Input type="password" dir="ltr" value={newKey} onChange={(e) => { setNewKey(e.target.value); setMsg(null); }} placeholder="AQ... / AIza..." className="h-11 rounded-xl" autoComplete="off" />
           {newKey && (
             <Button type="button" variant="outline" className="h-9 rounded-xl text-xs" onClick={() => setNewKey("")}>
               <Trash2 className="h-3.5 w-3.5" /> {tr("مسح الحقل")}
