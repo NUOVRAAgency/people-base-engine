@@ -832,7 +832,7 @@
   "تعذر حذف المستخدم": "Could not delete user",
   "هذا الإعداد لمدير النظام فقط": "This setting is for the system admin only",
   "كلمة المرور غير صحيحة": "Incorrect password",
-  "المفتاح ناقص أو بصيغة خاطئة (يبدأ بـ AIza)": "Key is incomplete or malformed (starts with AIza)",
+  "المفتاح ناقص أو بصيغة خاطئة (يبدأ بـ AIza أو AQ.)": "Key is incomplete or malformed (starts with AIza or AQ.)",
   "المفتاح غير صالح أو مرفوض من Google، لم يُحفظ": "Key is invalid or rejected by Google; not saved",
   "تعذر حفظ المفتاح، حاول مرة أخرى": "Could not save the key, try again",
   "أدخل كلمة المرور": "Enter your password",

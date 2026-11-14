@@ -42,7 +42,7 @@ export const saveAiKey = createServerFn({ method: "POST" })
     const r = await assertAdminWithPassword(context as any, data.password);
     if (r !== "ok") return { ok: false as const, reason: r };
     const apiKey = data.apiKey.trim();
-    if (!/^AIza[0-9A-Za-z_-]{30,}$/.test(apiKey)) return { ok: false as const, reason: "format" };
+    if (!/^(AIza[0-9A-Za-z_-]{30,}|AQ\.[0-9A-Za-z._-]{30,})$/.test(apiKey)) return { ok: false as const, reason: "format" };
     const test = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=1", { headers: { "x-goog-api-key": apiKey } });
     if (!test.ok) return { ok: false as const, reason: "invalid" };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
