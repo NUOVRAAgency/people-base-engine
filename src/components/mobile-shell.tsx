@@ -121,17 +121,6 @@ export function MobileShell({ children }: { children: ReactNode }) {
         <div className="w-full bg-white pt-[max(7px,env(safe-area-inset-top))]" />
         <div className="relative flex h-[52px] items-center gap-3 px-3 text-primary-foreground [background:var(--header-gradient)] md:h-[56px] md:px-6">
         <div className="flex min-w-0 items-center gap-2.5">
-          {companyName ? (
-            <span
-              dir="auto"
-              className={cn(
-                "hidden max-w-[180px] truncate rounded-full border border-white/25 bg-white/15 px-3 py-1 text-[12px] font-bold leading-[1.5] md:inline-block",
-                companyNameIsArabic ? "font-kufi" : "font-sans",
-              )}
-            >
-              {companyName}
-            </span>
-          ) : null}
           <h1 className="truncate rounded-full bg-white px-3.5 py-1 text-[13px] font-bold leading-[1.5] text-header-deep md:text-base">{title}</h1>
         </div>
 

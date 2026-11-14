@@ -3,15 +3,15 @@
 // - Read-only offline data: GET responses for an allow-list of tables are cached
 //   for 7 days. Payroll, adjustments, loans and saved reports are NEVER cached.
 // - No queued writes: anything other than GET always goes straight to the network.
-const SHELL_CACHE = "hr-shell-v5";
+const SHELL_CACHE = "hr-shell-v6";
 const DATA_CACHE = "hr-data-v1";
 const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
-const SHELL = ["/", "/favicon.png"];
+const SHELL = ["/", "/auth", "/dashboard", "/favicon.png", "/manifest.json"];
 const ALLOWED_TABLES = ["employees", "attendance", "leave_requests", "branches", "app_settings", "users", "user_roles", "absence_decision_log"];
 const SUPABASE_ORIGIN = new URL(self.location.href).searchParams.get("sb") || "";
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(SHELL_CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(SHELL_CACHE).then((c) => Promise.allSettled(SHELL.map((u) => fetch(u).then((r) => r.ok && c.put(u, clean(r)))))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
@@ -26,6 +26,11 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("message", (event) => {
   if (event.data === "clear-data") event.waitUntil(caches.delete(DATA_CACHE));
 });
+
+// Redirected responses cannot answer navigations; store a fresh copy.
+function clean(res) {
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers: res.headers });
+}
 
 function dataTable(url) {
   if (!SUPABASE_ORIGIN || url.origin !== SUPABASE_ORIGIN) return null;
@@ -79,11 +84,16 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(SHELL_CACHE).then((c) => c.put(url.pathname, copy));
+          if (res.ok) caches.open(SHELL_CACHE).then((c) => c.put(url.pathname, clean(res.clone())));
           return res;
         })
-        .catch(() => caches.match(url.pathname).then((r) => r || caches.match("/")).then((r) => r || Response.error())),
+        .catch(async () => {
+          for (const k of [url.pathname, "/dashboard", "/auth", "/"]) {
+            const r = await caches.match(k);
+            if (r) return r;
+          }
+          return Response.error();
+        }),
     );
     return;
   }
