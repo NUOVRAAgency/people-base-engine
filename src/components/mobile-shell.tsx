@@ -67,7 +67,6 @@ export function MobileShell({ children }: { children: ReactNode }) {
   const online = useOnline();
   const lastSync = online ? null : readLastSync();
   const { companyName, notifications } = useHeaderData();
-  const companyNameIsArabic = /[\u0600-\u06ff]/.test(companyName);
   const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
