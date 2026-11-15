@@ -427,6 +427,7 @@
   "تعذر التقاط الصوت. تاكد من اذن الميكروفون.": "Could not capture audio. Check microphone permissions.",
   "تعذر الحصول على رد الان. حاول مرة اخرى بعد قليل.": "Could not get a response. Please try again shortly.",
   "تعذر تحديث حالة الفرع": "Could not update branch status",
+  "لا يوجد اتصال بالإنترنت. سجّل الدخول مرة واحدة والنت شغال أولاً": "No internet. Sign in once while online first",
   "تعذر تسجيل الدخول، تحقق من البيانات": "Login failed, check credentials",
   "تعذر تغيير كلمة المرور": "Couldn't change the password",
   "تعذر توليد التحليل حاليا. حاول مرة اخرى.": "Could not generate analysis. Try again.",
