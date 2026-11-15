@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { getLanguage, setLanguage, tr } from "@/lib/i18n";
+import { checkOfflineLogin, OFFLINE_FLAG, rememberOfflineLogin } from "@/lib/offline-login";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -40,9 +41,24 @@ function AuthPage() {
     event.preventDefault();
     setBusy(true);
     setMessage("");
+    const offlineTry = async () => {
+      if (await checkOfflineLogin(email, password)) {
+        sessionStorage.setItem(OFFLINE_FLAG, "1");
+        navigate({ to: "/dashboard", replace: true });
+      } else setMessage(tr("لا يوجد اتصال بالإنترنت. سجّل الدخول مرة واحدة والنت شغال أولاً"));
+    };
+    if (!navigator.onLine) {
+      await offlineTry();
+      setBusy(false);
+      return;
+    }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setMessage(tr("تعذر تسجيل الدخول، تحقق من البيانات"));
-    else navigate({ to: "/dashboard", replace: true });
+    if (error && (error.name === "AuthRetryableFetchError" || !navigator.onLine)) await offlineTry();
+    else if (error) setMessage(tr("تعذر تسجيل الدخول، تحقق من البيانات"));
+    else {
+      await rememberOfflineLogin(email, password).catch(() => {});
+      navigate({ to: "/dashboard", replace: true });
+    }
     setBusy(false);
   }
 

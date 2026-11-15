@@ -39,6 +39,7 @@ export function readLastSync(): string | null {
 
 /** Sign out and wipe every locally stored copy of data. */
 export async function signOutAndClear() {
+  try { sessionStorage.removeItem("hr-offline-auth"); } catch {}
   try {
     navigator.serviceWorker?.controller?.postMessage("clear-data");
     if ("caches" in window) {
