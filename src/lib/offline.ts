@@ -38,8 +38,27 @@ export function readLastSync(): string | null {
 }
 
 /** Sign out and wipe every locally stored copy of data. */
+export const LOCK_KEY = "hr-locked";
+export const PROFILE_KEY = "hr-profile-cache";
+
+export function readProfileCache<T>(): T | null {
+  try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || "null") as T | null; } catch { return null; }
+}
+export function writeProfileCache(v: unknown) {
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(v)); } catch {}
+}
+export function isLocked() {
+  try { return localStorage.getItem(LOCK_KEY) === "1"; } catch { return false; }
+}
+
 export async function signOutAndClear() {
   try { sessionStorage.removeItem("hr-offline-auth"); } catch {}
+  // Offline: lock the app locally and keep the saved copy so offline sign-in can show it again.
+  if (!navigator.onLine) {
+    try { localStorage.setItem(LOCK_KEY, "1"); } catch {}
+    return;
+  }
+  try { localStorage.removeItem(LOCK_KEY); localStorage.removeItem(PROFILE_KEY); } catch {}
   try {
     navigator.serviceWorker?.controller?.postMessage("clear-data");
     if ("caches" in window) {
@@ -50,5 +69,5 @@ export async function signOutAndClear() {
   } catch {
     /* ignore */
   }
-  await supabase.auth.signOut();
+  await supabase.auth.signOut().catch(() => supabase.auth.signOut({ scope: "local" }));
 }

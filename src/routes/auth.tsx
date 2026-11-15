@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { getLanguage, setLanguage, tr } from "@/lib/i18n";
+import { isLocked, LOCK_KEY } from "@/lib/offline";
 import { checkOfflineLogin, OFFLINE_FLAG, rememberOfflineLogin } from "@/lib/offline-login";
 
 export const Route = createFileRoute("/auth")({
@@ -33,7 +34,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
+      if (data.session && !isLocked()) navigate({ to: "/dashboard", replace: true });
     });
   }, [navigate]);
 
@@ -44,6 +45,7 @@ function AuthPage() {
     const offlineTry = async () => {
       if (await checkOfflineLogin(email, password)) {
         sessionStorage.setItem(OFFLINE_FLAG, "1");
+        localStorage.removeItem(LOCK_KEY);
         navigate({ to: "/dashboard", replace: true });
       } else setMessage(tr("لا يوجد اتصال بالإنترنت. سجّل الدخول مرة واحدة والنت شغال أولاً"));
     };
@@ -56,6 +58,7 @@ function AuthPage() {
     if (error && (error.name === "AuthRetryableFetchError" || !navigator.onLine)) await offlineTry();
     else if (error) setMessage(tr("تعذر تسجيل الدخول، تحقق من البيانات"));
     else {
+      localStorage.removeItem(LOCK_KEY);
       await rememberOfflineLogin(email, password).catch(() => {});
       navigate({ to: "/dashboard", replace: true });
     }

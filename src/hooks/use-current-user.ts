@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 import { tr } from "@/lib/i18n";
+import { readProfileCache, writeProfileCache } from "@/lib/offline";
 export type AppRole = "admin" | "operator" | "viewer";
 
 export const ROLE_LABELS: Record<AppRole, string> = {
@@ -18,6 +19,14 @@ let cache: Info | null = null;
 let pending: Promise<Info> | null = null;
 
 async function fetchInfo(): Promise<Info> {
+  const cached = readProfileCache<{ info?: Info }>()?.info;
+  if (!navigator.onLine && cached) return cached;
+  const info = await fetchOnline();
+  if (info.role) writeProfileCache({ ...(readProfileCache<object>() ?? {}), info });
+  return info;
+}
+
+async function fetchOnline(): Promise<Info> {
   const { data } = await supabase.auth.getUser();
   const user = data.user;
   if (!user) return { email: "", fullName: "", role: null };

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MobileShell } from "@/components/mobile-shell";
 import { isOfflineAuthed } from "@/lib/offline-login";
+import { isLocked } from "@/lib/offline";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
@@ -23,7 +24,7 @@ function AuthenticatedLayout() {
       : supabase.auth.getSession().then(({ data }) => ({ ok: !!data.session || isOfflineAuthed() }));
     check.then(async ({ ok }) => {
       if (!isMounted) return;
-      if (!ok) {
+      if (!ok || (isLocked() && !isOfflineAuthed())) {
         navigate({ to: "/auth", replace: true });
         return;
       }
