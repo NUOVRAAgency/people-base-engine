@@ -1,4 +1,4 @@
-import { signOutAndClear } from "@/lib/offline";
+import { readProfileCache, signOutAndClear, writeProfileCache } from "@/lib/offline";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -33,6 +33,11 @@ function AccountPage() {
   const changePw = useServerFn(changeMyPassword);
 
   useEffect(() => {
+    type Acc = { email: string; lastSignIn: string | null; userId: string; fullName: string; branch: string | null };
+    const apply = (a: Acc) => { setEmail(a.email); setLastSignIn(a.lastSignIn); setUserId(a.userId); setFullName(a.fullName); setBranch(a.branch); };
+    const cached = readProfileCache<{ account?: Acc }>()?.account;
+    if (cached) apply(cached);
+    if (!navigator.onLine) return;
     void (async () => {
       const { data } = await supabase.auth.getUser();
       const user = data.user;
@@ -43,10 +48,13 @@ function AccountPage() {
       const { data: profile } = await supabase.from("users").select("branch_id,full_name,must_change_password").eq("id", user.id).maybeSingle();
       setFullName(profile?.full_name ?? "");
       setMustChange(!!profile?.must_change_password);
+      let branchName: string | null = null;
       if (profile?.branch_id) {
         const { data: b } = await supabase.from("branches").select("name").eq("id", profile.branch_id).maybeSingle();
-        setBranch(b?.name ?? null);
+        branchName = b?.name ?? null;
+        setBranch(branchName);
       }
+      writeProfileCache({ ...(readProfileCache<object>() ?? {}), account: { email: user.email ?? "", lastSignIn: user.last_sign_in_at ?? null, userId: user.id, fullName: profile?.full_name ?? "", branch: branchName } });
     })();
   }, []);
 
