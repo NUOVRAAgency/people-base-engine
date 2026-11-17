@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { getLanguage, setLanguage, tr } from "@/lib/i18n";
 import { isLocked, LOCK_KEY } from "@/lib/offline";
-import { checkOfflineLogin, OFFLINE_FLAG, rememberOfflineLogin } from "@/lib/offline-login";
+import { OFFLINE_FLAG } from "@/lib/offline-login";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -43,11 +43,7 @@ function AuthPage() {
     setBusy(true);
     setMessage("");
     const offlineTry = async () => {
-      if (await checkOfflineLogin(email, password)) {
-        localStorage.setItem(OFFLINE_FLAG, "1");
-        localStorage.removeItem(LOCK_KEY);
-        navigate({ to: "/dashboard", replace: true });
-      } else setMessage(tr("لا يوجد اتصال بالإنترنت. سجّل الدخول مرة واحدة والنت شغال أولاً"));
+      setMessage(tr("لا يوجد اتصال بالإنترنت. تسجيل الدخول يحتاج إنترنت"));
     };
     if (!navigator.onLine) {
       await offlineTry();
@@ -62,7 +58,6 @@ function AuthPage() {
     else {
       localStorage.removeItem(LOCK_KEY);
       localStorage.removeItem(OFFLINE_FLAG);
-      await rememberOfflineLogin(email, password).catch(() => {});
       navigate({ to: "/dashboard", replace: true });
     }
     setBusy(false);

@@ -22,6 +22,9 @@ export async function checkOfflineLogin(email: string, password: string) {
   return (await hash(email, password, salt)) === h;
 }
 
+// Offline sign-in is disabled: signing in always needs internet.
+// A session created online keeps working for viewing when the connection drops.
 export function isOfflineAuthed() {
-  try { return localStorage.getItem(OFFLINE_FLAG) === "1"; } catch { return false; }
+  try { localStorage.removeItem(OFFLINE_FLAG); localStorage.removeItem(KEY); } catch {}
+  return false;
 }
