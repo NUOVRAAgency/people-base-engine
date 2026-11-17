@@ -23,5 +23,5 @@ export async function checkOfflineLogin(email: string, password: string) {
 }
 
 export function isOfflineAuthed() {
-  try { return sessionStorage.getItem(OFFLINE_FLAG) === "1"; } catch { return false; }
+  try { return localStorage.getItem(OFFLINE_FLAG) === "1"; } catch { return false; }
 }

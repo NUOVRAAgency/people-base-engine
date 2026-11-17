@@ -52,7 +52,7 @@ export function isLocked() {
 }
 
 export async function signOutAndClear() {
-  try { sessionStorage.removeItem("hr-offline-auth"); } catch {}
+  try { localStorage.removeItem("hr-offline-auth"); sessionStorage.removeItem("hr-offline-auth"); } catch {}
   // Offline: lock the app locally and keep the saved copy so offline sign-in can show it again.
   if (!navigator.onLine) {
     try { localStorage.setItem(LOCK_KEY, "1"); } catch {}

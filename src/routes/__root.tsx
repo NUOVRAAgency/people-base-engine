@@ -42,7 +42,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window === "undefined" || !error.message.includes("Failed to fetch dynamically imported module")) return;
+    if (typeof window === "undefined" || !navigator.onLine || !error.message.includes("Failed to fetch dynamically imported module")) return;
 
     const retryKey = "dynamic-import-retry";
     const previousRetry = window.sessionStorage.getItem(retryKey);

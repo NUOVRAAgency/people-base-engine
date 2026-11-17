@@ -20,16 +20,16 @@ function AuthenticatedLayout() {
     let isMounted = true;
 
     // Offline sign-in wins; otherwise ask the server, and if it can't be reached use the saved session.
-    const check: Promise<{ ok: boolean }> = isOfflineAuthed()
+    const check: Promise<{ ok: boolean }> = isOfflineAuthed() && !navigator.onLine
       ? Promise.resolve({ ok: true })
       : supabase.auth.getUser().then(async ({ data, error }) => {
           if (!error && data.user) return { ok: true };
           if (error && !error.status) {
             const { data: s } = await supabase.auth.getSession();
-            return { ok: !!s.session };
+            return { ok: !!s.session || isOfflineAuthed() };
           }
           return { ok: false };
-        }).catch(() => ({ ok: false }));
+        }).catch(() => ({ ok: isOfflineAuthed() }));
     check.then(async ({ ok }) => {
       if (!isMounted) return;
       if (!ok || (isLocked() && !isOfflineAuthed())) {

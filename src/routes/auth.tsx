@@ -44,7 +44,7 @@ function AuthPage() {
     setMessage("");
     const offlineTry = async () => {
       if (await checkOfflineLogin(email, password)) {
-        sessionStorage.setItem(OFFLINE_FLAG, "1");
+        localStorage.setItem(OFFLINE_FLAG, "1");
         localStorage.removeItem(LOCK_KEY);
         navigate({ to: "/dashboard", replace: true });
       } else setMessage(tr("لا يوجد اتصال بالإنترنت. سجّل الدخول مرة واحدة والنت شغال أولاً"));
@@ -61,7 +61,7 @@ function AuthPage() {
     else if (error) setMessage(tr("تعذر تسجيل الدخول، تحقق من البيانات"));
     else {
       localStorage.removeItem(LOCK_KEY);
-      sessionStorage.removeItem(OFFLINE_FLAG);
+      localStorage.removeItem(OFFLINE_FLAG);
       await rememberOfflineLogin(email, password).catch(() => {});
       navigate({ to: "/dashboard", replace: true });
     }
