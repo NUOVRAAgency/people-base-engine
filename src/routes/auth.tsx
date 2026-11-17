@@ -55,10 +55,13 @@ function AuthPage() {
       return;
     }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error && (error.name === "AuthRetryableFetchError" || !navigator.onLine)) await offlineTry();
+    // No real answer from the server (no internet, Wi-Fi without internet, timeout) -> check locally.
+    const noServer = error && (!error.status || error.name === "AuthRetryableFetchError" || /fetch|network/i.test(error.message) || !navigator.onLine);
+    if (noServer) await offlineTry();
     else if (error) setMessage(tr("تعذر تسجيل الدخول، تحقق من البيانات"));
     else {
       localStorage.removeItem(LOCK_KEY);
+      sessionStorage.removeItem(OFFLINE_FLAG);
       await rememberOfflineLogin(email, password).catch(() => {});
       navigate({ to: "/dashboard", replace: true });
     }

@@ -19,16 +19,24 @@ function AuthenticatedLayout() {
   useEffect(() => {
     let isMounted = true;
 
-    const check = navigator.onLine
-      ? supabase.auth.getUser().then(({ data, error }) => ({ ok: !error && !!data.user }))
-      : supabase.auth.getSession().then(({ data }) => ({ ok: !!data.session || isOfflineAuthed() }));
+    // Offline sign-in wins; otherwise ask the server, and if it can't be reached use the saved session.
+    const check: Promise<{ ok: boolean }> = isOfflineAuthed()
+      ? Promise.resolve({ ok: true })
+      : supabase.auth.getUser().then(async ({ data, error }) => {
+          if (!error && data.user) return { ok: true };
+          if (error && !error.status) {
+            const { data: s } = await supabase.auth.getSession();
+            return { ok: !!s.session };
+          }
+          return { ok: false };
+        }).catch(() => ({ ok: false }));
     check.then(async ({ ok }) => {
       if (!isMounted) return;
       if (!ok || (isLocked() && !isOfflineAuthed())) {
         navigate({ to: "/auth", replace: true });
         return;
       }
-      if (navigator.onLine) {
+      if (navigator.onLine && !isOfflineAuthed()) {
         const { data: u } = await supabase.auth.getUser();
         const { data: profile } = u.user
           ? await supabase.from("users").select("must_change_password").eq("id", u.user.id).maybeSingle()
