@@ -12,6 +12,7 @@ export function useOnline() {
       document.documentElement.toggleAttribute("data-offline", !value);
       if (value) {
         try {
+          localStorage.removeItem("hr-offline-auth");
           localStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
         } catch {
           /* ignore */
@@ -58,7 +59,7 @@ export async function signOutAndClear() {
     try { localStorage.setItem(LOCK_KEY, "1"); } catch {}
     return;
   }
-  try { localStorage.removeItem(LOCK_KEY); localStorage.removeItem(PROFILE_KEY); } catch {}
+  try { localStorage.removeItem(LOCK_KEY); localStorage.removeItem(PROFILE_KEY); localStorage.removeItem("hr-offline-cred"); } catch {}
   try {
     navigator.serviceWorker?.controller?.postMessage("clear-data");
     if ("caches" in window) {

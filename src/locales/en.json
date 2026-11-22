@@ -851,5 +851,6 @@
   "غير موجود": "Not set",
   "مسح الحقل": "Clear field",
   "أوافق على حذف المفتاح القديم واستبداله بهذا المفتاح": "I agree to delete the old key and replace it with this one",
-  "قفل": "Lock"
+  "قفل": "Lock",
+  "لا يوجد اتصال. الدخول بدون إنترنت متاح فقط لمن سجّل دخوله سابقاً على هذا الجهاز": "No connection. Offline sign-in works only for someone who signed in on this device before"
 }
